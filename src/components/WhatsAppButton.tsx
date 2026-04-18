@@ -1,4 +1,5 @@
 import React from 'react';
+import type { TabId } from './BottomNav'
 
 const WhatsAppIcon = () => (
   <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
@@ -6,16 +7,22 @@ const WhatsAppIcon = () => (
   </svg>
 );
 
-export const WhatsAppButton: React.FC = () => {
+interface WhatsAppButtonProps {
+  activeTab?: TabId
+}
+
+export const WhatsAppButton: React.FC<WhatsAppButtonProps> = ({ activeTab }) => {
   const openWhatsApp = () => {
     // Replace with your company phone number
     window.open('https://wa.me/919000000000', '_blank');
   };
 
+  const shouldHideOnMobile = activeTab === 'products'
+
   return (
     <button
       onClick={openWhatsApp}
-      className="fixed bottom-24 right-5 lg:bottom-10 lg:right-10 z-[100] w-14 h-14 lg:w-16 lg:h-16 bg-[#25D366] text-white rounded-full flex items-center justify-center shadow-2xl shadow-green-500/30 hover:scale-110 active:scale-95 transition-all duration-300 group overflow-hidden"
+      className={`fixed bottom-24 right-5 z-[100] h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-[#25D366] text-white shadow-2xl shadow-green-500/30 transition-all duration-300 hover:scale-110 active:scale-95 group lg:bottom-10 lg:right-10 lg:flex lg:h-16 lg:w-16 ${shouldHideOnMobile ? 'hidden lg:flex' : 'flex'}`}
       aria-label="Contact on WhatsApp"
     >
       <div className="absolute inset-0 bg-white/20 scale-0 group-hover:scale-150 transition-transform duration-700 rounded-full" />

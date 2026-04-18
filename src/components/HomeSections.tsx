@@ -514,7 +514,8 @@ const normalizeProductRating = (value: unknown) => {
 export const ProductCard = React.memo<Product & {
   onAddToCart?: (product: Omit<Product, 'category'>) => void
   onViewProduct?: (product: Product) => void
-}>(({ id, name, price, category, image, onAddToCart, onViewProduct, ...rest }) => {
+  className?: string
+}>(({ id, name, price, category, image, onAddToCart, onViewProduct, className, ...rest }) => {
   const displayPrice = formatProductPrice(price);
   const productPayload: Product = { id, name, price, category, image, ...rest };
   const rating = normalizeProductRating(rest.rating);
@@ -522,7 +523,7 @@ export const ProductCard = React.memo<Product & {
 
   return (
     <div
-      className="ui-hover-row-card min-w-[180px] lg:min-w-[280px] bg-white dark:bg-slate-800 rounded-[28px] p-4 lg:p-6 shadow-sm border border-gray-100 dark:border-slate-700/50 active:scale-[0.98] group cursor-pointer"
+      className={`ui-hover-row-card flex h-full w-full min-w-0 flex-col bg-white dark:bg-slate-800 rounded-[28px] p-4 lg:p-6 shadow-sm border border-gray-100 dark:border-slate-700/50 active:scale-[0.98] group cursor-pointer ${className ?? ''}`}
       role="button"
       tabIndex={0}
       onClick={() => onViewProduct?.(productPayload)}
@@ -582,8 +583,8 @@ export const ProductCard = React.memo<Product & {
 
 ProductCard.displayName = 'ProductCard';
 
-export const SkeletonProductCard: React.FC = () => (
-  <div className="min-w-[180px] lg:min-w-[280px] bg-white dark:bg-slate-800 rounded-[28px] p-4 lg:p-6 shadow-sm border border-gray-100 dark:border-slate-700/50 animate-pulse">
+export const SkeletonProductCard: React.FC<{ className?: string }> = ({ className }) => (
+  <div className={`w-full min-w-0 bg-white dark:bg-slate-800 rounded-[28px] p-4 lg:p-6 shadow-sm border border-gray-100 dark:border-slate-700/50 animate-pulse ${className ?? ''}`}>
     <div className="aspect-square rounded-2xl bg-gray-200 dark:bg-slate-700 mb-4" />
     <div className="h-4 bg-gray-200 dark:bg-slate-700 rounded w-2/3 mb-4" />
     <div className="flex justify-between items-center">
@@ -687,8 +688,8 @@ export const FeaturedProducts: React.FC<{
          </div>
       <div ref={scrollContainerRef} className="flex gap-4 lg:gap-8 overflow-x-auto px-3 lg:px-8 pt-2 pb-8 lg:pb-12 scrollbar-none snap-x">
         {isLoading 
-          ? Array.from({ length: 4 }).map((_, i) => <SkeletonProductCard key={i} />)
-          : filtered?.map((prod) => <ProductCard key={prod.id} {...prod} onAddToCart={onAddToCart} onViewProduct={onViewProduct} />)
+          ? Array.from({ length: 4 }).map((_, i) => <SkeletonProductCard key={i} className="min-w-[180px] lg:min-w-[280px]" />)
+          : filtered?.map((prod) => <ProductCard key={prod.id} {...prod} className="min-w-[180px] lg:min-w-[280px]" onAddToCart={onAddToCart} onViewProduct={onViewProduct} />)
         }
       </div>
     </section>

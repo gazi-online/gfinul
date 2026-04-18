@@ -632,7 +632,7 @@ const App: React.FC = () => {
       )}
 
       {/* Floating Buttons */}
-      <WhatsAppButton />
+      <WhatsAppButton activeTab={activeTab} />
 
       {/* Auth Modal */}
       {isAuthOpen && (
