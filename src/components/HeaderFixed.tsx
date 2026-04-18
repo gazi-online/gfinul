@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import type { TabId } from './BottomNav'
+import { uiText, type Language } from '../lib/uiText'
 
 const UserCircleIcon = () => (
   <svg
@@ -187,8 +188,6 @@ interface NavLink {
   icon: React.FC
 }
 
-type AppLanguage = 'en' | 'bn' | 'hi'
-
 const NAV_LINKS: NavLink[] = [
   { id: 'home', label: 'Home', icon: HomeNavIcon },
   { id: 'services', label: 'Services', icon: ServicesNavIcon },
@@ -204,17 +203,16 @@ interface HeaderProps {
   onTabChange?: (tab: TabId) => void
   cartCount?: number
   onOpenCart?: () => void
-  language: AppLanguage
-  onLanguageChange: (lang: AppLanguage) => void
+  language: Language
+  onLanguageChange: (lang: Language) => void
   notificationCount: number
 }
 
-const LANGUAGE_OPTIONS: AppLanguage[] = ['en', 'bn', 'hi']
+const LANGUAGE_OPTIONS: Language[] = ['en', 'bn']
 
-const LANGUAGE_LABELS: Record<AppLanguage, string> = {
+const LANGUAGE_LABELS: Record<Language, string> = {
   en: 'EN',
   bn: 'BN',
-  hi: 'HI',
 }
 
 const HeaderFixed: React.FC<HeaderProps> = ({
@@ -228,6 +226,7 @@ const HeaderFixed: React.FC<HeaderProps> = ({
   notificationCount,
 }) => {
   const [isDark, setIsDark] = useState(false)
+  const navText = uiText[language].nav
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme')
@@ -279,7 +278,7 @@ const HeaderFixed: React.FC<HeaderProps> = ({
 
         <div className="flex items-center gap-3 lg:gap-6">
           <nav className="hidden items-center gap-3 lg:flex" aria-label="Main navigation">
-            {NAV_LINKS.filter((link) => link.id !== 'profile').map(({ id, label, icon: Icon }) => (
+            {NAV_LINKS.filter((link) => link.id !== 'profile').map(({ id, icon: Icon }) => (
               <button
                 key={id}
                 id={`nav-${id}`}
@@ -300,9 +299,9 @@ const HeaderFixed: React.FC<HeaderProps> = ({
                 >
                   <Icon />
                 </span>
-                <span className="transition-transform duration-300 group-hover:translate-x-0.5">{label}</span>
-              </button>
-            ))}
+                  <span className="transition-transform duration-300 group-hover:translate-x-0.5">{navText[id]}</span>
+                </button>
+              ))}
           </nav>
 
           <div className="flex items-center gap-3 lg:gap-4">

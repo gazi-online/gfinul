@@ -4,6 +4,7 @@ import { type User } from '@supabase/supabase-js'
 import { formatServiceRequestReference, matchesServiceRequestReference } from '../lib/references'
 import { getServiceDisplayDescription, getServiceDisplayName, getServiceKind } from '../lib/serviceDisplay'
 import { ProductCard, SkeletonProductCard, getProductCategoryMeta } from './HomeSections'
+import { uiText, type Language } from '../lib/uiText'
 
 // ── Icons ────────────────────────────────────────────────────────────────────
 const SearchIcon = () => (
@@ -104,11 +105,11 @@ const getServiceIcon = (name: string) => {
   }
 }
 
-const CATEGORIES = ['All', 'Government', 'Finance', 'Utility']
+const CATEGORIES = ['all', 'government', 'finance', 'utility'] as const
 
 // ── Components ───────────────────────────────────────────────────────────────
 
-const CategoryFilter: React.FC<{ active: string; onSelect: (cat: string) => void }> = ({ active, onSelect }) => (
+const CategoryFilter: React.FC<{ active: string; onSelect: (cat: string) => void; language?: Language }> = ({ active, onSelect, language = 'en' }) => (
   <div className="flex flex-wrap gap-3 mb-8">
     {CATEGORIES.map((cat) => (
       <button
@@ -120,7 +121,7 @@ const CategoryFilter: React.FC<{ active: string; onSelect: (cat: string) => void
             : 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400 hover:bg-gray-200 dark:hover:bg-slate-700'
         }`}
       >
-        {cat}
+        {uiText[language].pages.services.categories[cat]}
       </button>
     ))}
   </div>
@@ -175,9 +176,11 @@ export const ServicesPage: React.FC<{
   onStartService?: (name: string, desc: string) => void;
   services: ServiceItem[];
   isLoading?: boolean;
-}> = ({ onStartService, services, isLoading = false }) => {
-  const [activeCategory, setActiveCategory] = useState('All')
+  language?: Language;
+}> = ({ onStartService, services, isLoading = false, language = 'en' }) => {
+  const [activeCategory, setActiveCategory] = useState('all')
   const [search, setSearch] = useState('')
+  const text = uiText[language]
 
   const filtered = services.filter(svc => {
     const displayName = getServiceDisplayName(svc.name).toLowerCase()
@@ -199,7 +202,7 @@ export const ServicesPage: React.FC<{
           </span>
           <input
             type="text"
-            placeholder="Search for a service or scheme..."
+            placeholder={text.pages.services.searchPlaceholder}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full bg-[#EBF0FF] dark:bg-slate-800 border-none rounded-2xl py-4 pl-12 pr-6 text-sm lg:text-base text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:ring-2 focus:ring-blue-500/50 transition-all outline-none shadow-inner"
@@ -207,11 +210,11 @@ export const ServicesPage: React.FC<{
         </div>
 
         {/* Categories */}
-        <CategoryFilter active={activeCategory} onSelect={setActiveCategory} />
+          <CategoryFilter active={activeCategory} onSelect={setActiveCategory} language={language} />
 
         {/* Section Title */}
         <p className="text-[10px] lg:text-xs font-black text-gray-400 dark:text-slate-500 uppercase tracking-[2px] mb-4">
-          Popular Services
+          {text.pages.services.eyebrow}
         </p>
 
         {/* List */}
@@ -225,7 +228,7 @@ export const ServicesPage: React.FC<{
           ) : (
             <div className="text-center py-20">
               <p className="text-4xl mb-4">🔍</p>
-              <p className="text-lg font-bold text-gray-400 dark:text-slate-500">No services found</p>
+              <p className="text-lg font-bold text-gray-400 dark:text-slate-500">{text.pages.services.noResults}</p>
             </div>
           )}
         </div>
@@ -243,16 +246,18 @@ export const ProductsPage: React.FC<{
   isLoading?: boolean
   onAddToCart?: (product: Omit<Product, 'category'>) => Promise<void> | void
   onViewProduct?: (product: Product) => void
-}> = ({ products, isLoading = false, onAddToCart, onViewProduct }) => {
+  language?: Language
+}> = ({ products, isLoading = false, onAddToCart, onViewProduct, language = 'en' }) => {
   const [search, setSearch] = useState('')
   const [activeCategory, setActiveCategory] = useState<'all' | string>('all')
   const [sortBy, setSortBy] = useState<'featured' | 'price-asc' | 'price-desc' | 'rating-desc'>('featured')
+  const text = uiText[language]
 
   const categoryChips = useMemo(() => {
     const categoryMap = new Map<string, { id: string; label: string; count: number }>()
 
     products.forEach((product) => {
-      const categoryMeta = getProductCategoryMeta(product)
+      const categoryMeta = getProductCategoryMeta(product, language)
       const existingCategory = categoryMap.get(categoryMeta.id)
       if (existingCategory) {
         existingCategory.count += 1
@@ -267,18 +272,18 @@ export const ProductsPage: React.FC<{
     })
 
     return [
-      { id: 'all', label: 'All', count: products.length },
+      { id: 'all', label: text.pages.products.all, count: products.length },
       ...Array.from(categoryMap.values()).sort((firstCategory, secondCategory) =>
         firstCategory.label.localeCompare(secondCategory.label),
       ),
     ]
-  }, [products])
+  }, [language, products, text.pages.products.all])
 
   const filteredProducts = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase()
 
     const nextProducts = products.filter((product) => {
-      const categoryMeta = getProductCategoryMeta(product)
+      const categoryMeta = getProductCategoryMeta(product, language)
       const matchesCategory = activeCategory === 'all' || categoryMeta.id === activeCategory
       const matchesSearch =
         !normalizedSearch ||
@@ -313,15 +318,15 @@ export const ProductsPage: React.FC<{
     })
 
     return nextProducts
-  }, [activeCategory, products, search, sortBy])
+  }, [activeCategory, language, products, search, sortBy])
 
   return (
     <div className="min-h-screen bg-[#F9FAFB] px-4 py-6 pb-[calc(env(safe-area-inset-bottom)+10rem)] dark:bg-slate-900/20 sm:px-5 lg:px-12 lg:py-10 lg:pb-10">
       <div className="mx-auto max-w-7xl">
         <div className="mb-6 lg:mb-8">
-          <p className="text-[10px] lg:text-xs font-black uppercase tracking-[0.18em] text-gray-400 dark:text-slate-500">Shop Catalog</p>
-          <h2 className="mt-2 text-2xl lg:text-4xl font-black text-gray-900 dark:text-white">Explore Products</h2>
-          <p className="mt-2 max-w-2xl text-sm lg:text-base text-gray-500 dark:text-slate-400">Browse your product catalog in one dedicated place without scrolling the home page.</p>
+          <p className="text-[10px] lg:text-xs font-black uppercase tracking-[0.18em] text-gray-400 dark:text-slate-500">{text.pages.products.eyebrow}</p>
+          <h2 className="mt-2 text-2xl lg:text-4xl font-black text-gray-900 dark:text-white">{text.pages.products.title}</h2>
+          <p className="mt-2 max-w-2xl text-sm lg:text-base text-gray-500 dark:text-slate-400">{text.pages.products.description}</p>
         </div>
 
         <div className="mb-6 rounded-[28px] border border-gray-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900 lg:mb-8 lg:p-5">
@@ -331,7 +336,7 @@ export const ProductsPage: React.FC<{
             </span>
             <input
               type="text"
-              placeholder="Search products by name or category..."
+              placeholder={text.pages.products.searchPlaceholder}
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               className="w-full rounded-2xl border border-gray-200 bg-[#F8FAFC] py-4 pl-12 pr-6 text-sm text-gray-900 outline-none transition focus:border-blue-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white lg:text-base"
@@ -360,23 +365,23 @@ export const ProductsPage: React.FC<{
             </div>
 
             <label className="flex min-h-11 items-center gap-3 rounded-2xl border border-gray-200 bg-[#F8FAFC] px-4 text-sm font-bold text-slate-600 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300">
-              <span>Sort</span>
+              <span>{text.pages.products.sort}</span>
               <select
                 value={sortBy}
                 onChange={(event) => setSortBy(event.target.value as 'featured' | 'price-asc' | 'price-desc' | 'rating-desc')}
                 className="min-h-11 flex-1 bg-transparent text-sm font-semibold text-slate-900 outline-none dark:text-white"
               >
-                <option value="featured">Featured</option>
-                <option value="price-asc">Price: Low to High</option>
-                <option value="price-desc">Price: High to Low</option>
-                <option value="rating-desc">Top Rated</option>
+                <option value="featured">{text.pages.products.sortOptions.featured}</option>
+                <option value="price-asc">{text.pages.products.sortOptions.priceAsc}</option>
+                <option value="price-desc">{text.pages.products.sortOptions.priceDesc}</option>
+                <option value="rating-desc">{text.pages.products.sortOptions.ratingDesc}</option>
               </select>
             </label>
           </div>
 
           <div className="mt-4 flex items-center justify-between text-xs font-bold uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500">
-            <span>{filteredProducts.length} products</span>
-            <span>{activeCategory === 'all' ? 'All categories' : categoryChips.find((category) => category.id === activeCategory)?.label ?? 'Filtered'}</span>
+            <span>{filteredProducts.length} {text.pages.products.countSuffix}</span>
+            <span>{activeCategory === 'all' ? text.pages.products.allCategories : categoryChips.find((category) => category.id === activeCategory)?.label ?? text.pages.products.filtered}</span>
           </div>
         </div>
 
@@ -387,13 +392,13 @@ export const ProductsPage: React.FC<{
         ) : filteredProducts.length > 0 ? (
           <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-4">
             {filteredProducts.map((product) => (
-              <ProductCard key={product.id} {...product} onAddToCart={onAddToCart} onViewProduct={onViewProduct} />
+              <ProductCard key={product.id} {...product} onAddToCart={onAddToCart} onViewProduct={onViewProduct} language={language} />
             ))}
           </div>
         ) : (
           <div className="rounded-[28px] border border-dashed border-gray-200 bg-white px-6 py-16 text-center dark:border-slate-700 dark:bg-slate-900">
-            <p className="text-lg font-black text-gray-900 dark:text-white">No matching products found</p>
-            <p className="mt-2 text-sm text-gray-500 dark:text-slate-400">Try a different product name or category keyword.</p>
+            <p className="text-lg font-black text-gray-900 dark:text-white">{text.pages.products.noResultsTitle}</p>
+            <p className="mt-2 text-sm text-gray-500 dark:text-slate-400">{text.pages.products.noResultsDescription}</p>
           </div>
         )}
       </div>
@@ -417,6 +422,7 @@ interface TrackPageProps {
   isSignedIn?: boolean
   lastUpdatedAt?: string | null
   onRefresh?: () => void
+  language?: Language
 }
 
 export const TrackPage: React.FC<TrackPageProps> = ({
@@ -426,11 +432,13 @@ export const TrackPage: React.FC<TrackPageProps> = ({
   isSignedIn = false,
   lastUpdatedAt = null,
   onRefresh,
+  language = 'en',
 }) => {
   const [search, setSearch] = useState('')
   const normalizedSearch = search.trim().toLowerCase()
   const hasGuestRequests = !isSignedIn && requests.some((request) => request.guest)
-  const canShowTrackedRequests = isSignedIn || hasGuestRequests
+  const canShowTrackedRequests = true
+  const text = uiText[language]
 
   const filtered = requests.filter((request) =>
     getServiceDisplayName(request.services?.name).toLowerCase().includes(normalizedSearch) ||
@@ -438,10 +446,10 @@ export const TrackPage: React.FC<TrackPageProps> = ({
   )
 
   const summaryCards = [
-    { value: requests.length, label: 'Total', color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-900/20' },
-    { value: requests.filter((request) => request.status === 'completed').length, label: 'Completed', color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
-    { value: requests.filter((request) => request.status === 'processing').length, label: 'In Progress', color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-900/20' },
-    { value: requests.filter((request) => request.status === 'pending').length, label: 'Pending', color: 'text-gray-600 dark:text-slate-400', bg: 'bg-gray-50 dark:bg-slate-800' },
+    { value: requests.length, label: text.pages.track.stats.total, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-900/20' },
+    { value: requests.filter((request) => request.status === 'completed').length, label: text.pages.track.stats.completed, color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
+    { value: requests.filter((request) => request.status === 'processing').length, label: text.pages.track.stats.inProgress, color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-900/20' },
+    { value: requests.filter((request) => request.status === 'pending').length, label: text.pages.track.stats.pending, color: 'text-gray-600 dark:text-slate-400', bg: 'bg-gray-50 dark:bg-slate-800' },
   ]
 
   const lastUpdatedLabel = lastUpdatedAt
@@ -452,7 +460,7 @@ export const TrackPage: React.FC<TrackPageProps> = ({
         hour: 'numeric',
         minute: '2-digit',
       })
-    : 'Waiting for sync'
+    : text.pages.track.waitingForSync
 
   return (
     <div className="px-4 py-6 lg:px-12 lg:py-10 min-h-screen">
@@ -460,19 +468,19 @@ export const TrackPage: React.FC<TrackPageProps> = ({
         {/* Header */}
         <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <h2 className="mb-2 text-2xl font-black text-gray-900 dark:text-white lg:text-4xl">Track Applications</h2>
-            <p className="text-sm font-medium text-gray-500 dark:text-slate-400 lg:text-base">Monitor the real-time status of your submissions.</p>
+            <h2 className="mb-2 text-2xl font-black text-gray-900 dark:text-white lg:text-4xl">{text.pages.track.title}</h2>
+            <p className="text-sm font-medium text-gray-500 dark:text-slate-400 lg:text-base">{text.pages.track.description}</p>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
             <div className="rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-2 text-left shadow-sm dark:border-emerald-900/40 dark:bg-emerald-900/10">
-              <p className="text-[11px] font-black uppercase tracking-[0.18em] text-emerald-600 dark:text-emerald-400">Live Status</p>
+              <p className="text-[11px] font-black uppercase tracking-[0.18em] text-emerald-600 dark:text-emerald-400">{text.pages.track.liveStatus}</p>
               <p className="mt-1 text-xs font-medium text-emerald-700 dark:text-emerald-300">
                 {isSignedIn
-                  ? `Last synced ${lastUpdatedLabel}`
+                  ? `${text.pages.track.lastSynced} ${lastUpdatedLabel}`
                   : hasGuestRequests
-                    ? 'Guest orders saved on this device'
-                    : 'Sign in to start live tracking'}
+                    ? text.pages.track.guestSaved
+                    : text.pages.track.availableWithoutSignIn}
               </p>
             </div>
 
@@ -485,43 +493,40 @@ export const TrackPage: React.FC<TrackPageProps> = ({
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182" />
                 </svg>
-                {isRefreshing ? 'Refreshing...' : 'Refresh'}
+                {isRefreshing ? text.pages.track.refreshing : text.pages.track.refresh}
               </button>
             ) : null}
           </div>
         </div>
 
-        {canShowTrackedRequests ? (
-          <>
-            {/* Search */}
-            <div className="relative mb-6">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-                <SearchIcon />
-              </span>
-              <input
-                type="text"
-                placeholder="Search by name or reference..."
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                className="w-full rounded-2xl border border-gray-100 bg-white py-4 pl-12 pr-6 text-sm text-gray-900 outline-none transition-all placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
-              />
-            </div>
+        {/* Search */}
+        <div className="relative mb-6">
+          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+            <SearchIcon />
+          </span>
+          <input
+            type="text"
+            placeholder={text.pages.track.searchPlaceholder}
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            className="w-full rounded-2xl border border-gray-100 bg-white py-4 pl-12 pr-6 text-sm text-gray-900 outline-none transition-all placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
+          />
+        </div>
 
-            {/* Summary Stats */}
-            <div className="mb-8 grid grid-cols-2 gap-3 lg:grid-cols-4">
-              {summaryCards.map(({ value, label, color, bg }) => (
-                <div key={label} className={`${bg} rounded-2xl p-4 text-center lg:p-5`}>
-                  <p className={`text-2xl font-black lg:text-3xl ${color}`}>{value}</p>
-                  <p className="mt-1 text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-slate-400 lg:text-xs">{label}</p>
-                </div>
-              ))}
-            </div>
-            {hasGuestRequests ? (
-              <div className="mb-8 rounded-[24px] border border-amber-100 bg-amber-50/80 px-5 py-4 text-sm font-medium text-amber-800 shadow-sm dark:border-amber-900/30 dark:bg-amber-500/10 dark:text-amber-200">
-                These guest orders are stored only on this device. Sign in before ordering if you want them to appear in your account dashboard.
+        {isSignedIn ? (
+          <div className="mb-8 grid grid-cols-2 gap-3 lg:grid-cols-4">
+            {summaryCards.map(({ value, label, color, bg }) => (
+              <div key={label} className={`${bg} rounded-2xl p-4 text-center lg:p-5`}>
+                <p className={`text-2xl font-black lg:text-3xl ${color}`}>{value}</p>
+                <p className="mt-1 text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-slate-400 lg:text-xs">{label}</p>
               </div>
-            ) : null}
-          </>
+            ))}
+          </div>
+        ) : null}
+        {hasGuestRequests ? (
+          <div className="mb-8 rounded-[24px] border border-amber-100 bg-amber-50/80 px-5 py-4 text-sm font-medium text-amber-800 shadow-sm dark:border-amber-900/30 dark:bg-amber-500/10 dark:text-amber-200">
+            {text.pages.track.guestNotice}
+          </div>
         ) : null}
 
         {/* Track Entries */}
@@ -551,14 +556,20 @@ export const TrackPage: React.FC<TrackPageProps> = ({
             </div>
           ) : filtered.length > 0 ? (
             filtered.map((req, i) => {
-              const statusMap: Record<string, TrackStatus> = {
+              const statusKeyMap: Record<string, TrackStatus> = {
                 'completed': 'Completed',
                 'processing': 'Processing',
                 'pending': 'Pending',
                 'rejected': 'Rejected'
               }
-              const displayStatus = statusMap[req.status] || 'Pending'
-              const style = trackStatusStyles[displayStatus]
+              const displayLabelMap: Record<TrackStatus, string> = {
+                Completed: text.pages.track.statuses.completed,
+                Processing: text.pages.track.statuses.processing,
+                Pending: text.pages.track.statuses.pending,
+                Rejected: text.pages.track.statuses.rejected,
+              }
+              const statusKey = statusKeyMap[req.status] || 'Pending'
+              const style = trackStatusStyles[statusKey]
               const progress = req.status === 'completed' ? 100 : req.status === 'processing' ? 60 : 20
               return (
                 <div
@@ -569,17 +580,17 @@ export const TrackPage: React.FC<TrackPageProps> = ({
                   <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="text-sm lg:text-base font-bold text-gray-900 dark:text-white">{getServiceDisplayName(req.services?.name) || 'Service Request'}</h3>
+                        <h3 className="text-sm lg:text-base font-bold text-gray-900 dark:text-white">{getServiceDisplayName(req.services?.name) || text.pages.track.serviceRequest}</h3>
                         {req.guest ? (
                           <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] text-amber-700 dark:bg-amber-500/10 dark:text-amber-300">
-                            Guest
+                            {text.pages.track.guest}
                           </span>
                         ) : null}
                       </div>
                       <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">#{req.id.slice(0, 8)} · {new Date(req.created_at).toLocaleDateString()}</p>
                     </div>
                     <span className={`text-[10px] lg:text-xs font-black px-3 py-1 rounded-full uppercase tracking-tighter ${style.bg} ${style.text}`}>
-                      {displayStatus}
+                      {displayLabelMap[statusKey]}
                     </span>
                   </div>
                   {req.status !== 'rejected' && (
@@ -603,7 +614,7 @@ export const TrackPage: React.FC<TrackPageProps> = ({
           ) : (
             <div className="text-center py-16">
               <p className="text-3xl mb-3">🔍</p>
-              <p className="font-bold text-gray-400 dark:text-slate-500">No applications found</p>
+              <p className="font-bold text-gray-400 dark:text-slate-500">{text.pages.track.noResults}</p>
             </div>
           )}
         </div>
@@ -637,7 +648,35 @@ export const ProfilePage: React.FC<{
   onLogout: () => void;
   isAdmin?: boolean;
   onOpenAdmin?: () => void;
-}> = ({ user, onLogout, isAdmin, onOpenAdmin }) => {
+  onSignIn?: () => void;
+  language?: Language;
+}> = ({ user, onLogout, isAdmin, onOpenAdmin, onSignIn, language = 'en' }) => {
+  const text = uiText[language]
+  const localizedProfileMenuItems: ProfileMenuItem[] = text.pages.profile.menuItems.map((item) => ({ ...item }))
+  if (!user) {
+    return (
+      <div className="px-4 py-6 lg:px-12 lg:py-10 min-h-screen">
+        <div className="max-w-3xl mx-auto rounded-[32px] border border-blue-100 bg-gradient-to-br from-blue-50 via-white to-indigo-50 px-6 py-12 text-center shadow-sm dark:border-slate-700 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800">
+          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-blue-600 text-white shadow-xl shadow-blue-500/20">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.7} stroke="currentColor" className="h-10 w-10">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-black text-gray-900 dark:text-white">{text.pages.profile.guestTitle}</h2>
+          <p className="mx-auto mt-3 max-w-md text-sm font-medium text-gray-500 dark:text-slate-400">
+            {text.pages.profile.guestDescription}
+          </p>
+          <button
+            onClick={onSignIn}
+            className="mt-8 inline-flex min-h-12 items-center justify-center rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-3 text-sm font-bold text-white shadow-xl shadow-blue-500/25 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-blue-500/40 active:scale-[0.97]"
+          >
+            {text.pages.profile.guestButton}
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="px-4 py-6 lg:px-12 lg:py-10 min-h-screen">
       <div className="max-w-3xl mx-auto">
@@ -648,7 +687,7 @@ export const ProfilePage: React.FC<{
               {user?.email?.charAt(0).toUpperCase() || '👤'}
             </div>
             <div>
-              <h2 className="text-xl lg:text-2xl font-black">{user?.user_metadata?.name || 'Citizen'}</h2>
+              <h2 className="text-xl lg:text-2xl font-black">{user?.user_metadata?.name || text.pages.profile.citizen}</h2>
               <p className="text-white/70 text-sm lg:text-base font-medium mt-1">{user?.email}</p>
               {user && (
                 <div className="flex items-center gap-2 mt-2">
@@ -682,13 +721,13 @@ export const ProfilePage: React.FC<{
             className="w-full mb-6 py-4 text-white font-bold text-sm lg:text-base rounded-2xl bg-gradient-to-r from-gray-900 to-slate-800 dark:from-slate-800 dark:to-slate-700 hover:from-black hover:to-gray-900 transition-all shadow-lg flex items-center justify-center gap-3 tap-scale"
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z" /><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z" /></svg>
-            Open Admin Dashboard
+            {text.pages.profile.adminButton}
           </button>
         )}
 
         {/* Menu Items */}
         <div className="flex flex-col gap-2">
-          {profileMenuItems.map(({ icon, label, sublabel, color }, i) => (
+          {localizedProfileMenuItems.map(({ icon, label, sublabel, color }, i) => (
             <button
               key={label}
               className="w-full bg-white dark:bg-slate-800 rounded-2xl p-4 lg:p-5 shadow-sm border border-gray-100 dark:border-slate-700/50 flex items-center gap-4 hover:shadow-lg hover:-translate-y-0.5 active:scale-[0.99] transition-all duration-300 text-left animate-slide-up"
@@ -710,7 +749,7 @@ export const ProfilePage: React.FC<{
             onClick={onLogout}
             className="w-full mt-6 py-4 text-red-500 dark:text-red-400 font-bold text-sm rounded-2xl border border-red-200 dark:border-red-500/20 bg-red-50/50 dark:bg-red-500/5 hover:bg-red-100 dark:hover:bg-red-500/10 transition-all tap-scale"
           >
-            Sign Out
+            {text.pages.profile.signOut}
           </button>
         ) : (
           <button

@@ -25,7 +25,7 @@ import WhatsAppButton from './components/WhatsAppButton'
 import AuthModal from './components/AuthModal'
 import UserDashboard from './components/UserDashboard'
 import AdminDashboard from './components/AdminManagementDashboard'
-import { translations, type Language } from './lib/translations'
+import { uiText, type Language } from './lib/uiText'
 import { type User } from '@supabase/supabase-js'
 import { supabase } from './lib/supabase'
 import { getServiceKind } from './lib/serviceDisplay'
@@ -123,7 +123,7 @@ const App: React.FC = () => {
 
   const mainRef = useRef<HTMLElement>(null)
   
-  const t = translations[language];
+  const t = uiText[language];
 
   const refreshServiceRequests = useCallback(async (
     userId?: string,
@@ -449,7 +449,7 @@ const App: React.FC = () => {
     home: (
       <>
         {/* Search Section */}
-        <SearchSection query={searchQuery} onChange={setSearchQuery} isLoading={isLoading} />
+        <SearchSection query={searchQuery} onChange={setSearchQuery} isLoading={isLoading} language={language} />
         
         {!isSearching ? (
           <>
@@ -459,7 +459,8 @@ const App: React.FC = () => {
                isLoading={isLoading}
                onStartService={handleStartService} 
                onViewAll={() => handleTabChange('services')}
-               title={t.quick_services}
+               title={language === 'en' ? 'Quick Access' : 'দ্রুত অ্যাক্সেস'}
+               language={language}
              />
             
             {/* Featured Products */}
@@ -469,11 +470,12 @@ const App: React.FC = () => {
                query={searchQuery} 
                onAddToCart={handleAddToCart} 
                onViewProduct={handleViewProduct}
-               title={t.featured_products} 
+               title={language === 'en' ? 'Featured Products' : 'বৈশিষ্ট্যযুক্ত পণ্য'}
+               language={language}
              />
             
             {/* Offers Banner */}
-            <OffersBanner isLoading={isLoading} />
+            <OffersBanner isLoading={isLoading} language={language} />
             
             {/* Popular Services */}
              <PopularServicesSection 
@@ -481,40 +483,42 @@ const App: React.FC = () => {
                isLoading={isLoading}
                onStartService={handleStartService} 
                onViewAll={() => handleTabChange('services')}
-               title={t.popular_services}
+               title={language === 'en' ? 'Most Requested Services' : 'সবচেয়ে বেশি চাওয়া সেবা'}
+               language={language}
              />
             
             {/* Customer Reviews */}
-            <CustomerReviews title={t.reviews} />
+            <CustomerReviews title={language === 'en' ? 'Customer Reviews' : 'গ্রাহক পর্যালোচনা'} language={language} />
             
             {/* Why Choose Us */}
-            <WhyChooseUs title={t.why_us} isLoading={isLoading} />
+            <WhyChooseUs title={language === 'en' ? 'Why Choose Us' : 'কেন আমাদের বেছে নেবেন'} isLoading={isLoading} language={language} />
             
             {/* Recent Applications */}
-            <RecentApplicationsSection title={t.recent_apps} />
+            <RecentApplicationsSection title={language === 'en' ? 'Recent Applications' : 'সাম্প্রতিক আবেদন'} language={language} />
             
             {/* App CTA */}
-            <AppCTASection isLoading={isLoading} />
+            <AppCTASection isLoading={isLoading} language={language} />
           </>
         ) : (
           <div className="animate-fade-in px-3 lg:px-8 pb-10">
-            <FeaturedProducts products={products} isLoading={isLoading} query={searchQuery} onAddToCart={handleAddToCart} onViewProduct={handleViewProduct} title={t.featured_products} />
+            <FeaturedProducts products={products} isLoading={isLoading} query={searchQuery} onAddToCart={handleAddToCart} onViewProduct={handleViewProduct} title={language === 'en' ? 'Featured Products' : 'বৈশিষ্ট্যযুক্ত পণ্য'} language={language} />
             <PopularServicesSection
               services={services}
               isLoading={isLoading}
               onStartService={handleStartService}
               onViewAll={() => handleTabChange('services')}
-              title={t.popular_services}
+              title={language === 'en' ? 'Most Requested Services' : 'সবচেয়ে বেশি চাওয়া সেবা'}
+              language={language}
             />
-            {!hasResults && <EmptyState />}
+            {!hasResults && <EmptyState language={language} />}
           </div>
         )}
-        
-        <FooterSection rights={t.footer_rights} />
+
+        <FooterSection language={language} />
       </>
     ),
-    services: <ServicesPage services={services} isLoading={isLoading} onStartService={handleStartService} />,
-    products: <ProductsPage products={products} isLoading={isLoading} onAddToCart={handleAddToCart} onViewProduct={handleViewProduct} />,
+    services: <ServicesPage services={services} isLoading={isLoading} onStartService={handleStartService} language={language} />,
+    products: <ProductsPage products={products} isLoading={isLoading} onAddToCart={handleAddToCart} onViewProduct={handleViewProduct} language={language} />,
     track:    (
       <TrackPage
         requests={serviceRequests}
@@ -523,13 +527,14 @@ const App: React.FC = () => {
         isSignedIn={Boolean(user)}
         lastUpdatedAt={requestsLastUpdatedAt}
         onRefresh={() => refreshServiceRequests(user?.id, { background: true })}
+        language={language}
       />
     ),
     dashboard: <UserDashboard user={user} onLogout={handleLogout} onSignIn={() => setIsAuthOpen(true)} />,
-    profile:  <ProfilePage user={user} onLogout={handleLogout} isAdmin={isAdmin} onOpenAdmin={() => setShowAdminPanel(true)} />,
+    profile:  <ProfilePage user={user} onLogout={handleLogout} isAdmin={isAdmin} onOpenAdmin={() => setShowAdminPanel(true)} onSignIn={() => setIsAuthOpen(true)} language={language} />,
   }
 
-  const pageTitle = language === 'en' ? PAGE_TITLES[activeTab] : t[`nav_${activeTab}` as keyof typeof t] || PAGE_TITLES[activeTab];
+  const pageTitle = t.nav[activeTab] ?? PAGE_TITLES[activeTab];
 
   return (
     <div className="min-h-screen flex flex-col bg-[var(--color-surface)] dark:bg-slate-900 transition-colors duration-300">
@@ -549,7 +554,7 @@ const App: React.FC = () => {
         id="main-content"
         className="main-scroll flex-1 pb-20 lg:pb-12"
         role="main"
-        aria-label={PAGE_TITLES[activeTab]}
+        aria-label={pageTitle}
       >
         <div className="max-w-7xl mx-auto">
           <div
@@ -562,7 +567,7 @@ const App: React.FC = () => {
       </main>
 
       {/* Bottom nav only visible on mobile */}
-      <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
+      <BottomNav activeTab={activeTab} onTabChange={handleTabChange} language={language} />
 
       {/* Full Screen Service Flow Modal */}
       {activeServiceFlow && (
@@ -608,6 +613,7 @@ const App: React.FC = () => {
           onAddToCart={handleAddToCart}
           onCheckout={handleCheckoutFromProductDetails}
           onViewProduct={handleViewProduct}
+          language={language}
         />
       )}
 

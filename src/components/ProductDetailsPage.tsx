@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { type Product } from '../lib/types';
 import { productsApi } from '../api/products';
 import { useToast } from './toast/useToast';
+import { type Language } from '../lib/uiText';
 
 type ProductDetailsPageProps = {
   productId: string;
@@ -13,6 +14,7 @@ type ProductDetailsPageProps = {
   onCheckout?: () => void;
   onViewProduct?: (product: Product) => void;
   warrantyMonths?: number;
+  language?: Language;
 };
 
 const formatCurrency = (value: number) => `Rs ${Number(value || 0).toLocaleString('en-IN')}`;
@@ -183,6 +185,7 @@ export const ProductDetailsPage: React.FC<ProductDetailsPageProps> = ({
   onCheckout,
   onViewProduct,
   warrantyMonths = 12,
+  language: _language = 'en',
 }) => {
   const { addToast } = useToast();
   const [product, setProduct] = useState<Product | null>(initialProduct);
@@ -489,11 +492,9 @@ export const ProductDetailsPage: React.FC<ProductDetailsPageProps> = ({
                       onClick={canCheckout ? onCheckout : undefined}
                       disabled={!canCheckout}
                       variant="secondary"
+                      icon={<ArrowIcon direction="right" className="h-4 w-4" />}
                     >
                       Continue to Checkout
-                    </ActionButton>
-                    <ActionButton onClick={onClose} variant="ghost" className="py-3.5 text-sm font-bold">
-                      Continue Shopping
                     </ActionButton>
                   </div>
                   {actionMessage ? (

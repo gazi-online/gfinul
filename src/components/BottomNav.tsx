@@ -1,4 +1,5 @@
 import React from 'react'
+import { uiText, type Language } from '../lib/uiText'
 
 // ── Tab Icon Components ───────────────────────────────────────────────────────
 const HomeIcon = ({ filled }: { filled?: boolean }) => (
@@ -63,24 +64,25 @@ export type TabId = 'home' | 'services' | 'products' | 'track' | 'dashboard' | '
 
 interface NavTab {
   id: TabId
-  label: string
   Icon: React.FC<{ filled?: boolean }>
 }
 
 const TABS: NavTab[] = [
-  { id: 'home',      label: 'Home',      Icon: HomeIcon      },
-  { id: 'services',  label: 'Services',  Icon: GridIcon      },
-  { id: 'products',  label: 'Products',  Icon: ShoppingBagIcon },
-  { id: 'track',     label: 'Track',     Icon: ClockIcon     },
-  { id: 'dashboard', label: 'Dashboard', Icon: DashboardIcon },
+  { id: 'home', Icon: HomeIcon },
+  { id: 'services', Icon: GridIcon },
+  { id: 'products', Icon: ShoppingBagIcon },
+  { id: 'track', Icon: ClockIcon },
+  { id: 'dashboard', Icon: DashboardIcon },
 ]
 
 interface BottomNavProps {
   activeTab: TabId
   onTabChange: (tab: TabId) => void
+  language: Language
 }
 
-const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) => {
+const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange, language }) => {
+  const navText = uiText[language].nav
   return (
     <nav
       id="bottom-nav"
@@ -88,8 +90,9 @@ const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) => {
       className="glass-nav fixed inset-x-0 bottom-0 z-40 bg-white dark:bg-slate-900 border-t border-gray-100/60 dark:border-slate-800 shadow-[0_-4px_24px_rgba(0,0,0,0.06)] lg:hidden transition-colors duration-300"
     >
       <div className="flex items-stretch max-w-lg mx-auto h-[72px]">
-        {TABS.map(({ id, label, Icon }) => {
+        {TABS.map(({ id, Icon }) => {
           const isActive = activeTab === id
+          const label = navText[id]
           return (
             <button
               key={id}

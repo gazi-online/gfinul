@@ -4,6 +4,7 @@ import { type CustomerReview, type Product, type ServiceItem } from '../lib/type
 import { getServiceDisplayDescription, getServiceDisplayName } from '../lib/serviceDisplay'
 import { reviewsApi } from '../api/reviews'
 import { useToast } from './toast/useToast'
+import { uiText, type Language } from '../lib/uiText'
 
 const GAZI_ONLINE_MAPS_URL = 'https://www.google.com/maps/place/Gazi+Online+%7C%7C+%E0%A6%97%E0%A6%BE%E0%A6%9C%E0%A6%BF+%E0%A6%85%E0%A6%A8%E0%A6%B2%E0%A6%BE%E0%A6%87%E0%A6%A8/@22.6120142,88.8414335,817m/data=!3m1!1e3!4m8!3m7!1s0x3a01ff13ccf3f2c1:0x7514f47bf39cb29!8m2!3d22.6120142!4d88.8440084!9m1!1b1!16s%2Fg%2F11lf41kn1q?entry=ttu&g_ep=EgoyMDI2MDQxMy4wIKXMDSoASAFQAw%3D%3D'
 
@@ -17,8 +18,6 @@ const ArrowRightIcon = () => (
 
 
 // Services data will be passed from App.tsx
-const DEFAULT_ACTION = 'Apply Now';
-
 const POPULAR_SERVICE_VISUALS: Record<string, { icon: LucideIcon; shell: string; iconColor: string; ring: string }> = {
   'Apply PAN': {
     icon: CreditCard,
@@ -104,18 +103,20 @@ const getPopularServiceVisual = (service: Pick<ServiceItem, 'name' | 'descriptio
   }
 }
 
-export const ServiceCard: React.FC<ServiceItem & { delayIndex?: number; onStartService?: (name: string, desc: string) => void }> = ({
+export const ServiceCard: React.FC<ServiceItem & { delayIndex?: number; onStartService?: (name: string, desc: string) => void; language?: Language }> = ({
   id,
   name,
   description,
   icon,
-  actionLabel = DEFAULT_ACTION,
+  actionLabel,
   delayIndex = 0,
   onStartService,
+  language = 'en',
 }) => {
   const displayName = getServiceDisplayName(name)
   const displayDescription = getServiceDisplayDescription(name, description)
   const { icon: Icon, shell, iconColor, ring } = getPopularServiceVisual({ name, description, icon })
+  const text = uiText[language]
 
   return (
     <div
@@ -132,7 +133,7 @@ export const ServiceCard: React.FC<ServiceItem & { delayIndex?: number; onStartS
         onClick={() => onStartService?.(name, displayDescription)}
         className="ui-hover-link text-blue-600 dark:text-blue-400 text-sm font-bold hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-1.5 tap-scale"
       >
-        {actionLabel} <ArrowRightIcon />
+        {actionLabel || text.common.applyNow} <ArrowRightIcon />
       </button>
     </div>
   )
@@ -156,7 +157,9 @@ export const PopularServicesSection: React.FC<{
   title?: string;
   services: ServiceItem[];
   isLoading?: boolean;
-}> = ({ onStartService, onViewAll, title = "Most Requested Services", services, isLoading = false }) => {
+  language?: Language;
+}> = ({ onStartService, onViewAll, title = "Most Requested Services", services, isLoading = false, language = 'en' }) => {
+  const text = uiText[language]
   return (
     <section id="popular-services" className="px-3 lg:px-8 mt-6 lg:mt-10">
       <div className="flex items-center justify-between mb-3 lg:mb-5">
@@ -167,14 +170,14 @@ export const PopularServicesSection: React.FC<{
           onClick={onViewAll}
           className="ui-hover-link text-sm lg:text-base font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-1 tap-scale"
         >
-          View All <ArrowRightIcon />
+          {text.common.viewAll} <ArrowRightIcon />
         </button>
       </div>
       <div className="flex flex-col lg:grid lg:grid-cols-3 gap-3 lg:gap-5">
         {isLoading
           ? Array.from({ length: 3 }).map((_, i) => <SkeletonServiceCard key={`skel-svc-${i}`} />)
           : services?.slice(0, 3)?.map((service, i) => (
-              <ServiceCard key={service.id} {...service} delayIndex={i + 5} onStartService={onStartService} />
+              <ServiceCard key={service.id} {...service} delayIndex={i + 5} onStartService={onStartService} language={language} />
             ))}
       </div>
     </section>
@@ -195,11 +198,6 @@ const statusStyles: Record<Application['status'], string> = {
   PENDING:    'bg-gray-100 text-gray-500 dark:bg-slate-800 dark:text-slate-400 border border-gray-200 dark:border-slate-700',
 }
 
-const applications: Application[] = [
-  { id: 'app-1', name: 'Income Certificate', ref: 'Ref: #CV-88219', status: 'COMPLETED' },
-  { id: 'app-2', name: 'Trade License',       ref: 'Ref: #CV-88432', status: 'PROCESSING' },
-]
-
 export const SkeletonApplicationCard: React.FC = () => (
   <div className="bg-white dark:bg-slate-800 rounded-2xl px-5 py-4 lg:px-8 lg:py-6 shadow-sm border border-gray-100 dark:border-slate-700/50 flex items-center justify-between gap-4 animate-pulse">
     <div className="flex items-center gap-4 lg:gap-6 w-full">
@@ -213,8 +211,9 @@ export const SkeletonApplicationCard: React.FC = () => (
   </div>
 )
 
-export const RecentApplicationsSection: React.FC<{ title?: string }> = ({ title = "Recent Applications" }) => {
+export const RecentApplicationsSection: React.FC<{ title?: string; language?: Language }> = ({ title = "Recent Applications", language = 'en' }) => {
   const [isLoading, setIsLoading] = useState(true)
+  const recentApplications: Application[] = uiText[language].home.recentApplications.map((application) => ({ ...application }))
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 1500)
@@ -227,7 +226,7 @@ export const RecentApplicationsSection: React.FC<{ title?: string }> = ({ title 
       <div className="flex flex-col lg:grid lg:grid-cols-2 gap-4 lg:gap-6">
         {isLoading
           ? Array.from({ length: 2 }).map((_, i) => <SkeletonApplicationCard key={`skel-app-${i}`} />)
-          : applications.map(({ id, name, ref, status }) => (
+          : recentApplications.map(({ id, name, ref, status }) => (
               <div
                 key={id}
                 id={id}
@@ -255,7 +254,9 @@ export const RecentApplicationsSection: React.FC<{ title?: string }> = ({ title 
 }
 
 // â”€â”€ Footer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-export const FooterSection: React.FC<{ rights?: string }> = ({ rights = "Empowering Digital Governance" }) => (
+export const FooterSection: React.FC<{ language?: Language }> = ({ language = 'en' }) => {
+  const text = uiText[language]
+  return (
   <footer id="site-footer" className="bg-white dark:bg-slate-900 border-t border-gray-200 dark:border-slate-800 px-4 py-6 lg:px-8 lg:py-8 lg:flex lg:justify-between lg:items-center mt-2 lg:mt-8">
     <div className="lg:flex lg:items-center lg:gap-8">
       <div className="flex items-center justify-center lg:justify-start gap-1.5 text-blue-600 dark:text-blue-500 mb-1.5 lg:mb-0">
@@ -265,15 +266,15 @@ export const FooterSection: React.FC<{ rights?: string }> = ({ rights = "Empower
           <span className="font-bold text-gray-900 dark:text-white text-sm lg:text-base">Gazi online</span>
       </div>
       <p className="text-[11px] lg:text-sm text-gray-400 dark:text-slate-500 mb-4 lg:mb-0 text-center lg:text-left">
-          Â© 2026 Gazi online. {rights}
+          Â© 2026 Gazi online. {text.footer.rights}
       </p>
     </div>
     
     <div className="lg:flex lg:items-center lg:gap-6">
       <div className="flex items-center justify-center gap-4 lg:gap-6 text-[11px] lg:text-sm font-medium text-gray-500 dark:text-slate-400 mb-3 lg:mb-0">
-        <button id="footer-privacy-btn" className="ui-hover-link hover:text-gray-900 dark:hover:text-slate-200 tap-scale transition-colors">Privacy Policy</button>
-        <button id="footer-terms-btn" className="ui-hover-link hover:text-gray-900 dark:hover:text-slate-200 tap-scale transition-colors">Terms</button>
-        <button id="footer-help-btn" className="ui-hover-link hover:text-gray-900 dark:hover:text-slate-200 tap-scale transition-colors">Help</button>
+        <button id="footer-privacy-btn" className="ui-hover-link hover:text-gray-900 dark:hover:text-slate-200 tap-scale transition-colors">{text.footer.privacy}</button>
+        <button id="footer-terms-btn" className="ui-hover-link hover:text-gray-900 dark:hover:text-slate-200 tap-scale transition-colors">{text.footer.terms}</button>
+        <button id="footer-help-btn" className="ui-hover-link hover:text-gray-900 dark:hover:text-slate-200 tap-scale transition-colors">{text.footer.help}</button>
       </div>
       <div className="text-center lg:text-right">
         <a
@@ -284,15 +285,16 @@ export const FooterSection: React.FC<{ rights?: string }> = ({ rights = "Empower
           className="ui-hover-pill inline-flex items-center gap-2 text-xs lg:text-sm text-blue-600 dark:text-blue-400 font-medium hover:text-blue-700 dark:hover:text-blue-300 bg-blue-50/50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/50 rounded-full px-4 py-1.5 lg:py-2 tap-scale hover:bg-blue-50 dark:hover:bg-blue-900/40 transition-colors"
         >
           <MapPin className="h-4 w-4" />
-          Gazi Online Location
+          {text.footer.location}
         </a>
       </div>
     </div>
   </footer>
-)
+  )
+}
 // â”€â”€ Search Section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-export const SearchSection: React.FC<{ query: string; onChange: (v: string) => void; isLoading?: boolean }> = ({ query, onChange, isLoading = false }) => (
+export const SearchSection: React.FC<{ query: string; onChange: (v: string) => void; isLoading?: boolean; language?: Language }> = ({ query, onChange, isLoading = false, language = 'en' }) => (
   <section id="search-section" className="px-3 lg:px-8 mt-6 lg:mt-10 animate-fade-in relative z-20">
     {isLoading ? (
       <div className="relative max-w-4xl mx-auto animate-pulse">
@@ -313,7 +315,7 @@ export const SearchSection: React.FC<{ query: string; onChange: (v: string) => v
           </span>
           <input
             type="text"
-            placeholder="Explore civic services, products, or trackers..."
+            placeholder={uiText[language].home.searchPlaceholder}
             value={query}
             onChange={(e) => onChange(e.target.value)}
             className="w-full bg-white dark:bg-slate-800 border-2 border-transparent dark:border-slate-700/50 rounded-[24px] py-4 lg:py-6 pl-16 pr-6 text-sm lg:text-lg text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 shadow-lg focus:border-blue-500 outline-none transition-all duration-300 focus:bg-gray-50/50 dark:focus:bg-slate-800/80"
@@ -425,7 +427,9 @@ export const QuickServicesGrid: React.FC<{
   title?: string;
   services: ServiceItem[];
   isLoading?: boolean;
-}> = ({ onStartService, onViewAll, title = "Quick Access", services, isLoading = false }) => {
+  language?: Language;
+}> = ({ onStartService, onViewAll, title = "Quick Access", services, isLoading = false, language = 'en' }) => {
+  const text = uiText[language]
   const quickServices = services?.filter(
     (service) => service.name.trim().toLowerCase() !== 'track service'
   ) ?? []
@@ -439,7 +443,7 @@ export const QuickServicesGrid: React.FC<{
           onClick={onViewAll}
           className="ui-hover-link text-sm lg:text-base font-bold text-blue-600 dark:text-blue-400 flex items-center gap-1.5 tap-scale"
         >
-          View All <ArrowRightIcon />
+          {text.common.viewAll} <ArrowRightIcon />
         </button>
       </div>
       <div className="grid grid-cols-4 lg:grid-cols-8 gap-3 lg:gap-5">
@@ -515,34 +519,28 @@ type ProductCategoryKey = 'accessories' | 'cards' | 'documents' | 'devices' | 'g
 
 type ProductCategoryMeta = {
   id: ProductCategoryKey
-  label: string
   badgeClassName: string
 }
 
 const PRODUCT_CATEGORY_META: Record<ProductCategoryKey, ProductCategoryMeta> = {
   accessories: {
     id: 'accessories',
-    label: 'Accessories',
     badgeClassName: 'bg-sky-600 text-white shadow-lg shadow-sky-500/25',
   },
   cards: {
     id: 'cards',
-    label: 'Cards',
     badgeClassName: 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/25',
   },
   documents: {
     id: 'documents',
-    label: 'Documents',
     badgeClassName: 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/25',
   },
   devices: {
     id: 'devices',
-    label: 'Devices',
     badgeClassName: 'bg-amber-400 text-slate-950 shadow-lg shadow-amber-500/25',
   },
   general: {
     id: 'general',
-    label: 'Essentials',
     badgeClassName: 'bg-slate-800 text-white shadow-lg shadow-slate-900/25',
   },
 }
@@ -554,32 +552,33 @@ const normalizeProductCategoryText = (value: unknown) =>
     .replace(/[_-]+/g, ' ')
     .replace(/\s+/g, ' ')
 
-export const getProductCategoryMeta = (product: Pick<Product, 'category' | 'name'>): ProductCategoryMeta => {
+export const getProductCategoryMeta = (product: Pick<Product, 'category' | 'name'>, language: Language = 'en'): ProductCategoryMeta & { label: string } => {
   const rawCategory = normalizeProductCategoryText(product.category)
   const normalizedName = normalizeProductCategoryText(product.name)
   const normalizedContext = `${rawCategory} ${normalizedName}`.trim()
+  const labels = uiText[language].home.productCategories
 
   if (!normalizedContext || /\btest\d*\b/.test(rawCategory)) {
-    return PRODUCT_CATEGORY_META.general
+    return { ...PRODUCT_CATEGORY_META.general, label: labels.general }
   }
 
   if (/(holder|accessor|accessories|case|cover|wallet|sleeve|strap|mount|stand)/.test(normalizedContext)) {
-    return PRODUCT_CATEGORY_META.accessories
+    return { ...PRODUCT_CATEGORY_META.accessories, label: labels.accessories }
   }
 
   if (/(smart card|pvc|card|id\b|identity|badge)/.test(normalizedContext)) {
-    return PRODUCT_CATEGORY_META.cards
+    return { ...PRODUCT_CATEGORY_META.cards, label: labels.cards }
   }
 
   if (/(certificate|document|form|paper|passport|print|copy)/.test(normalizedContext)) {
-    return PRODUCT_CATEGORY_META.documents
+    return { ...PRODUCT_CATEGORY_META.documents, label: labels.documents }
   }
 
   if (/(device|phone|mobile|charger|gadget|electronics|earbud|speaker|router)/.test(normalizedContext)) {
-    return PRODUCT_CATEGORY_META.devices
+    return { ...PRODUCT_CATEGORY_META.devices, label: labels.devices }
   }
 
-  return PRODUCT_CATEGORY_META.general
+  return { ...PRODUCT_CATEGORY_META.general, label: labels.general }
 }
 
 const getProductErrorMessage = (error: unknown, fallback: string) => {
@@ -601,14 +600,16 @@ export const ProductCard = React.memo<Product & {
   onAddToCart?: (product: Omit<Product, 'category'>) => Promise<void> | void
   onViewProduct?: (product: Product) => void
   className?: string
-}>(({ id, name, price, category, image, onAddToCart, onViewProduct, className, ...rest }) => {
+  language?: Language
+}>(({ id, name, price, category, image, onAddToCart, onViewProduct, className, language = 'en', ...rest }) => {
   const { addToast } = useToast()
   const [isAdding, setIsAdding] = useState(false)
+  const text = uiText[language]
   const displayPrice = formatProductPrice(price)
   const productPayload: Product = { id, name, price, category, image, ...rest }
   const rating = normalizeProductRating(rest.rating)
   const isOutOfStock = Number(rest.stock ?? 0) <= 0 || rest.is_active === false
-  const categoryMeta = getProductCategoryMeta({ category, name })
+  const categoryMeta = getProductCategoryMeta({ category, name }, language)
 
   const handleQuickAdd = async (event: React.MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation()
@@ -620,14 +621,14 @@ export const ProductCard = React.memo<Product & {
       await onAddToCart({ id, name, price, image, ...rest })
       addToast({
         type: 'success',
-        title: 'Added to cart',
-        message: `${name} is ready in your cart.`,
+        title: text.home.productCard.addedTitle,
+        message: `${name} ${text.home.productCard.addedMessage}`,
       })
     } catch (error) {
       addToast({
         type: 'error',
-        title: 'Add to cart failed',
-        message: getProductErrorMessage(error, 'Could not add this product right now.'),
+        title: text.home.productCard.failedTitle,
+        message: getProductErrorMessage(error, text.home.productCard.failedMessage),
       })
     } finally {
       setIsAdding(false)
@@ -646,7 +647,7 @@ export const ProductCard = React.memo<Product & {
           onViewProduct?.(productPayload);
         }
       }}
-      aria-label={`View details for ${name}`}
+      aria-label={`${text.home.productCard.viewDetails} ${name}`}
     >
       <div className="relative mb-4 aspect-square overflow-hidden rounded-[22px] bg-gray-100 dark:bg-slate-900/50">
         <img src={image} alt={name} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
@@ -663,7 +664,7 @@ export const ProductCard = React.memo<Product & {
         <div className="mb-2 flex items-center gap-2">
           <span className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-bold uppercase tracking-[0.14em] ${isOutOfStock ? 'bg-rose-50 text-rose-600 dark:bg-rose-900/30 dark:text-rose-300' : 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-300'}`}>
             <span className={`h-1.5 w-1.5 rounded-full ${isOutOfStock ? 'bg-rose-500' : 'bg-emerald-500'}`} />
-            {isOutOfStock ? 'Out of Stock' : 'In Stock'}
+            {isOutOfStock ? text.common.outOfStock : text.common.inStock}
           </span>
         </div>
         <div className="mb-4 flex items-center gap-2">
@@ -680,7 +681,7 @@ export const ProductCard = React.memo<Product & {
           <span className="text-base font-extrabold text-blue-600 dark:text-blue-400 lg:text-xl">{displayPrice}</span>
           {isOutOfStock ? (
             <span className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-slate-100 px-3 text-[11px] font-black uppercase tracking-[0.14em] text-slate-500 dark:bg-slate-700 dark:text-slate-300">
-              Out of Stock
+              {text.common.outOfStock}
             </span>
           ) : (
             <button
@@ -688,10 +689,10 @@ export const ProductCard = React.memo<Product & {
               onClick={handleQuickAdd}
               disabled={isAdding}
               className="ui-hover-primary inline-flex min-h-11 min-w-11 items-center justify-center rounded-2xl bg-gray-900 px-3 text-white hover:bg-black tap-scale disabled:cursor-wait disabled:bg-gray-300 disabled:text-gray-500 dark:bg-blue-600 dark:hover:bg-blue-500 dark:disabled:bg-slate-700 dark:disabled:text-slate-400"
-              aria-label={isAdding ? `Adding ${name} to cart` : `Add ${name} to cart`}
+              aria-label={isAdding ? `${text.common.adding} ${name}` : `${text.common.addToCart} ${name}`}
             >
               {isAdding ? (
-                <span className="text-[11px] font-black uppercase tracking-[0.14em]">Adding</span>
+                <span className="text-[11px] font-black uppercase tracking-[0.14em]">{text.common.adding}</span>
               ) : (
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -725,10 +726,12 @@ export const FeaturedProducts: React.FC<{
   title?: string;
   products: Product[];
   isLoading?: boolean;
-}> = ({ query, onAddToCart, onViewProduct, title = "Featured Products", products, isLoading = false }) => {
+  language?: Language;
+}> = ({ query, onAddToCart, onViewProduct, title = "Featured Products", products, isLoading = false, language = 'en' }) => {
   const scrollContainerRef = React.useRef<HTMLDivElement | null>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
+  const text = uiText[language]
   const filtered = products?.filter(p => p.name.toLowerCase().includes(query.toLowerCase())) ?? []
 
   const syncScrollButtons = () => {
@@ -782,7 +785,7 @@ export const FeaturedProducts: React.FC<{
              type="button"
              onClick={() => handleScrollProducts('left')}
              aria-disabled={!canScrollLeft}
-             aria-label="Scroll featured products left"
+             aria-label={text.home.featuredProducts.scrollLeft}
              className={`ui-hover-icon bg-white dark:bg-slate-800 p-2 lg:p-3 rounded-full border border-gray-100 dark:border-slate-700/50 transition dark:hover:border-slate-600 ${
                canScrollLeft
                  ? 'text-gray-400 hover:text-gray-700 hover:border-gray-200 dark:hover:text-slate-200'
@@ -797,7 +800,7 @@ export const FeaturedProducts: React.FC<{
               type="button"
               onClick={() => handleScrollProducts('right')}
               aria-disabled={!canScrollRight}
-              aria-label="Scroll featured products right"
+               aria-label={text.home.featuredProducts.scrollRight}
               className={`ui-hover-icon bg-white dark:bg-slate-800 p-2 lg:p-3 rounded-full border border-gray-100 dark:border-slate-700/50 transition dark:hover:border-slate-600 ${
                 canScrollRight
                   ? 'text-blue-600 hover:text-blue-700 hover:border-blue-100 dark:hover:text-blue-300'
@@ -813,7 +816,7 @@ export const FeaturedProducts: React.FC<{
       <div ref={scrollContainerRef} className="flex gap-4 lg:gap-8 overflow-x-auto px-3 lg:px-8 pt-2 pb-8 lg:pb-12 scrollbar-none snap-x">
         {isLoading 
           ? Array.from({ length: 4 }).map((_, i) => <SkeletonProductCard key={i} className="min-w-[180px] lg:min-w-[280px]" />)
-          : filtered?.map((prod) => <ProductCard key={prod.id} {...prod} className="min-w-[180px] lg:min-w-[280px]" onAddToCart={onAddToCart} onViewProduct={onViewProduct} />)
+          : filtered?.map((prod) => <ProductCard key={prod.id} {...prod} className="min-w-[180px] lg:min-w-[280px]" onAddToCart={onAddToCart} onViewProduct={onViewProduct} language={language} />)
         }
       </div>
     </section>
@@ -822,12 +825,18 @@ export const FeaturedProducts: React.FC<{
 
 // â”€â”€ Offers Banner â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-export const OffersBanner: React.FC<{ title?: string; subtitle?: string; buttonText?: string; isLoading?: boolean }> = ({ 
-  title = "20% off on all\nCitizen Accessories", 
-  subtitle = "Secure your digital life with premium protection.",
-  buttonText = "Shop Now",
+export const OffersBanner: React.FC<{ title?: string; subtitle?: string; buttonText?: string; isLoading?: boolean; language?: Language }> = ({ 
+  title,
+  subtitle,
+  buttonText,
   isLoading = false,
-}) => (
+  language = 'en',
+}) => {
+  const offerText = uiText[language].home.offers
+  const resolvedTitle = title ?? offerText.title
+  const resolvedSubtitle = subtitle ?? offerText.subtitle
+  const resolvedButtonText = buttonText ?? offerText.button
+  return (
   <section id="offers-banner" className="px-3 lg:px-8 mt-6">
     {isLoading ? (
       <div className="animate-pulse rounded-[28px] border border-blue-100 bg-white p-6 shadow-sm dark:border-slate-700/50 dark:bg-slate-800 lg:p-14">
@@ -845,18 +854,19 @@ export const OffersBanner: React.FC<{ title?: string; subtitle?: string; buttonT
       <div className="ui-hover-card bg-blue-600 dark:bg-blue-500 rounded-[28px] p-6 lg:p-14 text-white relative overflow-hidden group">
         <div className="relative z-10 lg:flex lg:items-center lg:justify-between">
           <div>
-            <span className="bg-white/20 text-[10px] lg:text-xs font-black uppercase tracking-[2px] px-3 py-1 lg:px-4 lg:py-2 rounded-full mb-4 lg:mb-6 inline-block">Limited Offer</span>
-            <h2 className="text-2xl lg:text-5xl font-black mb-2 lg:mb-4 leading-tight whitespace-pre-line">{title}</h2>
-            <p className="text-white/80 text-sm lg:text-xl font-medium mb-6 lg:mb-0">{subtitle}</p>
+            <span className="bg-white/20 text-[10px] lg:text-xs font-black uppercase tracking-[2px] px-3 py-1 lg:px-4 lg:py-2 rounded-full mb-4 lg:mb-6 inline-block">{offerText.badge}</span>
+            <h2 className="text-2xl lg:text-5xl font-black mb-2 lg:mb-4 leading-tight whitespace-pre-line">{resolvedTitle}</h2>
+            <p className="text-white/80 text-sm lg:text-xl font-medium mb-6 lg:mb-0">{resolvedSubtitle}</p>
           </div>
           <button className="ui-hover-primary bg-white text-blue-600 px-8 py-4 lg:px-12 lg:py-5 rounded-2xl font-black text-sm lg:text-lg hover:bg-gray-50 active:scale-95 shadow-xl">
-            {buttonText}
+            {resolvedButtonText}
           </button>
         </div>
       </div>
     )}
   </section>
 )
+}
 
 // â”€â”€ Customer Reviews â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
@@ -913,10 +923,11 @@ export const SkeletonReviewCard: React.FC = () => (
   </div>
 )
 
-export const CustomerReviews: React.FC<{ title?: string }> = ({ title = "What Citizens Say" }) => {
+export const CustomerReviews: React.FC<{ title?: string; language?: Language }> = ({ title = "What Citizens Say", language = 'en' }) => {
   const { addToast } = useToast()
   const [isLoading, setIsLoading] = useState(true)
   const [reviews, setReviews] = useState<CustomerReview[]>([])
+  const text = uiText[language]
 
   useEffect(() => {
     let isMounted = true
@@ -932,8 +943,8 @@ export const CustomerReviews: React.FC<{ title?: string }> = ({ title = "What Ci
         if (isMounted) {
           addToast({
             type: 'error',
-            title: 'Reviews unavailable',
-            message: 'We could not load reviews right now. Please try again shortly.',
+            title: text.home.reviews.unavailableTitle,
+            message: text.home.reviews.unavailableMessage,
           })
         }
       } finally {
@@ -956,7 +967,7 @@ export const CustomerReviews: React.FC<{ title?: string }> = ({ title = "What Ci
         <div>
           <h2 className="text-base lg:text-3xl font-bold text-gray-900 dark:text-white">{title}</h2>
           <p className="mt-2 max-w-2xl text-sm text-slate-500 dark:text-slate-400">
-            Tap the button to leave a review directly on Google Maps.
+            {text.home.reviews.subtitle}
           </p>
         </div>
         <a
@@ -965,7 +976,7 @@ export const CustomerReviews: React.FC<{ title?: string }> = ({ title = "What Ci
           rel="noreferrer"
           className="ui-hover-primary inline-flex items-center justify-center rounded-2xl bg-blue-600 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-blue-500/20 transition-all duration-300 hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-xl hover:shadow-blue-500/25"
         >
-          Write a Review
+          {text.home.reviews.cta}
         </a>
       </div>
       <div className="flex gap-4 lg:gap-8 overflow-x-auto px-3 lg:px-8 pt-2 pb-8 lg:pb-12 scrollbar-none snap-x">
@@ -1010,30 +1021,36 @@ const SkeletonFeatureCard: React.FC = () => (
   </div>
 )
 
-export const WhyChooseUs: React.FC<{ title?: string; isLoading?: boolean }> = ({ title = "Why Choose Us", isLoading = false }) => (
+export const WhyChooseUs: React.FC<{ title?: string; isLoading?: boolean; language?: Language }> = ({ title = "Why Choose Us", isLoading = false, language = 'en' }) => (
   <section id="why-choose-us" className="px-3 lg:px-8 mt-6 lg:mt-12">
     <div className="grid lg:grid-cols-3 gap-4 lg:gap-8">
       {isLoading
         ? Array.from({ length: 3 }).map((_, i) => <SkeletonFeatureCard key={`skel-why-${i}`} />)
-        : features.map((f, i) => (
+        : features.map((f, i) => {
+            const localized = uiText[language].home.whyChoose.items[i] ?? { title: f.title, text: f.text }
+            return (
             <div key={i} className="ui-hover-card bg-white dark:bg-slate-800 p-6 lg:p-10 rounded-[28px] border border-gray-100 dark:border-slate-700/50 shadow-sm first:bg-blue-50/30 dark:first:bg-blue-900/10">
               <span className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 shadow-inner ${f.bg} ${f.color}`}>{f.icon}</span>
-              <h3 className="text-lg lg:text-2xl font-black text-gray-900 dark:text-white mb-3">{f.title}</h3>
-              <p className="text-gray-500 dark:text-slate-400 text-sm lg:text-lg font-medium leading-relaxed">{f.text}</p>
+              <h3 className="text-lg lg:text-2xl font-black text-gray-900 dark:text-white mb-3">{localized.title}</h3>
+              <p className="text-gray-500 dark:text-slate-400 text-sm lg:text-lg font-medium leading-relaxed">{localized.text}</p>
             </div>
-          ))}
+          )})}
     </div>
   </section>
 )
 
 // â”€â”€ App CTA Section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-export const AppCTASection: React.FC<{ title?: React.ReactNode; desc?: string; buttonText?: string; isLoading?: boolean }> = ({ 
-  title = <>Always Connected.<br /><span className="text-blue-400 dark:text-blue-200">Everywhere.</span></>,
-  desc = "Download our app for faster processing and get real-time application trackers on your lockscreen.",
-  buttonText = "Download App",
+export const AppCTASection: React.FC<{ title?: React.ReactNode; desc?: string; buttonText?: string; isLoading?: boolean; language?: Language }> = ({ 
+  title,
+  desc,
+  buttonText,
   isLoading = false,
-}) => (
+  language = 'en',
+}) => {
+  const ctaText = uiText[language].home.appCta
+  const resolvedTitle = title ?? <>{ctaText.titleLead}<br /><span className="text-blue-400 dark:text-blue-200">{ctaText.titleAccent}</span></>
+  return (
   <section id="app-cta" className="px-3 lg:px-8 mt-12 lg:mt-24 mb-10">
     {isLoading ? (
       <div className="animate-pulse rounded-[32px] bg-[#1e293b] p-8 text-white shadow-sm lg:p-20">
@@ -1053,31 +1070,32 @@ export const AppCTASection: React.FC<{ title?: React.ReactNode; desc?: string; b
       <div className="ui-hover-card bg-[#1e293b] dark:bg-blue-600 rounded-[32px] p-8 lg:p-20 text-white relative flex flex-col lg:flex-row items-center justify-between gap-10">
         <div className="absolute inset-0 opacity-10 pointer-events-none" />
         <div className="text-center lg:text-left relative z-10">
-          <h2 className="text-3xl lg:text-6xl font-black mb-4 lg:mb-6">{title}</h2>
-          <p className="text-white/70 text-sm lg:text-2xl max-w-xl font-medium">{desc}</p>
+          <h2 className="text-3xl lg:text-6xl font-black mb-4 lg:mb-6">{resolvedTitle}</h2>
+          <p className="text-white/70 text-sm lg:text-2xl max-w-xl font-medium">{desc ?? ctaText.description}</p>
         </div>
         <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto relative z-10">
           <button className="ui-hover-primary flex-1 lg:flex-none flex items-center justify-center gap-3 bg-[#25D366] px-8 py-5 rounded-2xl font-bold hover:scale-105 active:scale-95 transition-all shadow-xl shadow-green-500/20">
             <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.414 0 .004 5.408.001 12.045a11.811 11.811 0 001.592 5.923L0 24l6.102-1.6c1.808.985 3.848 1.503 5.94 1.503h.005c6.637 0 12.046-5.409 12.049-12.047a11.821 11.821 0 00-3.582-8.514"/></svg>
-            WhatsApp Help
+            {ctaText.whatsapp}
           </button>
           <button className="ui-hover-primary flex-1 lg:flex-none flex items-center justify-center gap-3 bg-white text-gray-900 px-8 py-5 rounded-2xl font-bold hover:bg-gray-100 active:scale-95 transition-all shadow-xl">
             <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M17.523 15.303c-.55 0-1 .445-1 1s.45 1 1 1 1-.445 1-1-.45-1-1-1zm-4.5 0c-.55 0-1 .445-1 1s.45 1 1 1 1-.445 1-1-.45-1-1-1zm6-6.5c0-.55-.45-1-1-1H3.977c-.55 0-1 .45-1 1v12.045c0 .55.45 1 1 1h12.045c.55 0 1-.45 1-1V8.803zM3.977 4.5l8.023 8.023L20.023 4.5H3.977z"/></svg>
-            {buttonText}
+            {buttonText ?? ctaText.button}
           </button>
         </div>
       </div>
     )}
   </section>
 )
+}
 
-export const EmptyState: React.FC = () => (
+export const EmptyState: React.FC<{ language?: Language }> = ({ language = 'en' }) => (
   <div className="text-center py-20 lg:py-32 animate-fade-in">
     <div className="w-24 h-24 lg:w-32 lg:h-32 bg-gray-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6 lg:mb-8 text-4xl lg:text-5xl">
        ðŸ”Ž
     </div>
-    <h3 className="text-lg lg:text-2xl font-black text-gray-900 dark:text-white mb-2">No results found</h3>
-    <p className="text-gray-500 dark:text-slate-400 text-sm lg:text-lg max-w-sm mx-auto font-medium">Try adjusting your search terms to find what you're looking for.</p>
+    <h3 className="text-lg lg:text-2xl font-black text-gray-900 dark:text-white mb-2">{uiText[language].common.noResultsTitle}</h3>
+    <p className="text-gray-500 dark:text-slate-400 text-sm lg:text-lg max-w-sm mx-auto font-medium">{uiText[language].common.noResultsDescription}</p>
   </div>
 )
 
