@@ -86,23 +86,6 @@ const CartIcon = () => (
   </svg>
 )
 
-const BellIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.8}
-    stroke="currentColor"
-    className="h-6 w-6"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"
-    />
-  </svg>
-)
-
 const HomeNavIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -204,6 +187,8 @@ interface NavLink {
   icon: React.FC
 }
 
+type AppLanguage = 'en' | 'bn' | 'hi'
+
 const NAV_LINKS: NavLink[] = [
   { id: 'home', label: 'Home', icon: HomeNavIcon },
   { id: 'services', label: 'Services', icon: ServicesNavIcon },
@@ -219,9 +204,17 @@ interface HeaderProps {
   onTabChange?: (tab: TabId) => void
   cartCount?: number
   onOpenCart?: () => void
-  language: 'en' | 'bn' | 'hi'
-  onLanguageChange: (lang: 'en' | 'bn' | 'hi') => void
+  language: AppLanguage
+  onLanguageChange: (lang: AppLanguage) => void
   notificationCount: number
+}
+
+const LANGUAGE_OPTIONS: AppLanguage[] = ['en', 'bn', 'hi']
+
+const LANGUAGE_LABELS: Record<AppLanguage, string> = {
+  en: 'EN',
+  bn: 'BN',
+  hi: 'HI',
 }
 
 const HeaderFixed: React.FC<HeaderProps> = ({
@@ -263,6 +256,12 @@ const HeaderFixed: React.FC<HeaderProps> = ({
     doc.classList.add('dark')
     localStorage.setItem('theme', 'dark')
     setIsDark(true)
+  }
+
+  const handleMobileLanguageChange = () => {
+    const currentIndex = LANGUAGE_OPTIONS.indexOf(language)
+    const nextLanguage = LANGUAGE_OPTIONS[(currentIndex + 1) % LANGUAGE_OPTIONS.length]
+    onLanguageChange(nextLanguage)
   }
 
   return (
@@ -317,8 +316,8 @@ const HeaderFixed: React.FC<HeaderProps> = ({
               </span>
             </button>
 
-            <div className="flex items-center rounded-xl border border-gray-100 bg-gray-50 p-1 transition-all duration-300 hover:border-blue-100 hover:bg-blue-50/80 hover:shadow-sm hover:shadow-blue-100/60 dark:border-slate-700 dark:bg-slate-800 dark:hover:border-blue-500/20 dark:hover:bg-blue-500/10">
-              {(['en', 'bn', 'hi'] as const).map((lang) => (
+            <div className="hidden items-center rounded-xl border border-gray-100 bg-gray-50 p-1 transition-all duration-300 hover:border-blue-100 hover:bg-blue-50/80 hover:shadow-sm hover:shadow-blue-100/60 dark:border-slate-700 dark:bg-slate-800 dark:hover:border-blue-500/20 dark:hover:bg-blue-500/10 lg:flex">
+              {LANGUAGE_OPTIONS.map((lang) => (
                 <button
                   key={lang}
                   onClick={() => onLanguageChange(lang)}
@@ -328,24 +327,17 @@ const HeaderFixed: React.FC<HeaderProps> = ({
                       : 'text-gray-500 hover:bg-white/80 hover:text-blue-600 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-blue-300'
                   }`}
                 >
-                  {lang === 'en' ? 'EN' : lang === 'bn' ? 'BN' : 'HI'}
+                  {LANGUAGE_LABELS[lang]}
                 </button>
               ))}
             </div>
 
             <button
-              aria-label="Notifications"
-              className="group relative rounded-full border border-transparent p-2 text-gray-600 transition-all duration-300 hover:-translate-y-0.5 hover:border-rose-100 hover:bg-rose-50 hover:text-rose-600 hover:shadow-sm hover:shadow-rose-100/70 active:scale-95 dark:text-slate-400 dark:hover:border-rose-400/20 dark:hover:bg-rose-500/10 dark:hover:text-rose-300"
+              onClick={handleMobileLanguageChange}
+              aria-label={`Change language, current ${LANGUAGE_LABELS[language]}`}
+              className="rounded-xl border border-gray-100 bg-gray-50 px-2.5 py-2 text-[10px] font-black tracking-[0.2em] text-gray-600 transition-all duration-300 hover:border-blue-100 hover:bg-blue-50/80 hover:text-blue-600 hover:shadow-sm hover:shadow-blue-100/60 active:scale-95 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-blue-500/20 dark:hover:bg-blue-500/10 dark:hover:text-blue-300 lg:hidden"
             >
-              <span className="block transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6">
-                <BellIcon />
-              </span>
-              {notificationCount > 0 && (
-                <span className="absolute right-1 top-1 flex h-2.5 w-2.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-400 opacity-75"></span>
-                  <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-rose-500"></span>
-                </span>
-              )}
+              {LANGUAGE_LABELS[language]}
             </button>
 
             <button
