@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react'
-import Header from './components/Header'
+import Header from './components/HeaderFixed'
 import BottomNav, { type TabId } from './components/BottomNav'
 import { 
   PopularServicesSection, 
