@@ -511,19 +511,132 @@ const normalizeProductRating = (value: unknown) => {
   return 4.6
 }
 
+type ProductCategoryKey = 'accessories' | 'cards' | 'documents' | 'devices' | 'general'
+
+type ProductCategoryMeta = {
+  id: ProductCategoryKey
+  label: string
+  badgeClassName: string
+}
+
+const PRODUCT_CATEGORY_META: Record<ProductCategoryKey, ProductCategoryMeta> = {
+  accessories: {
+    id: 'accessories',
+    label: 'Accessories',
+    badgeClassName: 'bg-sky-600 text-white shadow-lg shadow-sky-500/25',
+  },
+  cards: {
+    id: 'cards',
+    label: 'Cards',
+    badgeClassName: 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/25',
+  },
+  documents: {
+    id: 'documents',
+    label: 'Documents',
+    badgeClassName: 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/25',
+  },
+  devices: {
+    id: 'devices',
+    label: 'Devices',
+    badgeClassName: 'bg-amber-400 text-slate-950 shadow-lg shadow-amber-500/25',
+  },
+  general: {
+    id: 'general',
+    label: 'Essentials',
+    badgeClassName: 'bg-slate-800 text-white shadow-lg shadow-slate-900/25',
+  },
+}
+
+const normalizeProductCategoryText = (value: unknown) =>
+  String(value ?? '')
+    .trim()
+    .toLowerCase()
+    .replace(/[_-]+/g, ' ')
+    .replace(/\s+/g, ' ')
+
+export const getProductCategoryMeta = (product: Pick<Product, 'category' | 'name'>): ProductCategoryMeta => {
+  const rawCategory = normalizeProductCategoryText(product.category)
+  const normalizedName = normalizeProductCategoryText(product.name)
+  const normalizedContext = `${rawCategory} ${normalizedName}`.trim()
+
+  if (!normalizedContext || /\btest\d*\b/.test(rawCategory)) {
+    return PRODUCT_CATEGORY_META.general
+  }
+
+  if (/(holder|accessor|accessories|case|cover|wallet|sleeve|strap|mount|stand)/.test(normalizedContext)) {
+    return PRODUCT_CATEGORY_META.accessories
+  }
+
+  if (/(smart card|pvc|card|id\b|identity|badge)/.test(normalizedContext)) {
+    return PRODUCT_CATEGORY_META.cards
+  }
+
+  if (/(certificate|document|form|paper|passport|print|copy)/.test(normalizedContext)) {
+    return PRODUCT_CATEGORY_META.documents
+  }
+
+  if (/(device|phone|mobile|charger|gadget|electronics|earbud|speaker|router)/.test(normalizedContext)) {
+    return PRODUCT_CATEGORY_META.devices
+  }
+
+  return PRODUCT_CATEGORY_META.general
+}
+
+const getProductErrorMessage = (error: unknown, fallback: string) => {
+  if (error instanceof Error && error.message.trim()) {
+    return error.message
+  }
+
+  if (typeof error === 'object' && error !== null && 'message' in error) {
+    const message = (error as { message?: unknown }).message
+    if (typeof message === 'string' && message.trim()) {
+      return message
+    }
+  }
+
+  return fallback
+}
+
 export const ProductCard = React.memo<Product & {
-  onAddToCart?: (product: Omit<Product, 'category'>) => void
+  onAddToCart?: (product: Omit<Product, 'category'>) => Promise<void> | void
   onViewProduct?: (product: Product) => void
   className?: string
 }>(({ id, name, price, category, image, onAddToCart, onViewProduct, className, ...rest }) => {
-  const displayPrice = formatProductPrice(price);
-  const productPayload: Product = { id, name, price, category, image, ...rest };
-  const rating = normalizeProductRating(rest.rating);
-  const isOutOfStock = Number(rest.stock ?? 0) <= 0 || rest.is_active === false;
+  const { addToast } = useToast()
+  const [isAdding, setIsAdding] = useState(false)
+  const displayPrice = formatProductPrice(price)
+  const productPayload: Product = { id, name, price, category, image, ...rest }
+  const rating = normalizeProductRating(rest.rating)
+  const isOutOfStock = Number(rest.stock ?? 0) <= 0 || rest.is_active === false
+  const categoryMeta = getProductCategoryMeta({ category, name })
+
+  const handleQuickAdd = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation()
+
+    if (!onAddToCart || isOutOfStock || isAdding) return
+
+    setIsAdding(true)
+    try {
+      await onAddToCart({ id, name, price, image, ...rest })
+      addToast({
+        type: 'success',
+        title: 'Added to cart',
+        message: `${name} is ready in your cart.`,
+      })
+    } catch (error) {
+      addToast({
+        type: 'error',
+        title: 'Add to cart failed',
+        message: getProductErrorMessage(error, 'Could not add this product right now.'),
+      })
+    } finally {
+      setIsAdding(false)
+    }
+  }
 
   return (
     <div
-      className={`ui-hover-row-card flex h-full w-full min-w-0 flex-col bg-white dark:bg-slate-800 rounded-[28px] p-4 lg:p-6 shadow-sm border border-gray-100 dark:border-slate-700/50 active:scale-[0.98] group cursor-pointer ${className ?? ''}`}
+      className={`ui-hover-row-card group flex h-full w-full min-w-0 cursor-pointer touch-manipulation flex-col rounded-[28px] border border-gray-100 bg-white p-3.5 shadow-sm transition-all duration-300 active:scale-[0.98] dark:border-slate-700/50 dark:bg-slate-800 sm:p-4 lg:p-6 ${className ?? ''}`}
       role="button"
       tabIndex={0}
       onClick={() => onViewProduct?.(productPayload)}
@@ -535,51 +648,62 @@ export const ProductCard = React.memo<Product & {
       }}
       aria-label={`View details for ${name}`}
     >
-      <div className="relative aspect-square rounded-2xl overflow-hidden mb-4 bg-gray-50 dark:bg-slate-900/50">
+      <div className="relative mb-4 aspect-square overflow-hidden rounded-[22px] bg-gray-100 dark:bg-slate-900/50">
         <img src={image} alt={name} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
         <div className="absolute left-2 top-2">
-          <span className="max-w-full truncate rounded-full bg-blue-600 px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-white sm:text-[10px]">
-            {category}
+          <span className={`inline-flex max-w-full truncate rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] ${categoryMeta.badgeClassName}`}>
+            {categoryMeta.label}
           </span>
         </div>
       </div>
-      <h3 className="font-bold text-gray-900 dark:text-white text-sm lg:text-lg mb-1 truncate">{name}</h3>
-      <div className="mb-2 flex items-center gap-2">
-        <span className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-bold uppercase tracking-[0.14em] ${isOutOfStock ? 'bg-rose-50 text-rose-600 dark:bg-rose-900/30 dark:text-rose-300' : 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-300'}`}>
-          <span className={`h-1.5 w-1.5 rounded-full ${isOutOfStock ? 'bg-rose-500' : 'bg-emerald-500'}`} />
-          {isOutOfStock ? 'Out of Stock' : 'In Stock'}
-        </span>
-      </div>
-      <div className="mb-3 flex items-center gap-2">
-        <div className="flex items-center gap-0.5 text-amber-400">
-          {Array.from({ length: 5 }).map((_, index) => (
-            <svg key={index} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill={index < Math.round(rating) ? 'currentColor' : 'none'} stroke="currentColor" className="h-3.5 w-3.5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" />
-            </svg>
-          ))}
+      <div className="flex flex-1 flex-col">
+        <h3 className="mb-2 min-h-[2.75rem] text-sm font-black leading-snug text-gray-900 dark:text-white sm:text-base lg:text-lg">
+          {name}
+        </h3>
+        <div className="mb-2 flex items-center gap-2">
+          <span className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-bold uppercase tracking-[0.14em] ${isOutOfStock ? 'bg-rose-50 text-rose-600 dark:bg-rose-900/30 dark:text-rose-300' : 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-300'}`}>
+            <span className={`h-1.5 w-1.5 rounded-full ${isOutOfStock ? 'bg-rose-500' : 'bg-emerald-500'}`} />
+            {isOutOfStock ? 'Out of Stock' : 'In Stock'}
+          </span>
         </div>
-        <span className="text-xs font-bold text-gray-500 dark:text-slate-400">{rating.toFixed(1)}</span>
-      </div>
-      <div className="flex items-center justify-between gap-2 mt-auto">
-        <span className="text-blue-600 dark:text-blue-400 font-extrabold lg:text-xl">{displayPrice}</span>
-        <button 
-          type="button"
-          onClick={(event) => {
-            event.stopPropagation();
-            onAddToCart?.({ id, name, price, image });
-          }}
-          disabled={isOutOfStock}
-          className="ui-hover-primary bg-gray-900 dark:bg-blue-600 text-white p-2 lg:p-3 rounded-xl hover:bg-black dark:hover:bg-blue-500 tap-scale disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500 disabled:shadow-none dark:disabled:bg-slate-700 dark:disabled:text-slate-400"
-          aria-label={isOutOfStock ? `${name} is out of stock` : `Add ${name} to cart`}
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-          </svg>
-        </button>
+        <div className="mb-4 flex items-center gap-2">
+          <div className="flex items-center gap-0.5 text-amber-400">
+            {Array.from({ length: 5 }).map((_, index) => (
+              <svg key={index} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill={index < Math.round(rating) ? 'currentColor' : 'none'} stroke="currentColor" className="h-3.5 w-3.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" />
+              </svg>
+            ))}
+          </div>
+          <span className="text-xs font-bold text-gray-500 dark:text-slate-400">{rating.toFixed(1)}</span>
+        </div>
+        <div className="mt-auto flex items-center justify-between gap-3">
+          <span className="text-base font-extrabold text-blue-600 dark:text-blue-400 lg:text-xl">{displayPrice}</span>
+          {isOutOfStock ? (
+            <span className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-slate-100 px-3 text-[11px] font-black uppercase tracking-[0.14em] text-slate-500 dark:bg-slate-700 dark:text-slate-300">
+              Out of Stock
+            </span>
+          ) : (
+            <button
+              type="button"
+              onClick={handleQuickAdd}
+              disabled={isAdding}
+              className="ui-hover-primary inline-flex min-h-11 min-w-11 items-center justify-center rounded-2xl bg-gray-900 px-3 text-white hover:bg-black tap-scale disabled:cursor-wait disabled:bg-gray-300 disabled:text-gray-500 dark:bg-blue-600 dark:hover:bg-blue-500 dark:disabled:bg-slate-700 dark:disabled:text-slate-400"
+              aria-label={isAdding ? `Adding ${name} to cart` : `Add ${name} to cart`}
+            >
+              {isAdding ? (
+                <span className="text-[11px] font-black uppercase tracking-[0.14em]">Adding</span>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+              )}
+            </button>
+          )}
+        </div>
       </div>
     </div>
-  );
-});
+  )
+})
 
 ProductCard.displayName = 'ProductCard';
 
@@ -596,7 +720,7 @@ export const SkeletonProductCard: React.FC<{ className?: string }> = ({ classNam
 
 export const FeaturedProducts: React.FC<{ 
   query: string; 
-  onAddToCart?: (product: Omit<Product, 'category'>) => void; 
+  onAddToCart?: (product: Omit<Product, 'category'>) => Promise<void> | void; 
   onViewProduct?: (product: Product) => void;
   title?: string;
   products: Product[];

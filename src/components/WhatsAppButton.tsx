@@ -17,12 +17,12 @@ export const WhatsAppButton: React.FC<WhatsAppButtonProps> = ({ activeTab }) => 
     window.open('https://wa.me/919000000000', '_blank');
   };
 
-  const shouldHideOnMobile = activeTab === 'products'
+  const mobileOffsetClass = activeTab === 'products' ? 'bottom-28' : 'bottom-24'
 
   return (
     <button
       onClick={openWhatsApp}
-      className={`fixed bottom-24 right-5 z-[100] h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-[#25D366] text-white shadow-2xl shadow-green-500/30 transition-all duration-300 hover:scale-110 active:scale-95 group lg:bottom-10 lg:right-10 lg:flex lg:h-16 lg:w-16 ${shouldHideOnMobile ? 'hidden lg:flex' : 'flex'}`}
+      className={`fixed ${mobileOffsetClass} right-4 z-[100] flex h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-[#25D366] text-white shadow-2xl shadow-green-500/30 transition-all duration-300 hover:scale-110 active:scale-95 group sm:right-5 lg:bottom-10 lg:right-10 lg:h-16 lg:w-16`}
       aria-label="Contact on WhatsApp"
     >
       <div className="absolute inset-0 bg-white/20 scale-0 group-hover:scale-150 transition-transform duration-700 rounded-full" />

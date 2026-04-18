@@ -348,7 +348,12 @@ const App: React.FC = () => {
   const handleAddToCart = useCallback(async (product: Omit<CartItem, 'quantity'>) => {
     if (!user) {
       setIsAuthOpen(true)
-      return
+      throw new Error('Please sign in to add items to your cart.')
+    }
+
+    const latestProduct = products.find((item) => item.id === product.id)
+    if (latestProduct && (Number(latestProduct.stock ?? 0) <= 0 || latestProduct.is_active === false)) {
+      throw new Error('This product is currently out of stock.')
     }
 
     try {
@@ -366,7 +371,7 @@ const App: React.FC = () => {
       console.error('Error adding to cart:', err)
       throw err
     }
-  }, [user, cartItems])
+  }, [products, user])
 
   const updateCartQuantity = async (id: string, delta: number) => {
     if (!user) return

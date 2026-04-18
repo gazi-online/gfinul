@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { type Product, type ServiceItem, type Order, type ServiceRequest } from '../lib/types'
 import { type User } from '@supabase/supabase-js'
 import { formatServiceRequestReference, matchesServiceRequestReference } from '../lib/references'
 import { getServiceDisplayDescription, getServiceDisplayName, getServiceKind } from '../lib/serviceDisplay'
-import { ProductCard, SkeletonProductCard } from './HomeSections'
+import { ProductCard, SkeletonProductCard, getProductCategoryMeta } from './HomeSections'
 
 // ── Icons ────────────────────────────────────────────────────────────────────
 const SearchIcon = () => (
@@ -241,44 +241,151 @@ export const ServicesPage: React.FC<{
 export const ProductsPage: React.FC<{
   products: Product[]
   isLoading?: boolean
-  onAddToCart?: (product: Omit<Product, 'category'>) => void
+  onAddToCart?: (product: Omit<Product, 'category'>) => Promise<void> | void
   onViewProduct?: (product: Product) => void
 }> = ({ products, isLoading = false, onAddToCart, onViewProduct }) => {
   const [search, setSearch] = useState('')
+  const [activeCategory, setActiveCategory] = useState<'all' | string>('all')
+  const [sortBy, setSortBy] = useState<'featured' | 'price-asc' | 'price-desc' | 'rating-desc'>('featured')
 
-  const filteredProducts = products.filter((product) => {
-    const searchValue = search.toLowerCase()
-    return product.name.toLowerCase().includes(searchValue) || (product.category ?? '').toLowerCase().includes(searchValue)
-  })
+  const categoryChips = useMemo(() => {
+    const categoryMap = new Map<string, { id: string; label: string; count: number }>()
+
+    products.forEach((product) => {
+      const categoryMeta = getProductCategoryMeta(product)
+      const existingCategory = categoryMap.get(categoryMeta.id)
+      if (existingCategory) {
+        existingCategory.count += 1
+        return
+      }
+
+      categoryMap.set(categoryMeta.id, {
+        id: categoryMeta.id,
+        label: categoryMeta.label,
+        count: 1,
+      })
+    })
+
+    return [
+      { id: 'all', label: 'All', count: products.length },
+      ...Array.from(categoryMap.values()).sort((firstCategory, secondCategory) =>
+        firstCategory.label.localeCompare(secondCategory.label),
+      ),
+    ]
+  }, [products])
+
+  const filteredProducts = useMemo(() => {
+    const normalizedSearch = search.trim().toLowerCase()
+
+    const nextProducts = products.filter((product) => {
+      const categoryMeta = getProductCategoryMeta(product)
+      const matchesCategory = activeCategory === 'all' || categoryMeta.id === activeCategory
+      const matchesSearch =
+        !normalizedSearch ||
+        product.name.toLowerCase().includes(normalizedSearch) ||
+        (product.category ?? '').toLowerCase().includes(normalizedSearch) ||
+        categoryMeta.label.toLowerCase().includes(normalizedSearch)
+
+      return matchesCategory && matchesSearch
+    })
+
+    nextProducts.sort((firstProduct, secondProduct) => {
+      const firstOutOfStock = Number(firstProduct.stock ?? 0) <= 0 || firstProduct.is_active === false
+      const secondOutOfStock = Number(secondProduct.stock ?? 0) <= 0 || secondProduct.is_active === false
+
+      if (firstOutOfStock !== secondOutOfStock) {
+        return Number(firstOutOfStock) - Number(secondOutOfStock)
+      }
+
+      if (sortBy === 'price-asc') {
+        return Number(firstProduct.price ?? 0) - Number(secondProduct.price ?? 0)
+      }
+
+      if (sortBy === 'price-desc') {
+        return Number(secondProduct.price ?? 0) - Number(firstProduct.price ?? 0)
+      }
+
+      if (sortBy === 'rating-desc') {
+        return Number(secondProduct.rating ?? 0) - Number(firstProduct.rating ?? 0)
+      }
+
+      return 0
+    })
+
+    return nextProducts
+  }, [activeCategory, products, search, sortBy])
 
   return (
-    <div className="px-5 py-6 lg:px-12 lg:py-10 min-h-screen bg-[#F9FAFB] dark:bg-slate-900/20">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-[#F9FAFB] px-4 py-6 pb-[calc(env(safe-area-inset-bottom)+10rem)] dark:bg-slate-900/20 sm:px-5 lg:px-12 lg:py-10 lg:pb-10">
+      <div className="mx-auto max-w-7xl">
         <div className="mb-6 lg:mb-8">
           <p className="text-[10px] lg:text-xs font-black uppercase tracking-[0.18em] text-gray-400 dark:text-slate-500">Shop Catalog</p>
           <h2 className="mt-2 text-2xl lg:text-4xl font-black text-gray-900 dark:text-white">Explore Products</h2>
           <p className="mt-2 max-w-2xl text-sm lg:text-base text-gray-500 dark:text-slate-400">Browse your product catalog in one dedicated place without scrolling the home page.</p>
         </div>
 
-        <div className="relative mb-6 lg:mb-8">
-          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500">
-            <SearchIcon />
-          </span>
-          <input
-            type="text"
-            placeholder="Search products by name or category..."
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            className="w-full rounded-2xl border border-gray-200 bg-white py-4 pl-12 pr-6 text-sm lg:text-base text-gray-900 outline-none transition focus:border-blue-500 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
-          />
+        <div className="mb-6 rounded-[28px] border border-gray-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900 lg:mb-8 lg:p-5">
+          <div className="relative">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500">
+              <SearchIcon />
+            </span>
+            <input
+              type="text"
+              placeholder="Search products by name or category..."
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              className="w-full rounded-2xl border border-gray-200 bg-[#F8FAFC] py-4 pl-12 pr-6 text-sm text-gray-900 outline-none transition focus:border-blue-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white lg:text-base"
+            />
+          </div>
+
+          <div className="mt-4 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+              {categoryChips.map((category) => (
+                <button
+                  key={category.id}
+                  type="button"
+                  onClick={() => setActiveCategory(category.id)}
+                  className={`inline-flex min-h-11 items-center gap-2 whitespace-nowrap rounded-2xl px-4 text-sm font-bold transition-all duration-200 ${
+                    activeCategory === category.id
+                      ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
+                  }`}
+                >
+                  <span>{category.label}</span>
+                  <span className={`rounded-full px-2 py-0.5 text-[11px] ${activeCategory === category.id ? 'bg-white/20 text-white' : 'bg-white text-slate-500 dark:bg-slate-900 dark:text-slate-300'}`}>
+                    {category.count}
+                  </span>
+                </button>
+              ))}
+            </div>
+
+            <label className="flex min-h-11 items-center gap-3 rounded-2xl border border-gray-200 bg-[#F8FAFC] px-4 text-sm font-bold text-slate-600 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300">
+              <span>Sort</span>
+              <select
+                value={sortBy}
+                onChange={(event) => setSortBy(event.target.value as 'featured' | 'price-asc' | 'price-desc' | 'rating-desc')}
+                className="min-h-11 flex-1 bg-transparent text-sm font-semibold text-slate-900 outline-none dark:text-white"
+              >
+                <option value="featured">Featured</option>
+                <option value="price-asc">Price: Low to High</option>
+                <option value="price-desc">Price: High to Low</option>
+                <option value="rating-desc">Top Rated</option>
+              </select>
+            </label>
+          </div>
+
+          <div className="mt-4 flex items-center justify-between text-xs font-bold uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500">
+            <span>{filteredProducts.length} products</span>
+            <span>{activeCategory === 'all' ? 'All categories' : categoryChips.find((category) => category.id === activeCategory)?.label ?? 'Filtered'}</span>
+          </div>
         </div>
 
         {isLoading ? (
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-4">
             {Array.from({ length: 8 }).map((_, index) => <SkeletonProductCard key={index} />)}
           </div>
         ) : filteredProducts.length > 0 ? (
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-4">
             {filteredProducts.map((product) => (
               <ProductCard key={product.id} {...product} onAddToCart={onAddToCart} onViewProduct={onViewProduct} />
             ))}
