@@ -1,4 +1,5 @@
 import React, { forwardRef, useId, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { getInteractiveInputClass, INPUT_STATE_CLASSES } from './inputFieldStyles';
 
 export const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
@@ -35,7 +36,7 @@ export const EmailInput = forwardRef<HTMLInputElement, EmailInputProps>(function
     hint,
     id,
     name,
-    placeholder = 'Enter Email Address',
+    placeholder,
     disabled = false,
     required = false,
     className = '',
@@ -47,6 +48,7 @@ export const EmailInput = forwardRef<HTMLInputElement, EmailInputProps>(function
   },
   ref,
 ) {
+  const { t } = useTranslation();
   const generatedId = useId();
   const inputId = id ?? `email-input-${generatedId}`;
   const errorId = `${inputId}-error`;
@@ -68,11 +70,11 @@ export const EmailInput = forwardRef<HTMLInputElement, EmailInputProps>(function
     }
 
     if (!hasValue) {
-      return required ? 'Please enter your email address.' : null;
+      return required ? t('validation.emailRequired') : null;
     }
 
-    return validEmail ? null : 'Please enter a valid email address.';
-  }, [error, hasValue, isTouched, required, validEmail]);
+    return validEmail ? null : t('validation.emailInvalid');
+  }, [error, hasValue, isTouched, required, t, validEmail]);
 
   const showSuccess = !disabled && !resolvedError && !isFocused && validEmail && isTouched;
 
@@ -112,7 +114,7 @@ export const EmailInput = forwardRef<HTMLInputElement, EmailInputProps>(function
           inputMode="email"
           autoComplete={autoComplete}
           value={value}
-          placeholder={placeholder}
+          placeholder={placeholder ?? t('auth.emailPlaceholder')}
           disabled={disabled}
           required={required}
           aria-invalid={resolvedError ? 'true' : 'false'}

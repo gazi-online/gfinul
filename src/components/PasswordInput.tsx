@@ -1,5 +1,6 @@
 import React, { forwardRef, useId, useMemo, useState } from 'react';
 import { getInteractiveInputClass, INPUT_STATE_CLASSES, type InputVisualState } from './inputFieldStyles';
+import { useTranslation } from 'react-i18next';
 
 type PasswordInputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type' | 'value' | 'onChange'> & {
   label: string;
@@ -43,12 +44,13 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(fu
     onFocus,
     onInvalid,
     minLength = 6,
-    placeholder = 'Enter your password',
+    placeholder,
     autoComplete = 'current-password',
     ...props
   },
   ref,
 ) {
+  const { t } = useTranslation();
   const generatedId = useId();
   const inputId = id ?? `password-input-${generatedId}`;
   const errorId = `${inputId}-error`;
@@ -69,11 +71,11 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(fu
     }
 
     if (!hasValue) {
-      return required ? 'Please enter your password.' : null;
+      return required ? t('validation.passwordRequired') : null;
     }
 
-    return value.length >= minLength ? null : `Password must be at least ${minLength} characters long.`;
-  }, [error, hasValue, isTouched, minLength, required, value.length]);
+    return value.length >= minLength ? null : t('validation.passwordMin', { count: minLength });
+  }, [error, hasValue, isTouched, minLength, required, t, value.length]);
 
   const showSuccess = !disabled && !resolvedError && !isFocused && value.length >= minLength && isTouched;
 
@@ -108,7 +110,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(fu
           disabled={disabled}
           required={required}
           autoComplete={autoComplete}
-          placeholder={placeholder}
+          placeholder={placeholder ?? t('auth.passwordPlaceholder')}
           aria-invalid={resolvedError ? 'true' : 'false'}
           aria-disabled={disabled ? 'true' : undefined}
           aria-describedby={resolvedError ? errorId : hint ? hintId : undefined}
@@ -135,7 +137,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(fu
           type="button"
           onClick={() => setIsVisible((prev) => !prev)}
           disabled={disabled}
-          aria-label={isVisible ? 'Hide password' : 'Show password'}
+          aria-label={isVisible ? t('auth.hidePassword') : t('auth.showPassword')}
           className="absolute inset-y-0 right-3 flex items-center justify-center text-slate-400 transition hover:text-blue-500 disabled:cursor-not-allowed disabled:text-slate-300 dark:text-slate-500 dark:hover:text-blue-300"
         >
           <EyeIcon open={isVisible} />

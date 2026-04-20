@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import type { TabId } from './BottomNav'
-import { uiText, type Language } from '../lib/uiText'
+import { useTranslation } from 'react-i18next'
+import { LANGUAGE_LABELS, type Language } from '../lib/i18n'
 
 const UserCircleIcon = () => (
   <svg
@@ -138,6 +139,20 @@ const ProductsNavIcon = () => (
   </svg>
 )
 
+const TollNavIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.9}
+    stroke="currentColor"
+    className="h-4 w-4"
+  >
+    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9.75 12 4.5l8.25 5.25v8.625A1.125 1.125 0 0 1 19.125 19.5H4.875A1.125 1.125 0 0 1 3.75 18.375V9.75Z" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 19.5v-4.125A1.875 1.875 0 0 1 9.375 13.5h5.25a1.875 1.875 0 0 1 1.875 1.875V19.5M9 9.75h.008v.008H9V9.75Zm6 0h.008v.008H15V9.75Z" />
+  </svg>
+)
+
 const TrackNavIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -188,15 +203,6 @@ interface NavLink {
   icon: React.FC
 }
 
-const NAV_LINKS: NavLink[] = [
-  { id: 'home', label: 'Home', icon: HomeNavIcon },
-  { id: 'services', label: 'Services', icon: ServicesNavIcon },
-  { id: 'products', label: 'Products', icon: ProductsNavIcon },
-  { id: 'track', label: 'Track', icon: TrackNavIcon },
-  { id: 'dashboard', label: 'Dashboard', icon: DashboardNavIcon },
-  { id: 'profile', label: 'Profile', icon: ProfileNavIcon },
-]
-
 interface HeaderProps {
   title?: string
   activeTab?: TabId
@@ -210,11 +216,6 @@ interface HeaderProps {
 
 const LANGUAGE_OPTIONS: Language[] = ['en', 'bn']
 
-const LANGUAGE_LABELS: Record<Language, string> = {
-  en: 'EN',
-  bn: 'BN',
-}
-
 const HeaderFixed: React.FC<HeaderProps> = ({
   title = 'Gazi online',
   activeTab = 'home',
@@ -225,14 +226,22 @@ const HeaderFixed: React.FC<HeaderProps> = ({
   onLanguageChange,
   notificationCount,
 }) => {
+  const { t } = useTranslation()
   const [isDark, setIsDark] = useState(false)
-  const navText = uiText[language].nav
+  const navLinks: NavLink[] = [
+    { id: 'home', label: t('nav.home'), icon: HomeNavIcon },
+    { id: 'services', label: t('nav.services'), icon: ServicesNavIcon },
+    { id: 'products', label: t('nav.products'), icon: ProductsNavIcon },
+    { id: 'toll', label: t('nav.toll'), icon: TollNavIcon },
+    { id: 'track', label: t('nav.track'), icon: TrackNavIcon },
+    { id: 'dashboard', label: t('nav.dashboard'), icon: DashboardNavIcon },
+    { id: 'profile', label: t('nav.profile'), icon: ProfileNavIcon },
+  ]
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme')
-    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches
 
-    if (savedTheme === 'dark' || (!savedTheme && systemDark)) {
+    if (savedTheme === 'dark') {
       document.documentElement.classList.add('dark')
       setIsDark(true)
       return
@@ -263,6 +272,9 @@ const HeaderFixed: React.FC<HeaderProps> = ({
     onLanguageChange(nextLanguage)
   }
 
+  const currentLanguageIndex = LANGUAGE_OPTIONS.indexOf(language)
+  const nextLanguage = LANGUAGE_OPTIONS[(currentLanguageIndex + 1) % LANGUAGE_OPTIONS.length]
+
   return (
     <header
       id="app-header"
@@ -277,8 +289,8 @@ const HeaderFixed: React.FC<HeaderProps> = ({
         </div>
 
         <div className="flex items-center gap-3 lg:gap-6">
-          <nav className="hidden items-center gap-3 lg:flex" aria-label="Main navigation">
-            {NAV_LINKS.filter((link) => link.id !== 'profile').map(({ id, icon: Icon }) => (
+          <nav className="hidden items-center gap-3 lg:flex" aria-label={t('nav.main')}>
+            {navLinks.filter((link) => link.id !== 'profile').map(({ id, label, icon: Icon }) => (
               <button
                 key={id}
                 id={`nav-${id}`}
@@ -299,16 +311,16 @@ const HeaderFixed: React.FC<HeaderProps> = ({
                 >
                   <Icon />
                 </span>
-                  <span className="transition-transform duration-300 group-hover:translate-x-0.5">{navText[id]}</span>
-                </button>
-              ))}
+                <span className="transition-transform duration-300 group-hover:translate-x-0.5">{label}</span>
+              </button>
+            ))}
           </nav>
 
           <div className="flex items-center gap-3 lg:gap-4">
             <button
               onClick={toggleDarkMode}
               className="group rounded-full border border-transparent p-2 text-gray-600 transition-all duration-300 hover:-translate-y-0.5 hover:border-amber-100 hover:bg-amber-50 hover:text-amber-600 hover:shadow-sm hover:shadow-amber-100/70 active:scale-95 dark:text-slate-400 dark:hover:border-amber-400/20 dark:hover:bg-amber-500/10 dark:hover:text-amber-300"
-              aria-label="Toggle dark mode"
+              aria-label={t('header.toggleDarkMode')}
             >
               <span className="block transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6">
                 {isDark ? <SunIcon /> : <MoonIcon />}
@@ -333,15 +345,15 @@ const HeaderFixed: React.FC<HeaderProps> = ({
 
             <button
               onClick={handleMobileLanguageChange}
-              aria-label={`Change language, current ${LANGUAGE_LABELS[language]}`}
+              aria-label={t('header.changeLanguage', { language: LANGUAGE_LABELS[nextLanguage] })}
               className="rounded-xl border border-gray-100 bg-gray-50 px-2.5 py-2 text-[10px] font-black tracking-[0.2em] text-gray-600 transition-all duration-300 hover:border-blue-100 hover:bg-blue-50/80 hover:text-blue-600 hover:shadow-sm hover:shadow-blue-100/60 active:scale-95 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-blue-500/20 dark:hover:bg-blue-500/10 dark:hover:text-blue-300 lg:hidden"
             >
-              {LANGUAGE_LABELS[language]}
+              {LANGUAGE_LABELS[nextLanguage]}
             </button>
 
             <button
               onClick={() => onOpenCart?.()}
-              aria-label="Cart"
+              aria-label={t('header.cart')}
               className="group relative rounded-full border border-transparent p-1.5 text-gray-600 transition-all duration-300 hover:-translate-y-0.5 hover:border-emerald-100 hover:bg-emerald-50 hover:text-emerald-600 hover:shadow-sm hover:shadow-emerald-100/70 active:scale-95 dark:text-slate-400 dark:hover:border-emerald-400/20 dark:hover:bg-emerald-500/10 dark:hover:text-emerald-300 lg:p-2"
             >
               <span className="block transition-transform duration-300 group-hover:scale-110 group-hover:translate-x-0.5">
@@ -356,7 +368,7 @@ const HeaderFixed: React.FC<HeaderProps> = ({
 
             <button
               onClick={() => onTabChange?.('profile')}
-              aria-label="Profile"
+              aria-label={t('header.profile')}
               className={`
                 group rounded-full border-2 p-1 transition-all duration-300 active:scale-95
                 ${

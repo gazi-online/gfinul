@@ -1,5 +1,6 @@
 import React, { forwardRef, useId, useMemo, useState } from 'react';
 import { getInteractiveInputClass, INPUT_STATE_CLASSES, type InputVisualState } from './inputFieldStyles';
+import { useTranslation } from 'react-i18next';
 
 type TextInputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange'> & {
   label: string;
@@ -46,6 +47,7 @@ export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(function T
   },
   ref,
 ) {
+  const { t } = useTranslation();
   const generatedId = useId();
   const inputId = id ?? `text-input-${generatedId}`;
   const errorId = `${inputId}-error`;
@@ -66,8 +68,8 @@ export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(function T
       return null;
     }
 
-    return 'This field is required.';
-  }, [error, hasValue, isTouched, required]);
+    return t('validation.required');
+  }, [error, hasValue, isTouched, required, t]);
 
   const showSuccess = !disabled && !resolvedError && success && hasValue;
 

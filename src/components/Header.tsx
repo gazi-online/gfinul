@@ -97,8 +97,8 @@ interface HeaderProps {
   onTabChange?: (tab: TabId) => void
   cartCount?: number
   onOpenCart?: () => void
-  language: 'en' | 'bn' | 'hi'
-  onLanguageChange: (lang: 'en' | 'bn' | 'hi') => void
+  language: 'en' | 'bn'
+  onLanguageChange: (lang: 'en' | 'bn') => void
   notificationCount: number
 }
 
@@ -116,9 +116,8 @@ const Header: React.FC<HeaderProps> = ({
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme')
-    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-    
-    if (savedTheme === 'dark' || (!savedTheme && systemDark)) {
+
+    if (savedTheme === 'dark') {
       document.documentElement.classList.add('dark')
       setIsDark(true)
     } else {
@@ -198,7 +197,7 @@ const Header: React.FC<HeaderProps> = ({
 
             {/* Language Toggle */}
               <div className="flex items-center rounded-xl border border-gray-100 bg-gray-50 p-1 transition-all duration-300 hover:border-blue-100 hover:bg-blue-50/80 hover:shadow-sm hover:shadow-blue-100/60 dark:border-slate-700 dark:bg-slate-800 dark:hover:border-blue-500/20 dark:hover:bg-blue-500/10">
-                {(['en', 'bn', 'hi'] as const).map((lang) => (
+                {(['en', 'bn'] as const).map((lang) => (
                   <button
                     key={lang}
                     onClick={() => onLanguageChange(lang)}
@@ -208,7 +207,7 @@ const Header: React.FC<HeaderProps> = ({
                         : 'text-gray-500 hover:bg-white/80 hover:text-blue-600 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-blue-300'
                     }`}
                   >
-                  {lang === 'en' ? 'EN' : lang === 'bn' ? 'বাং' : 'हिं'}
+                  {lang === 'en' ? 'EN' : 'বাং'}
                 </button>
               ))}
             </div>

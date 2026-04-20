@@ -7,6 +7,7 @@ import {
   FooterSection, 
   SearchSection, 
   QuickServicesGrid, 
+  QuickToolsGrid,
   FeaturedProducts, 
   OffersBanner, 
   CustomerReviews, 
@@ -15,20 +16,22 @@ import {
   EmptyState
 } from './components/HomeSections'
 import { type Product, type ServiceItem, type CartItem, type ServiceRequest } from './lib/types'
-import { ServicesPage, ProductsPage, TrackPage, ProfilePage } from './components/OtherPages'
+import { ServicesPage, ProductsPage, TollPage, TrackPage } from './components/OtherPages'
+import ProfilePage, { PROFILE_BASE_PATH, type ProfileSectionId } from './components/ProfilePage'
 import ServiceFlow from './components/ServiceFlow'
 import CartPage from './components/CartPage'
 import CheckoutPage from './components/CheckoutPage'
 import OrderSuccessPage from './components/OrderSuccessPage'
 import ProductDetailsPage from './components/ProductDetailsPage'
-import WhatsAppButton from './components/WhatsAppButton'
+import ScrollToTopButton from './components/ScrollToTopButton'
 import AuthModal from './components/AuthModal'
 import UserDashboard from './components/UserDashboard'
 import AdminDashboard from './components/AdminManagementDashboard'
-import { uiText, type Language } from './lib/uiText'
 import { type User } from '@supabase/supabase-js'
 import { supabase } from './lib/supabase'
 import { getServiceKind } from './lib/serviceDisplay'
+import { useTranslation } from 'react-i18next'
+import { changeAppLanguage, getCurrentLanguage, type Language } from './lib/i18n'
 
 import { authApi } from './api/auth'
 import { productsApi } from './api/products'
@@ -40,6 +43,7 @@ const PAGE_TITLES: Record<TabId, string> = {
   home:      'Gazi online',
   services:  'All Services',
   products:  'Products',
+  toll:      'Toll Services',
   track:     'Track Application',
   dashboard: 'Dashboard',
   profile:   'My Profile',
@@ -49,6 +53,7 @@ const TAB_PATHS: Record<TabId, string> = {
   home: '/',
   services: '/services',
   products: '/products',
+  toll: '/toll',
   track: '/track',
   dashboard: '/dashboard',
   profile: '/profile',
@@ -62,7 +67,13 @@ const PATH_TO_TAB: Record<string, TabId> = Object.entries(TAB_PATHS).reduce(
   {} as Record<string, TabId>
 )
 
-const getTabFromPathname = (pathname: string): TabId => PATH_TO_TAB[pathname] ?? 'home'
+const getTabFromPathname = (pathname: string): TabId => {
+  if (pathname === PROFILE_BASE_PATH || pathname.startsWith(`${PROFILE_BASE_PATH}/`)) {
+    return 'profile'
+  }
+
+  return PATH_TO_TAB[pathname] ?? 'home'
+}
 
 const getReadableErrorMessage = (error: unknown, fallback: string) => {
   if (error instanceof Error && error.message.trim()) {
@@ -90,13 +101,16 @@ const WARRANTY_MONTHS = 12;
 // ── App ───────────────────────────────────────────────────────────────────────
 const App: React.FC = () => {
   // App States
+  const [currentPath, setCurrentPath] = useState(() => {
+    if (typeof window === 'undefined') return '/'
+    return window.location.pathname
+  })
   const [activeTab, setActiveTab] = useState<TabId>(() => {
     if (typeof window === 'undefined') return 'home'
     return getTabFromPathname(window.location.pathname)
   })
   const [searchQuery, setSearchQuery] = useState('')
   const [activeServiceFlow, setActiveServiceFlow] = useState<ActiveService>(null)
-  const [language, setLanguage] = useState<Language>('en')
   const [notifications, setNotifications] = useState<number>(3)
   
   // Auth & User States
@@ -122,8 +136,8 @@ const App: React.FC = () => {
   const [activeProduct, setActiveProduct] = useState<ActiveProduct>(null)
 
   const mainRef = useRef<HTMLElement>(null)
-  
-  const t = uiText[language];
+  const { t } = useTranslation()
+  const language = getCurrentLanguage()
 
   const refreshServiceRequests = useCallback(async (
     userId?: string,
@@ -270,7 +284,9 @@ const App: React.FC = () => {
     if (typeof window === 'undefined') return
 
     const handlePopState = () => {
-      setActiveTab(getTabFromPathname(window.location.pathname))
+      const nextPath = window.location.pathname
+      setCurrentPath(nextPath)
+      setActiveTab(getTabFromPathname(nextPath))
       setSearchQuery('')
       if (mainRef.current) {
         mainRef.current.scrollTo({ top: 0, behavior: 'smooth' })
@@ -287,12 +303,29 @@ const App: React.FC = () => {
       if (window.location.pathname !== nextPath) {
         window.history.pushState({}, '', nextPath)
       }
+      setCurrentPath(nextPath)
     }
     setActiveTab(tab)
     setSearchQuery('')
     if (mainRef.current) {
       mainRef.current.scrollTo({ top: 0, behavior: 'smooth' })
     }
+  }, [])
+
+  const handleProfileNavigate = useCallback((section: ProfileSectionId | null) => {
+    if (typeof window !== 'undefined') {
+      const nextPath = section ? `${PROFILE_BASE_PATH}/${section}` : PROFILE_BASE_PATH
+      if (window.location.pathname !== nextPath) {
+        window.history.pushState({}, '', nextPath)
+      }
+      setCurrentPath(nextPath)
+    }
+
+    setActiveTab('profile')
+  }, [])
+
+  const handleLanguageChange = useCallback((nextLanguage: Language) => {
+    void changeAppLanguage(nextLanguage)
   }, [])
 
   const handleStartService = useCallback((title: string, desc: string) => {
@@ -348,12 +381,7 @@ const App: React.FC = () => {
   const handleAddToCart = useCallback(async (product: Omit<CartItem, 'quantity'>) => {
     if (!user) {
       setIsAuthOpen(true)
-      throw new Error('Please sign in to add items to your cart.')
-    }
-
-    const latestProduct = products.find((item) => item.id === product.id)
-    if (latestProduct && (Number(latestProduct.stock ?? 0) <= 0 || latestProduct.is_active === false)) {
-      throw new Error('This product is currently out of stock.')
+      return
     }
 
     try {
@@ -371,7 +399,7 @@ const App: React.FC = () => {
       console.error('Error adding to cart:', err)
       throw err
     }
-  }, [products, user])
+  }, [user, cartItems])
 
   const updateCartQuantity = async (id: string, delta: number) => {
     if (!user) return
@@ -449,19 +477,25 @@ const App: React.FC = () => {
     home: (
       <>
         {/* Search Section */}
-        <SearchSection query={searchQuery} onChange={setSearchQuery} isLoading={isLoading} language={language} />
+        <SearchSection query={searchQuery} onChange={setSearchQuery} isLoading={isLoading} />
         
         {!isSearching ? (
           <>
             {/* Quick Services Grid */}
-             <QuickServicesGrid 
-               services={services}
-               isLoading={isLoading}
-               onStartService={handleStartService} 
-               onViewAll={() => handleTabChange('services')}
-               title={language === 'en' ? 'Quick Access' : 'দ্রুত অ্যাক্সেস'}
-               language={language}
-             />
+            <QuickServicesGrid 
+              services={services}
+              isLoading={isLoading}
+              onStartService={handleStartService} 
+              onViewAll={() => handleTabChange('services')}
+              title={t('home.quickServices')}
+            />
+
+            <QuickToolsGrid
+              isLoading={isLoading}
+              onOpenTools={() => handleTabChange('toll')}
+              onViewAll={() => handleTabChange('toll')}
+              title={t('home.quickTools')}
+            />
             
             {/* Featured Products */}
              <FeaturedProducts 
@@ -470,12 +504,11 @@ const App: React.FC = () => {
                query={searchQuery} 
                onAddToCart={handleAddToCart} 
                onViewProduct={handleViewProduct}
-               title={language === 'en' ? 'Featured Products' : 'বৈশিষ্ট্যযুক্ত পণ্য'}
-               language={language}
+               title={t('home.featuredProducts')} 
              />
             
             {/* Offers Banner */}
-            <OffersBanner isLoading={isLoading} language={language} />
+            <OffersBanner isLoading={isLoading} />
             
             {/* Popular Services */}
              <PopularServicesSection 
@@ -483,42 +516,41 @@ const App: React.FC = () => {
                isLoading={isLoading}
                onStartService={handleStartService} 
                onViewAll={() => handleTabChange('services')}
-               title={language === 'en' ? 'Most Requested Services' : 'সবচেয়ে বেশি চাওয়া সেবা'}
-               language={language}
+               title={t('home.popularServices')}
              />
             
             {/* Customer Reviews */}
-            <CustomerReviews title={language === 'en' ? 'Customer Reviews' : 'গ্রাহক পর্যালোচনা'} language={language} />
+            <CustomerReviews title={t('home.reviews')} />
             
             {/* Why Choose Us */}
-            <WhyChooseUs title={language === 'en' ? 'Why Choose Us' : 'কেন আমাদের বেছে নেবেন'} isLoading={isLoading} language={language} />
+            <WhyChooseUs title={t('home.whyChooseUs')} isLoading={isLoading} />
             
             {/* Recent Applications */}
-            <RecentApplicationsSection title={language === 'en' ? 'Recent Applications' : 'সাম্প্রতিক আবেদন'} language={language} />
+            <RecentApplicationsSection title={t('home.recentApplications')} />
             
             {/* App CTA */}
-            <AppCTASection isLoading={isLoading} language={language} />
+            <AppCTASection isLoading={isLoading} />
           </>
         ) : (
           <div className="animate-fade-in px-3 lg:px-8 pb-10">
-            <FeaturedProducts products={products} isLoading={isLoading} query={searchQuery} onAddToCart={handleAddToCart} onViewProduct={handleViewProduct} title={language === 'en' ? 'Featured Products' : 'বৈশিষ্ট্যযুক্ত পণ্য'} language={language} />
+            <FeaturedProducts products={products} isLoading={isLoading} query={searchQuery} onAddToCart={handleAddToCart} onViewProduct={handleViewProduct} title={t('home.featuredProducts')} />
             <PopularServicesSection
               services={services}
               isLoading={isLoading}
               onStartService={handleStartService}
               onViewAll={() => handleTabChange('services')}
-              title={language === 'en' ? 'Most Requested Services' : 'সবচেয়ে বেশি চাওয়া সেবা'}
-              language={language}
+              title={t('home.popularServices')}
             />
-            {!hasResults && <EmptyState language={language} />}
+            {!hasResults && <EmptyState />}
           </div>
         )}
-
-        <FooterSection language={language} />
+        
+        <FooterSection rights={t('home.rights')} />
       </>
     ),
-    services: <ServicesPage services={services} isLoading={isLoading} onStartService={handleStartService} language={language} />,
-    products: <ProductsPage products={products} isLoading={isLoading} onAddToCart={handleAddToCart} onViewProduct={handleViewProduct} language={language} />,
+    services: <ServicesPage services={services} isLoading={isLoading} onStartService={handleStartService} />,
+    products: <ProductsPage products={products} isLoading={isLoading} onAddToCart={handleAddToCart} onViewProduct={handleViewProduct} />,
+    toll: <TollPage />,
     track:    (
       <TrackPage
         requests={serviceRequests}
@@ -527,14 +559,30 @@ const App: React.FC = () => {
         isSignedIn={Boolean(user)}
         lastUpdatedAt={requestsLastUpdatedAt}
         onRefresh={() => refreshServiceRequests(user?.id, { background: true })}
-        language={language}
       />
     ),
     dashboard: <UserDashboard user={user} onLogout={handleLogout} onSignIn={() => setIsAuthOpen(true)} />,
-    profile:  <ProfilePage user={user} onLogout={handleLogout} isAdmin={isAdmin} onOpenAdmin={() => setShowAdminPanel(true)} onSignIn={() => setIsAuthOpen(true)} language={language} />,
+    profile:  <ProfilePage 
+      user={user} 
+      onLogout={handleLogout} 
+      onSignIn={() => setIsAuthOpen(true)}
+      isAdmin={isAdmin} 
+      onOpenAdmin={() => setShowAdminPanel(true)} 
+      language={language}
+      onLanguageChange={handleLanguageChange}
+      onUserChange={setUser}
+      stats={{
+        total: serviceRequests.length,
+        completed: serviceRequests.filter(r => r.status === 'completed').length,
+        active: serviceRequests.filter(r => r.status === 'pending' || r.status === 'processing').length
+      }}
+      isStatsLoading={Boolean(user) && isRequestsLoading}
+      currentPath={currentPath}
+      onNavigate={handleProfileNavigate}
+    />,
   }
 
-  const pageTitle = t.nav[activeTab] ?? PAGE_TITLES[activeTab];
+  const pageTitle = t(`app.pageTitle.${activeTab}`) || PAGE_TITLES[activeTab]
 
   return (
     <div className="min-h-screen flex flex-col bg-[var(--color-surface)] dark:bg-slate-900 transition-colors duration-300">
@@ -545,7 +593,7 @@ const App: React.FC = () => {
         cartCount={cartCount} 
         onOpenCart={() => setIsCartOpen(true)}
         language={language}
-        onLanguageChange={setLanguage}
+        onLanguageChange={handleLanguageChange}
         notificationCount={notifications}
       />
 
@@ -554,7 +602,7 @@ const App: React.FC = () => {
         id="main-content"
         className="main-scroll flex-1 pb-20 lg:pb-12"
         role="main"
-        aria-label={pageTitle}
+        aria-label={PAGE_TITLES[activeTab]}
       >
         <div className="max-w-7xl mx-auto">
           <div
@@ -567,7 +615,7 @@ const App: React.FC = () => {
       </main>
 
       {/* Bottom nav only visible on mobile */}
-      <BottomNav activeTab={activeTab} onTabChange={handleTabChange} language={language} />
+      <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
 
       {/* Full Screen Service Flow Modal */}
       {activeServiceFlow && (
@@ -613,7 +661,6 @@ const App: React.FC = () => {
           onAddToCart={handleAddToCart}
           onCheckout={handleCheckoutFromProductDetails}
           onViewProduct={handleViewProduct}
-          language={language}
         />
       )}
 
@@ -643,7 +690,7 @@ const App: React.FC = () => {
       )}
 
       {/* Floating Buttons */}
-      <WhatsAppButton activeTab={activeTab} />
+      <ScrollToTopButton targetRef={mainRef} />
 
       {/* Auth Modal */}
       {isAuthOpen && (

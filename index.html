@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
     <meta name="description" content="Fast, transparent, and secure access to essential civic documentation and utility payments." />
     <title>Gazi online – Digital Gateway to Government Services</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -13,8 +13,7 @@
          are fully handled by index.css to avoid specificity conflicts. */
       (function() {
         var theme = localStorage.getItem('theme');
-        var systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        if (theme === 'dark' || (!theme && systemDark)) {
+        if (theme === 'dark') {
           document.documentElement.classList.add('dark');
         } else {
           document.documentElement.classList.remove('dark');

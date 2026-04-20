@@ -1,34 +1,53 @@
+import i18n from './i18n'
+
 export type ServiceKind = 'default' | 'pvc_card_order' | 'google_play_redeem_codes'
 
 type ServiceDisplayMeta = {
-  displayName?: string
-  description?: string
+  displayNameKey?: string
+  descriptionKey?: string
   kind?: ServiceKind
 }
 
 const SERVICE_DISPLAY_META: Record<string, ServiceDisplayMeta> = {
   Aadhaar: {
-    displayName: 'Aadhaar mobile number update',
+    displayNameKey: 'services.names.aadhaar',
   },
   'Income Cert.': {
-    displayName: 'PVC Card Order',
+    displayNameKey: 'services.names.incomeCertificate',
     kind: 'pvc_card_order',
   },
   'Vehicle Tax': {
-    displayName: 'Google Play Redeem Codes',
-    description: 'Buy or redeem Google Play gift codes online.',
+    displayNameKey: 'services.names.vehicleTax',
+    descriptionKey: 'services.descriptions.googlePlayRedeemCodes',
+    kind: 'google_play_redeem_codes',
+  },
+  'Apply PAN': {
+    displayNameKey: 'services.names.applyPan',
+    descriptionKey: 'services.descriptions.applyPan',
+  },
+  'Aadhaar Update': {
+    displayNameKey: 'services.names.aadhaarUpdate',
+  },
+  'Pay Bill': {
+    displayNameKey: 'services.names.payBill',
+  },
+  'Google Play Redeem Codes': {
+    displayNameKey: 'services.names.googlePlayRedeemCodes',
+    descriptionKey: 'services.descriptions.googlePlayRedeemCodes',
     kind: 'google_play_redeem_codes',
   },
 }
 
 export const getServiceDisplayName = (name?: string | null) => {
   if (!name) return ''
-  return SERVICE_DISPLAY_META[name]?.displayName ?? name
+  const key = SERVICE_DISPLAY_META[name]?.displayNameKey
+  return key ? i18n.t(key) : name
 }
 
 export const getServiceDisplayDescription = (name?: string | null, description?: string | null) => {
   if (!name) return description ?? ''
-  return SERVICE_DISPLAY_META[name]?.description ?? description ?? ''
+  const key = SERVICE_DISPLAY_META[name]?.descriptionKey
+  return key ? i18n.t(key) : description ?? ''
 }
 
 export const getServiceKind = (name?: string | null): ServiceKind => {

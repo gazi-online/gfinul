@@ -1,5 +1,5 @@
 import React from 'react'
-import { uiText, type Language } from '../lib/uiText'
+import { useTranslation } from 'react-i18next'
 
 // ── Tab Icon Components ───────────────────────────────────────────────────────
 const HomeIcon = ({ filled }: { filled?: boolean }) => (
@@ -25,6 +25,18 @@ const ShoppingBagIcon = ({ filled }: { filled?: boolean }) => (
     {filled
       ? <path fillRule="evenodd" d="M6.75 5.25A2.25 2.25 0 0 1 9 3h6a2.25 2.25 0 0 1 2.25 2.25v1.13h1.125A1.875 1.875 0 0 1 20.25 8.25v10.125a2.625 2.625 0 0 1-2.625 2.625H6.375A2.625 2.625 0 0 1 3.75 18.375V8.25A1.875 1.875 0 0 1 5.625 6.375H6.75V5.25ZM9 6.375h6V5.25a.75.75 0 0 0-.75-.75H9.75A.75.75 0 0 0 9 5.25v1.125Z" clipRule="evenodd" />
       : <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 6.375V5.25A2.25 2.25 0 0 1 9 3h6a2.25 2.25 0 0 1 2.25 2.25v1.125m-10.5 0h10.5m-10.5 0H5.625A1.875 1.875 0 0 0 3.75 8.25v10.125A2.625 2.625 0 0 0 6.375 21h11.25a2.625 2.625 0 0 0 2.625-2.625V8.25a1.875 1.875 0 0 0-1.875-1.875H17.25" />
+    }
+  </svg>
+)
+
+const TollIcon = ({ filled }: { filled?: boolean }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill={filled ? 'currentColor' : 'none'} strokeWidth={1.8} stroke="currentColor" className="w-6 h-6">
+    {filled
+      ? <path fillRule="evenodd" d="M12 2.75a1.5 1.5 0 0 1 .806.235l7.25 4.625a1.5 1.5 0 0 1 .694 1.265v9.375A2.25 2.25 0 0 1 18.5 20.5h-13A2.25 2.25 0 0 1 3.25 18.25V8.875a1.5 1.5 0 0 1 .694-1.265l7.25-4.625A1.5 1.5 0 0 1 12 2.75Zm-2 6.75a1 1 0 1 0 0 2h.01a1 1 0 1 0-.01-2Zm4 0a1 1 0 1 0 0 2h.01a1 1 0 1 0-.01-2Zm-4.25 11h4.5v-4a1.25 1.25 0 0 0-1.25-1.25h-2A1.25 1.25 0 0 0 9.75 16.5v4Z" clipRule="evenodd" />
+      : <>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9.75 12 4.5l8.25 5.25v8.625A1.125 1.125 0 0 1 19.125 19.5H4.875A1.125 1.125 0 0 1 3.75 18.375V9.75Z" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 19.5v-4.125A1.875 1.875 0 0 1 9.375 13.5h5.25a1.875 1.875 0 0 1 1.875 1.875V19.5M9 9.75h.008v.008H9V9.75Zm6 0h.008v.008H15V9.75Z" />
+        </>
     }
   </svg>
 )
@@ -60,39 +72,39 @@ const UserIcon = ({ filled }: { filled?: boolean }) => (
   </svg>
 )
 
-export type TabId = 'home' | 'services' | 'products' | 'track' | 'dashboard' | 'profile'
+export type TabId = 'home' | 'services' | 'products' | 'toll' | 'track' | 'dashboard' | 'profile'
 
 interface NavTab {
   id: TabId
+  label: string
   Icon: React.FC<{ filled?: boolean }>
 }
-
-const TABS: NavTab[] = [
-  { id: 'home', Icon: HomeIcon },
-  { id: 'services', Icon: GridIcon },
-  { id: 'products', Icon: ShoppingBagIcon },
-  { id: 'track', Icon: ClockIcon },
-  { id: 'dashboard', Icon: DashboardIcon },
-]
 
 interface BottomNavProps {
   activeTab: TabId
   onTabChange: (tab: TabId) => void
-  language: Language
 }
 
-const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange, language }) => {
-  const navText = uiText[language].nav
+const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) => {
+  const { t } = useTranslation()
+  const tabs: NavTab[] = [
+    { id: 'home', label: t('nav.home'), Icon: HomeIcon },
+    { id: 'services', label: t('nav.services'), Icon: GridIcon },
+    { id: 'products', label: t('nav.products'), Icon: ShoppingBagIcon },
+    { id: 'toll', label: t('nav.toll'), Icon: TollIcon },
+    { id: 'track', label: t('nav.track'), Icon: ClockIcon },
+    { id: 'dashboard', label: t('nav.dashboard'), Icon: DashboardIcon },
+  ]
+
   return (
     <nav
       id="bottom-nav"
-      aria-label="Main navigation"
+      aria-label={t('nav.main')}
       className="glass-nav fixed inset-x-0 bottom-0 z-40 bg-white dark:bg-slate-900 border-t border-gray-100/60 dark:border-slate-800 shadow-[0_-4px_24px_rgba(0,0,0,0.06)] lg:hidden transition-colors duration-300"
     >
       <div className="flex items-stretch max-w-lg mx-auto h-[72px]">
-        {TABS.map(({ id, Icon }) => {
+        {tabs.map(({ id, label, Icon }) => {
           const isActive = activeTab === id
-          const label = navText[id]
           return (
             <button
               key={id}

@@ -34,9 +34,9 @@ export const authApi = {
   },
 
   // Auth state listener
-  onAuthStateChange(callback: (session: any) => void) {
-    return supabase.auth.onAuthStateChange((_event, session) => {
-      callback(session);
+  onAuthStateChange(callback: (event: string, session: any) => void) {
+    return supabase.auth.onAuthStateChange((event, session) => {
+      callback(event, session);
     });
   },
 
@@ -100,5 +100,66 @@ export const authApi = {
       console.error("Error fetching user role:", err);
       return false;
     }
+  },
+
+  async updateProfile(data: { name?: string; phone?: string; email?: string }) {
+    const payload: {
+      email?: string;
+      data?: {
+        name?: string;
+        phone?: string;
+      };
+    } = {};
+
+    if (data.email !== undefined) {
+      payload.email = data.email;
+    }
+
+    if (data.name !== undefined || data.phone !== undefined) {
+      payload.data = { name: data.name, phone: data.phone };
+    }
+
+    const { data: userData, error } = await supabase.auth.updateUser(payload);
+    if (error) throw error;
+    
+    if (userData.user && (data.name !== undefined || data.phone !== undefined || data.email !== undefined)) {
+      const updates: any = {};
+      if (data.name !== undefined) updates.name = data.name;
+      if (data.phone !== undefined) updates.phone = data.phone;
+      if (data.email !== undefined) updates.email = data.email;
+      
+      const { error: dbError } = await supabase
+        .from('users')
+        .update(updates)
+        .eq('id', userData.user.id);
+      if (dbError) console.error("Error syncing profile to users table:", dbError);
+    }
+    return userData;
+  },
+
+  async verifyCurrentPassword(email: string, password: string) {
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    if (error) throw error;
+  },
+
+  async updatePassword(password: string) {
+    const { data, error } = await supabase.auth.updateUser({
+      password: password
+    });
+    if (error) throw error;
+    return data;
+  },
+
+  async requestPasswordReset(email: string) {
+    const redirectTo = typeof window !== 'undefined' ? window.location.origin : undefined;
+    const { data, error } = await supabase.auth.resetPasswordForEmail(
+      email,
+      redirectTo ? { redirectTo } : undefined
+    );
+    if (error) throw error;
+    return data;
   }
 };

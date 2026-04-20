@@ -9,3 +9,5 @@ live-app.js
 screen.png
 .DS_Store
 Thumbs.db
+
+.vercel

@@ -1,0 +1,471 @@
+{
+  "app": {
+    "brand": "গাজী অনলাইন",
+    "pageTitle": {
+      "home": "গাজী অনলাইন",
+      "services": "সব পরিষেবা",
+      "products": "পণ্য",
+      "toll": "স্টুডিও টুলস",
+      "track": "আবেদন ট্র্যাক",
+      "dashboard": "ড্যাশবোর্ড",
+      "profile": "আমার প্রোফাইল"
+    }
+  },
+  "nav": {
+    "home": "হোম",
+    "services": "পরিষেবা",
+    "products": "পণ্য",
+    "toll": "টুলস",
+    "track": "ট্র্যাক",
+    "dashboard": "ড্যাশবোর্ড",
+    "profile": "প্রোফাইল",
+    "main": "মূল নেভিগেশন"
+  },
+  "header": {
+    "toggleDarkMode": "ডার্ক মোড পরিবর্তন করুন",
+    "changeLanguage": "ভাষা পরিবর্তন করুন, বর্তমান {{language}}",
+    "cart": "কার্ট",
+    "profile": "প্রোফাইল"
+  },
+  "language": {
+    "en": "ইংরেজি",
+    "bn": "বাংলা",
+    "switcher": "ভাষা"
+  },
+  "common": {
+    "viewAll": "সব দেখুন",
+    "save": "সংরক্ষণ করুন",
+    "saveChanges": "পরিবর্তন সংরক্ষণ করুন",
+    "saving": "সংরক্ষণ করা হচ্ছে...",
+    "loading": "লোড হচ্ছে...",
+    "close": "বন্ধ করুন",
+    "cancel": "বাতিল",
+    "edit": "সম্পাদনা",
+    "link": "লিঙ্ক করুন",
+    "verify": "যাচাই করুন",
+    "verified": "যাচাইকৃত",
+    "notVerified": "যাচাইকৃত নয়",
+    "signIn": "সাইন ইন",
+    "signOut": "সাইন আউট",
+    "goToSignIn": "সাইন ইন-এ যান",
+    "pleaseSignIn": "অনুগ্রহ করে সাইন ইন করুন",
+    "optional": "ঐচ্ছিক",
+    "required": "প্রয়োজনীয়",
+    "search": "অনুসন্ধান",
+    "refresh": "রিফ্রেশ",
+    "comingSoon": "শীঘ্রই আসছে",
+    "ok": "ঠিক আছে",
+    "guest": "অতিথি",
+    "admin": "অ্যাডমিন",
+    "yes": "হ্যাঁ",
+    "no": "না",
+    "na": "প্রযোজ্য নয়",
+    "updated": "{{date}}-এ হালনাগাদ",
+    "notAvailable": "উপলভ্য নয়"
+  },
+  "categories": {
+    "all": "সব",
+    "government": "সরকারি",
+    "finance": "আর্থিক",
+    "utility": "ইউটিলিটি"
+  },
+  "validation": {
+    "required": "এই ঘরটি পূরণ করা আবশ্যক।",
+    "emailRequired": "অনুগ্রহ করে আপনার ইমেইল লিখুন।",
+    "emailInvalid": "অনুগ্রহ করে একটি বৈধ ইমেইল লিখুন।",
+    "passwordRequired": "অনুগ্রহ করে আপনার পাসওয়ার্ড লিখুন।",
+    "passwordMin": "পাসওয়ার্ড অন্তত {{count}} অক্ষরের হতে হবে।",
+    "valueInvalid": "অনুগ্রহ করে একটি বৈধ মান লিখুন।",
+    "fullNameRequired": "অনুগ্রহ করে আপনার পুরো নাম লিখুন।",
+    "phoneInvalid": "১০ থেকে ১৫ সংখ্যার একটি বৈধ ফোন নম্বর লিখুন।",
+    "currentPasswordRequired": "বর্তমান পাসওয়ার্ড লিখুন।",
+    "newPasswordMin": "নতুন পাসওয়ার্ড অন্তত ৮ অক্ষরের হতে হবে।",
+    "newPasswordNumber": "নতুন পাসওয়ার্ডে অন্তত একটি সংখ্যা রাখুন।",
+    "confirmPasswordMismatch": "পাসওয়ার্ড দুটি মেলেনি।",
+    "linkedAccountRequired": "অনুগ্রহ করে একটি আইডি নম্বর লিখুন।",
+    "aadhaarInvalid": "আধার নম্বর অবশ্যই ১২ সংখ্যার হতে হবে।",
+    "panInvalid": "প্যান নম্বর ABCDE1234F ফরম্যাটে হতে হবে।",
+    "voterInvalid": "ভোটার আইডি ৮ থেকে ১৬ অক্ষর বা সংখ্যার হতে হবে।"
+  },
+  "auth": {
+    "welcomeBack": "আবার স্বাগতম",
+    "createAccount": "অ্যাকাউন্ট তৈরি করুন",
+    "fullName": "পূর্ণ নাম",
+    "emailAddress": "ইমেইল ঠিকানা",
+    "password": "পাসওয়ার্ড",
+    "showPassword": "পাসওয়ার্ড দেখান",
+    "hidePassword": "পাসওয়ার্ড লুকান",
+    "signIn": "সাইন ইন",
+    "signUp": "সাইন আপ",
+    "createAccountButton": "অ্যাকাউন্ট তৈরি করুন",
+    "dontHaveAccount": "অ্যাকাউন্ট নেই? সাইন আপ করুন",
+    "alreadyHaveAccount": "আগেই অ্যাকাউন্ট আছে? সাইন ইন করুন",
+    "namePlaceholder": "গাজী অনলাইন",
+    "emailPlaceholder": "name@example.com",
+    "passwordPlaceholder": "পাসওয়ার্ড",
+    "authFailed": "প্রমাণীকরণের সময় একটি সমস্যা হয়েছে"
+  },
+  "status": {
+    "pending": "অপেক্ষমাণ",
+    "processing": "প্রক্রিয়াধীন",
+    "completed": "সম্পন্ন",
+    "rejected": "প্রত্যাখ্যাত",
+    "shipped": "প্রেরিত",
+    "delivered": "ডেলিভার হয়েছে",
+    "cancelled": "বাতিল",
+    "inStock": "স্টকে আছে",
+    "outOfStock": "স্টক শেষ",
+    "lowStock": "স্বল্প স্টক"
+  },
+  "home": {
+    "heroTitle": "সরকারি পরিষেবার ডিজিটাল গেটওয়ে",
+    "heroDescription": "প্রয়োজনীয় নাগরিক নথিতে দ্রুত, স্বচ্ছ এবং নিরাপদ প্রবেশাধিকার।",
+    "quickServices": "দ্রুত অ্যাক্সেস",
+    "quickTools": "দ্রুত টুলস",
+    "featuredProducts": "বৈশিষ্ট্যযুক্ত পণ্য",
+    "popularServices": "সবচেয়ে চাওয়া পরিষেবা",
+    "recentApplications": "সাম্প্রতিক আবেদন",
+    "reviews": "গ্রাহক পর্যালোচনা",
+    "whyChooseUs": "কেন আমাদের বেছে নেবেন",
+    "viewAllServices": "সব দেখুন",
+    "searchPlaceholder": "পরিষেবা, পণ্য বা ট্র্যাকার খুঁজুন...",
+    "offersBadge": "সীমিত অফার",
+    "offersTitle": "সব\nনাগরিক উপকরণে ২০% ছাড়",
+    "offersSubtitle": "প্রিমিয়াম সুরক্ষার সাথে আপনার ডিজিটাল জীবন নিরাপদ রাখুন।",
+    "shopNow": "এখনই কিনুন",
+    "whatCitizensSay": "নাগরিকরা যা বলছেন",
+    "reviewPrompt": "Google Maps-এ সরাসরি রিভিউ দিতে বোতামে চাপুন।",
+    "writeReview": "রিভিউ লিখুন",
+    "privacyPolicy": "গোপনীয়তা নীতি",
+    "terms": "শর্তাবলি",
+    "help": "সহায়তা",
+    "location": "গাজী অনলাইন লোকেশন",
+    "rights": "সমস্ত অধিকার সংরক্ষিত।",
+    "footerTagline": "ডিজিটাল শাসনকে ক্ষমতায়ন করছি",
+    "fastService": "দ্রুত পরিষেবা",
+    "fastServiceDescription": "অধিকাংশ আবেদন ২৪ ঘণ্টার মধ্যে এক্সপ্রেস কিউয়ের মাধ্যমে সম্পন্ন হয়।",
+    "securePayments": "নিরাপদ পেমেন্ট",
+    "securePaymentsDescription": "আপনার প্রতিটি লেনদেনে সামরিক মানের এনক্রিপশন ব্যবহার করা হয়।",
+    "support247": "২৪/৭ সহায়তা",
+    "support247Description": "আমাদের দল আপনার প্রশ্ন ও ডকুমেন্ট সমস্যায় সবসময় পাশে আছে।",
+    "alwaysConnected": "সবসময় সংযুক্ত।",
+    "everywhere": "সবখানে।",
+    "appDescription": "দ্রুত প্রসেসিং ও লকস্ক্রিনে রিয়েল-টাইম ট্র্যাকার পেতে আমাদের অ্যাপ ডাউনলোড করুন।",
+    "downloadApp": "অ্যাপ ডাউনলোড",
+    "whatsappHelp": "হোয়াটসঅ্যাপ সহায়তা",
+    "noResultsTitle": "কোন ফলাফল পাওয়া যায়নি",
+    "noResultsDescription": "যা খুঁজছেন তা পেতে আপনার অনুসন্ধান শব্দ বদলে দেখুন।",
+    "reviewsUnavailableTitle": "রিভিউ এখন উপলভ্য নয়",
+    "reviewsUnavailableMessage": "এই মুহূর্তে রিভিউ লোড করা যায়নি। পরে আবার চেষ্টা করুন।"
+  },
+  "services": {
+    "applyNow": "এখনই আবেদন করুন",
+    "searchPlaceholder": "পরিষেবা বা স্কিম খুঁজুন...",
+    "popularServices": "জনপ্রিয় পরিষেবা",
+    "noServicesFound": "কোন পরিষেবা পাওয়া যায়নি",
+    "names": {
+      "applyPan": "প্যান আবেদন",
+      "aadhaar": "আধার মোবাইল নম্বর আপডেট",
+      "aadhaarUpdate": "আধার আপডেট",
+      "payBill": "বিল পরিশোধ",
+      "incomeCertificate": "পিভিসি কার্ড অর্ডার",
+      "vehicleTax": "গুগল প্লে রিডিম কোড",
+      "googlePlayRedeemCodes": "গুগল প্লে রিডিম কোড"
+    },
+    "descriptions": {
+      "applyPan": "নতুন পার্মানেন্ট অ্যাকাউন্ট নম্বর কার্ডের জন্য ডিজিটাল আবেদন।",
+      "googlePlayRedeemCodes": "অনলাইনে গুগল প্লে গিফট কোড কিনুন বা রিডিম করুন।"
+    }
+  },
+  "serviceFlow": {
+    "requirements": {
+      "heading": "প্রয়োজনীয় কাগজপত্র",
+      "headingLabel": "প্রয়োজনীয় কাগজপত্র:",
+      "default": {
+        "mobile": "বৈধ মোবাইল নম্বর",
+        "aadhaar": "আধার কার্ড (PDF/JPG)",
+        "photo": "সাম্প্রতিক ছবি"
+      },
+      "aadhaar": {
+        "aadhaarNumber": "আধার নম্বর",
+        "mobile": "বৈধ মোবাইল নম্বর",
+        "card": "আধার কার্ড (PDF/JPG)"
+      },
+      "payBill": {
+        "consumerNumber": "কনজিউমার বা অ্যাকাউন্ট নম্বর",
+        "billCopy": "বিল কপি বা সর্বশেষ বিলের তথ্য"
+      },
+      "vehicleTax": {
+        "mobile": "বৈধ মোবাইল নম্বর"
+      },
+      "pan": {
+        "identityTitle": "১. পরিচয়পত্রের প্রমাণ (যেকোনো একটি)",
+        "addressTitle": "২. ঠিকানার প্রমাণ (যেকোনো একটি)",
+        "birthTitle": "৩. জন্ম তারিখের প্রমাণ (যেকোনো একটি)",
+        "photoTitle": "৪. পাসপোর্ট সাইজের ছবি",
+        "identityItems": {
+          "aadhaar": "আধার কার্ড",
+          "voter": "ভোটার আইডি",
+          "passport": "পাসপোর্ট",
+          "driving": "ড্রাইভিং লাইসেন্স",
+          "photoId": "সরকার প্রদত্ত ফটো আইডি"
+        },
+        "addressItems": {
+          "aadhaar": "আধার কার্ড",
+          "passport": "পাসপোর্ট",
+          "utility": "ইউটিলিটি বিল (বিদ্যুৎ, জল, গ্যাস - ৩ মাসের বেশি পুরোনো নয়)",
+          "bank": "ব্যাংক অ্যাকাউন্ট স্টেটমেন্ট",
+          "postOffice": "পোস্ট অফিস পাসবুক"
+        },
+        "birthItems": {
+          "birthCertificate": "জন্ম সনদ",
+          "aadhaar": "আধার কার্ড",
+          "passport": "পাসপোর্ট",
+          "matriculation": "মাধ্যমিকের সনদ"
+        },
+        "photoItems": {
+          "photo": "ক্রপ/এডিট সুবিধাসহ রঙিন পাসপোর্ট ছবি আপলোড",
+          "signature": "ক্রপ/এডিট সুবিধাসহ সাদা কাগজে সই।"
+        }
+      }
+    },
+    "startApplication": "আবেদন শুরু করুন",
+    "trackStatus": "স্ট্যাটাস ট্র্যাক করুন",
+    "trackApplication": "আবেদন ট্র্যাক করুন",
+    "trackOrder": "অর্ডার ট্র্যাক করুন",
+    "form": {
+      "basicTitle": "মৌলিক তথ্য",
+      "basicSubtitle": "অনুগ্রহ করে আপনার যোগাযোগের তথ্য দিন।",
+      "fullNameLabel": "পূর্ণ নাম *",
+      "fullNamePlaceholder": "জন ডো",
+      "mobileLabel": "মোবাইল নম্বর *",
+      "aadhaarMobilePlaceholder": "১০ সংখ্যার মোবাইল নম্বর লিখুন",
+      "mobilePlaceholder": "+91",
+      "emailLabel": "ইমেইল ঠিকানা",
+      "emailPlaceholder": "john@example.com",
+      "emailHint": "ঐচ্ছিক, তবে আবেদন আপডেটের জন্য সহায়ক।",
+      "currentAddressLabel": "বর্তমান ঠিকানা *",
+      "currentAddressPlaceholder": "সম্পূর্ণ ঠিকানা লিখুন",
+      "currentAddressRequired": "অনুগ্রহ করে আপনার বর্তমান ঠিকানা লিখুন।",
+      "currentAddressInvalid": "ঠিকানা কমপক্ষে {{count}} অক্ষরের হতে হবে।",
+      "currentAddressHint": "আপনার সম্পূর্ণ বর্তমান ঠিকানা লিখুন।",
+      "continue": "চালিয়ে যান",
+      "proceedToPayment": "পেমেন্টে এগিয়ে যান"
+    }
+  },
+  "trackPage": {
+    "publicHint": "সর্বশেষ আবেদনের স্ট্যাটাস দেখতে সার্ভিসের নাম বা রেফারেন্স নম্বর দিয়ে খুঁজুন।",
+    "publicSearchReady": "পাবলিক ট্র্যাকিং চালু আছে।",
+    "emptyTitle": "এখনও কোনো ট্র্যাক করা অনুরোধ নেই",
+    "emptyMessage": "রেফারেন্স নম্বর দিয়ে খুঁজুন বা নতুন সার্ভিস অনুরোধ জমা দিন, তাহলে এখানে আপডেট দেখা যাবে।"
+  },
+  "toll": {
+    "badge": "স্টুডিও টুলস",
+    "title": "সব ডকুমেন্ট ও মিডিয়া কাজের জন্য এক স্মার্ট স্টুডিও",
+    "subtitle": "স্টুডিও, ফটোকপি ও কম্পিউটার শপের জন্য — দ্রুত, সহজ এবং ফ্রি।",
+    "cards": {
+      "recharge": {
+        "title": "ডকুমেন্ট টুলস",
+        "description": "একটি জায়গা থেকে আধার, প্যান, পিভিসি এবং অন্যান্য গ্রাহক ডকুমেন্ট ফাইল তৈরি, এডিট ও প্রস্তুত করুন।"
+      },
+      "vehicle": {
+        "title": "ফটো ও মিডিয়া",
+        "description": "পাসপোর্ট ছবি, সিগনেচার, ইমেজ ক্লিনআপ এবং প্রিন্ট-রেডি মিডিয়া সহজে সামলান দ্রুত স্টুডিও ওয়ার্কফ্লোতে।"
+      },
+      "history": {
+        "title": "শপ ওয়ার্কফ্লো",
+        "description": "স্টুডিও, ফটোকপি শপ এবং কম্পিউটার সেন্টারের দৈনন্দিন ডকুমেন্ট ও মিডিয়া কাজগুলো গুছিয়ে রাখুন।"
+      }
+    },
+    "noteTitle": "ডিজিটাল স্টুডিওর জন্য তৈরি",
+    "noteDescription": "টপ নেভিগেশন থেকে এই সেকশন এখন ডকুমেন্ট ও মিডিয়া কাজের জন্য একটি নির্দিষ্ট টুলস হাব হিসেবে কাজ করবে।"
+  },
+  "products": {
+    "catalogTitle": "পণ্য অন্বেষণ করুন",
+    "catalogDescription": "হোম পেজ স্ক্রল না করেই আপনার পণ্যের ক্যাটালগ এক জায়গায় দেখুন।",
+    "searchPlaceholder": "নাম বা ক্যাটাগরি দিয়ে পণ্য খুঁজুন...",
+    "noProductsFound": "মিল থাকা কোনো পণ্য পাওয়া যায়নি",
+    "noProductsDescription": "অন্য নাম বা ক্যাটাগরি কীওয়ার্ড দিয়ে চেষ্টা করুন।",
+    "addToCart": "কার্টে যোগ করুন",
+    "viewDetails": "বিস্তারিত দেখুন",
+    "stock": "স্টক",
+    "rating": "রেটিং",
+    "description": "বিবরণ",
+    "category": "ক্যাটাগরি",
+    "reviews": "রিভিউ",
+    "continueCheckout": "চেকআউটে যান",
+    "details": {
+      "back": "ফিরুন",
+      "closeAria": "পণ্যের বিস্তারিত বন্ধ করুন",
+      "productUnavailableTitle": "পণ্য উপলভ্য নয়",
+      "productUnavailableMessage": "এই পণ্যটি খুঁজে পাওয়া যায়নি।",
+      "loadError": "এই মুহূর্তে পণ্যের তথ্য লোড করা যায়নি।",
+      "availabilityOnRequest": "চাহিদা অনুযায়ী উপলভ্য",
+      "limited": "সীমিত",
+      "outOfStock": "স্টক শেষ",
+      "outOfStockShort": "স্টক শেষ",
+      "leftInStock": "স্টকে আর {{count}}টি আছে",
+      "lowStock": "স্বল্প স্টক",
+      "inStock": "স্টকে আছে",
+      "inStockShort": "স্টকে আছে",
+      "verifiedReviews": "{{count}}টি যাচাইকৃত রিভিউ",
+      "stockStatus": "স্টকের অবস্থা",
+      "warranty": "ওয়ারেন্টি",
+      "warrantyMonths": "{{count}} মাসের ওয়ারেন্টি",
+      "inYourCart": "আপনার কার্টে",
+      "cartReady_one": "চেকআউটের জন্য {{count}}টি আইটেম প্রস্তুত",
+      "cartReady_other": "চেকআউটের জন্য {{count}}টি আইটেম প্রস্তুত",
+      "notAddedYet": "এখনও যোগ করা হয়নি",
+      "descriptionHeading": "বিবরণ",
+      "addToCart": "কার্টে যোগ করুন",
+      "addingToCart": "যোগ করা হচ্ছে...",
+      "continueShopping": "কেনাকাটা চালিয়ে যান",
+      "addToCartHint": "আগে এই পণ্যটি কার্টে যোগ করুন, তারপর এখান থেকেই চেকআউটে যান।",
+      "relatedProducts": "সম্পর্কিত পণ্য",
+      "relatedSubtitle": "একই ক্যাটাগরি থেকে আরও কিছু পছন্দ।",
+      "relatedEmpty": "এই মুহূর্তে মিল রয়েছে এমন কোনো পণ্য নেই।",
+      "showPreviousImage": "আগের পণ্যের ছবি দেখান",
+      "showNextImage": "পরের পণ্যের ছবি দেখান",
+      "showImage": "{{label}} ছবি দেখান",
+      "outBadge": "শেষ",
+      "stockBadge": "স্টক",
+      "addedToCart": "কার্টে যোগ হয়েছে",
+      "addedToCartMessage": "{{name}} আপনার কার্টে প্রস্তুত আছে।",
+      "addToCartFailed": "কার্টে যোগ করা যায়নি",
+      "couldNotAdd": "এই মুহূর্তে পণ্যটি কার্টে যোগ করা যায়নি।",
+      "autoDescription": "{{name}} একটি যত্নসহকারে বাছাই করা {{category}}, যা নির্ভরযোগ্য দৈনন্দিন ব্যবহারের জন্য এবং আমাদের টিমের দ্রুত সহায়তাসহ প্রস্তুত।"
+    }
+  },
+  "profile": {
+    "citizenProfile": "নাগরিক প্রোফাইল",
+    "signInUnlockTitle": "সেটিংস খুলতে সাইন ইন করুন",
+    "signInUnlockDescription": "আপনার ব্যক্তিগত তথ্য, লিঙ্ক করা আইডি, পাসওয়ার্ড ও পছন্দসমূহ সংরক্ষণ করুন।",
+    "applications": "আবেদন",
+    "activeRequests": "সক্রিয় অনুরোধ",
+    "completedServices": "সম্পন্ন পরিষেবা",
+    "openAdminDashboard": "অ্যাডমিন ড্যাশবোর্ড খুলুন",
+    "sections": {
+      "personal": { "title": "ব্যক্তিগত তথ্য", "subtitle": "নাম, ফোন, ইমেইল" },
+      "linked": { "title": "লিঙ্ক করা অ্যাকাউন্ট", "subtitle": "আধার, প্যান, ভোটার আইডি" },
+      "notifications": { "title": "নোটিফিকেশন", "subtitle": "এসএমএস, ইমেইল ও অ্যাপ এলার্ট" },
+      "security": { "title": "নিরাপত্তা", "subtitle": "পাসওয়ার্ড পরিবর্তন করুন" },
+      "language": { "title": "ভাষা", "subtitle": "ইংরেজি, বাংলা" },
+      "help": { "title": "সহায়তা ও সাপোর্ট", "subtitle": "প্রশ্নোত্তর ও যোগাযোগ" }
+    },
+    "personal": {
+      "fullName": "পূর্ণ নাম",
+      "phoneNumber": "ফোন নম্বর",
+      "emailAddress": "ইমেইল ঠিকানা",
+      "saveChanges": "পরিবর্তন সংরক্ষণ করুন",
+      "saving": "পরিবর্তন সংরক্ষণ করা হচ্ছে..."
+    },
+    "linked": {
+      "updated": "{{date}}-এ হালনাগাদ",
+      "notLinkedYet": "এখনও লিঙ্ক করা হয়নি",
+      "linkNewAccount": "নতুন অ্যাকাউন্ট লিঙ্ক করুন",
+      "linkDescription": "সরকারি পরিচয় নম্বর যোগ বা পরিবর্তন করুন।",
+      "documentType": "ডকুমেন্টের ধরন",
+      "idNumber": "আইডি নম্বর",
+      "aadhaarHint": "১২ সংখ্যার আধার নম্বর",
+      "panHint": "ABCDE1234F ফরম্যাটের প্যান",
+      "voterHint": "৮ থেকে ১৬ অক্ষরের ভোটার আইডি",
+      "saveLinkedAccount": "লিঙ্ক করা অ্যাকাউন্ট সংরক্ষণ করুন",
+      "savingLinkedAccount": "অ্যাকাউন্ট সংরক্ষণ করা হচ্ছে...",
+      "aadhaar": "আধার",
+      "pan": "প্যান",
+      "voter": "ভোটার আইডি",
+      "noAccountLinked": "কোনো অ্যাকাউন্ট লিঙ্ক করা নেই"
+    },
+    "notifications": {
+      "smsTitle": "এসএমএস এলার্ট",
+      "smsDescription": "স্ট্যাটাস আপডেট ও রিমাইন্ডার মেসেজে পান।",
+      "emailTitle": "ইমেইল নোটিফিকেশন",
+      "emailDescription": "রসিদ, আপডেট ও পরিষেবা নোটিশ ইমেইলে পান।",
+      "appTitle": "অ্যাপ নোটিফিকেশন",
+      "appDescription": "অ্যাপের ভেতরে লাইভ আপডেট দেখুন।",
+      "savePreferences": "পছন্দ সংরক্ষণ করুন",
+      "savingPreferences": "পছন্দ সংরক্ষণ করা হচ্ছে..."
+    },
+    "security": {
+      "currentPassword": "বর্তমান পাসওয়ার্ড",
+      "newPassword": "নতুন পাসওয়ার্ড",
+      "newPasswordHint": "অন্তত ৮ অক্ষর এবং একটি সংখ্যা",
+      "confirmPassword": "পাসওয়ার্ড নিশ্চিত করুন",
+      "changePassword": "পাসওয়ার্ড পরিবর্তন করুন",
+      "updatingPassword": "পাসওয়ার্ড আপডেট করা হচ্ছে..."
+    },
+    "help": {
+      "contactSupport": "সাপোর্টে যোগাযোগ",
+      "contactSupportDescription": "ইমেইল অ্যাপ খুলে সহায়তার অনুরোধ পাঠান।",
+      "whatsAppSupport": "হোয়াটসঅ্যাপ সাপোর্ট",
+      "whatsAppSupportDescription": "দ্রুত সহায়তার জন্য চ্যাট শুরু করুন।",
+      "faq": {
+        "trackQuestion": "আবেদন জমার পরে কিভাবে ট্র্যাক করব?",
+        "trackAnswer": "ট্র্যাক ট্যাব খুলে আপনার লাইভ টাইমলাইন, স্ট্যাটাস ও রেফারেন্স নম্বর দেখুন।",
+        "documentsQuestion": "পরে কি লিঙ্ক করা ডকুমেন্ট নম্বর আপডেট করতে পারব?",
+        "documentsAnswer": "হ্যাঁ। নতুন আবেদন শুরু করার আগে যেকোনো সময় লিঙ্ক করা অ্যাকাউন্ট সম্পাদনা করতে পারবেন।",
+        "notificationsQuestion": "আমি কেন আপডেট পাচ্ছি না?",
+        "notificationsAnswer": "নোটিফিকেশন টগল, ইমেইল ও ফোন নম্বর এবং ডিভাইস নোটিফিকেশন সেটিংস পরীক্ষা করুন।"
+      }
+    },
+    "languageOptions": {
+      "enDescription": "বিস্তৃত সামঞ্জস্যের জন্য সুপারিশকৃত",
+      "bnDescription": "আঞ্চলিক ব্যবহারকারীদের জন্য বাংলা ইন্টারফেস"
+    },
+    "toasts": {
+      "pleaseSignInTitle": "অনুগ্রহ করে সাইন ইন করুন",
+      "pleaseSignInMessage": "প্রোফাইল ও নিরাপত্তা সেটিংস ব্যবস্থাপনার জন্য সাইন ইন করুন।",
+      "sectionSignInMessage": "এই প্রোফাইল অংশ দেখতে সাইন ইন করুন।",
+      "detailsErrorTitle": "আপনার তথ্য পরীক্ষা করুন",
+      "detailsErrorMessage": "সংরক্ষণের আগে চিহ্নিত ঘরগুলো ঠিক করুন।",
+      "profileUpdatedTitle": "প্রোফাইল হালনাগাদ হয়েছে",
+      "profileUpdatedMessage": "আপনার ব্যক্তিগত তথ্য সফলভাবে সংরক্ষিত হয়েছে।",
+      "profileUpdateFailedTitle": "হালনাগাদ ব্যর্থ",
+      "profileUpdateFailedMessage": "আপনার প্রোফাইল তথ্য সংরক্ষণ করা যায়নি।",
+      "preferencesSavedTitle": "পছন্দ সংরক্ষিত হয়েছে",
+      "preferencesSavedMessage": "আপনার নোটিফিকেশন সেটিংস এখন হালনাগাদ।",
+      "preferencesFailedTitle": "সংরক্ষণ ব্যর্থ",
+      "preferencesFailedMessage": "নোটিফিকেশন পছন্দ সংরক্ষণ করা যায়নি।",
+      "languageUpdatedTitle": "ভাষা আপডেট হয়েছে",
+      "languageUpdatedMessage": "আপনার ভাষা পছন্দ এখন পুরো অ্যাপে সংরক্ষিত।",
+      "languageFailedTitle": "আপডেট ব্যর্থ",
+      "languageFailedMessage": "ভাষা পছন্দ সংরক্ষণ করা যায়নি।",
+      "passwordCheckFailedTitle": "পাসওয়ার্ড যাচাই ব্যর্থ",
+      "passwordCheckFailedMessage": "পাসওয়ার্ড ফর্মের ভুলগুলো ঠিক করে আবার চেষ্টা করুন।",
+      "missingAccountEmailTitle": "অ্যাকাউন্ট ইমেইল পাওয়া যায়নি",
+      "missingAccountEmailMessage": "পাসওয়ার্ড পরিবর্তনের আগে আবার সাইন ইন করুন।",
+      "passwordUpdatedTitle": "পাসওয়ার্ড আপডেট হয়েছে",
+      "passwordUpdatedMessage": "আপনার পাসওয়ার্ড সফলভাবে পরিবর্তন হয়েছে।",
+      "passwordUpdateFailedTitle": "পাসওয়ার্ড পরিবর্তন করা যায়নি",
+      "passwordUpdateFailedMessage": "বর্তমান পাসওয়ার্ড পরীক্ষা করে আবার চেষ্টা করুন।",
+      "linkSuccessTitle": "অ্যাকাউন্ট লিঙ্ক হয়েছে",
+      "linkSuccessMessage": "{{label}} যোগ করা হয়েছে এবং যাচাইয়ের অপেক্ষায় আছে।",
+      "linkFailedTitle": "লিঙ্ক ব্যর্থ",
+      "linkFailedMessage": "এই আইডি এখন সংরক্ষণ করা যায়নি।",
+      "verifyEmptyTitle": "যাচাই করার কিছু নেই",
+      "verifyEmptyMessage": "আগে আপনার {{label}} নম্বর লিঙ্ক করুন।",
+      "verifySuccessTitle": "{{label}} যাচাইকৃত",
+      "verifySuccessMessage": "{{label}} এখন যাচাইকৃত হিসেবে চিহ্নিত হয়েছে।",
+      "verifyFailedTitle": "যাচাই ব্যর্থ",
+      "verifyFailedMessage": "আবার এই অ্যাকাউন্ট যাচাই করার চেষ্টা করুন।"
+    }
+  },
+  "admin": {
+    "title": "অ্যাডমিন কনসোল",
+    "subtitle": "গাজী অনলাইন ম্যানেজমেন্ট",
+    "accessDenied": "প্রবেশ নিষিদ্ধ",
+    "accessDeniedDescription": "এই অংশে প্রবেশের জন্য আপনার প্রয়োজনীয় অনুমতি নেই।",
+    "returnHome": "হোমে ফিরুন",
+    "refreshData": "ডেটা রিফ্রেশ করুন",
+    "fetchingLatestData": "সর্বশেষ ডেটা আনা হচ্ছে...",
+    "totalUsers": "মোট ব্যবহারকারী",
+    "totalOrders": "মোট অর্ডার",
+    "totalRevenue": "মোট আয়",
+    "orders": "অর্ডার",
+    "requests": "অনুরোধ",
+    "products": "পণ্য",
+    "inventory": "ইনভেন্টরি",
+    "users": "ব্যবহারকারী",
+    "overview": "সারসংক্ষেপ"
+  }
+}

@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { type Product } from '../lib/types';
 import { productsApi } from '../api/products';
 import { useToast } from './toast/useToast';
-import { type Language } from '../lib/uiText';
+import { useTranslation } from 'react-i18next';
 
 type ProductDetailsPageProps = {
   productId: string;
@@ -14,7 +14,6 @@ type ProductDetailsPageProps = {
   onCheckout?: () => void;
   onViewProduct?: (product: Product) => void;
   warrantyMonths?: number;
-  language?: Language;
 };
 
 const formatCurrency = (value: number) => `Rs ${Number(value || 0).toLocaleString('en-IN')}`;
@@ -51,43 +50,46 @@ const normalizeReviewCount = (value: unknown) => {
   return Math.round(numericValue);
 };
 
-const deriveProductDescription = (product: Product) => {
+const deriveProductDescription = (product: Product, t: (key: string, options?: Record<string, unknown>) => string) => {
   if (product.description?.trim()) {
     return product.description.trim();
   }
 
   const categoryLabel = product.category?.trim() || 'daily essential';
-  return `${product.name} is a carefully selected ${categoryLabel.toLowerCase()} designed for reliable everyday use with quick support from our team.`;
+  return t('products.details.autoDescription', {
+    name: product.name,
+    category: categoryLabel.toLowerCase(),
+  });
 };
 
-const getStockLabel = (stock?: number) => {
+const getStockLabel = (stock: number | undefined, t: (key: string, options?: Record<string, unknown>) => string) => {
   if (typeof stock !== 'number') {
     return {
-      label: 'Availability on request',
-      shortLabel: 'Limited',
+      label: t('products.details.availabilityOnRequest'),
+      shortLabel: t('products.details.limited'),
       tone: 'text-amber-700 bg-amber-50 border-amber-200 dark:text-amber-300 dark:bg-amber-500/10 dark:border-amber-500/20',
     };
   }
 
   if (stock <= 0) {
     return {
-      label: 'Out of stock',
-      shortLabel: 'Out of Stock',
+      label: t('products.details.outOfStock'),
+      shortLabel: t('products.details.outOfStockShort'),
       tone: 'text-rose-700 bg-rose-50 border-rose-200 dark:text-rose-300 dark:bg-rose-500/10 dark:border-rose-500/20',
     };
   }
 
   if (stock <= 5) {
     return {
-      label: `${stock} left in stock`,
-      shortLabel: 'Low Stock',
+      label: t('products.details.leftInStock', { count: stock }),
+      shortLabel: t('products.details.lowStock'),
       tone: 'text-amber-700 bg-amber-50 border-amber-200 dark:text-amber-300 dark:bg-amber-500/10 dark:border-amber-500/20',
     };
   }
 
   return {
-    label: 'In stock',
-    shortLabel: 'In Stock',
+    label: t('products.details.inStock'),
+    shortLabel: t('products.details.inStockShort'),
     tone: 'text-emerald-700 bg-emerald-50 border-emerald-200 dark:text-emerald-300 dark:bg-emerald-500/10 dark:border-emerald-500/20',
   };
 };
@@ -185,8 +187,8 @@ export const ProductDetailsPage: React.FC<ProductDetailsPageProps> = ({
   onCheckout,
   onViewProduct,
   warrantyMonths = 12,
-  language: _language = 'en',
 }) => {
+  const { t } = useTranslation();
   const { addToast } = useToast();
   const [product, setProduct] = useState<Product | null>(initialProduct);
   const [isLoading, setIsLoading] = useState(!initialProduct);
@@ -212,7 +214,7 @@ export const ProductDetailsPage: React.FC<ProductDetailsPageProps> = ({
       } catch (loadError) {
         console.error('Failed to load product details:', loadError);
         if (isMounted) {
-          setError('We could not load this product right now.');
+          setError(t('products.details.loadError'));
         }
       } finally {
         if (isMounted) {
@@ -226,7 +228,7 @@ export const ProductDetailsPage: React.FC<ProductDetailsPageProps> = ({
     return () => {
       isMounted = false;
     };
-  }, [initialProduct, productId]);
+  }, [initialProduct, productId, t]);
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
@@ -256,15 +258,18 @@ export const ProductDetailsPage: React.FC<ProductDetailsPageProps> = ({
 
   const galleryImages = useMemo(() => buildProductGallery(product), [product]);
   const selectedGalleryImage = galleryImages[selectedImageIndex] ?? galleryImages[0] ?? null;
-  const description = useMemo(() => (product ? deriveProductDescription(product) : ''), [product]);
-  const stockMeta = useMemo(() => getStockLabel(product?.stock), [product?.stock]);
-  const warrantyLabel = `${product?.warranty_months ?? warrantyMonths} month warranty`;
+  const description = useMemo(() => (product ? deriveProductDescription(product, t) : ''), [product, t]);
+  const stockMeta = useMemo(() => getStockLabel(product?.stock, t), [product?.stock, t]);
   const rating = useMemo(() => normalizeRating(product?.rating), [product?.rating]);
   const ratingCount = useMemo(() => normalizeReviewCount(product?.review_count), [product?.review_count]);
   const isOutOfStock = Number(product?.stock ?? 0) <= 0 || product?.is_active === false;
   const canCheckout = cartQuantity > 0 && Boolean(onCheckout);
-  const isActionSuccess = Boolean(actionMessage) && /added|success/i.test(actionMessage ?? '');
-  const primaryActionLabel = isOutOfStock ? 'Out of Stock' : isAdding ? 'Adding...' : 'Add to Cart';
+  const isActionSuccess = actionMessage === t('products.details.addedToCart');
+  const primaryActionLabel = isOutOfStock
+    ? t('products.details.outOfStockShort')
+    : isAdding
+      ? t('products.details.addingToCart')
+      : t('products.details.addToCart');
   const showStickyMobileCta = !isCompactMobileViewport;
 
   useEffect(() => {
@@ -299,18 +304,18 @@ export const ProductDetailsPage: React.FC<ProductDetailsPageProps> = ({
         price: product.price,
         image: product.image,
       });
-      setActionMessage('Added to cart');
+      setActionMessage(t('products.details.addedToCart'));
       addToast({
         type: 'success',
-        title: 'Added to cart',
-        message: `${product.name} is ready in your cart.`,
+        title: t('products.details.addedToCart'),
+        message: t('products.details.addedToCartMessage', { name: product.name }),
       });
     } catch (addError: any) {
-      const message = addError?.message || 'Could not add this product right now.';
+      const message = addError?.message || t('products.details.couldNotAdd');
       setActionMessage(message);
       addToast({
         type: 'error',
-        title: 'Add to cart failed',
+        title: t('products.details.addToCartFailed'),
         message,
       });
     } finally {
@@ -344,13 +349,13 @@ export const ProductDetailsPage: React.FC<ProductDetailsPageProps> = ({
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.2} stroke="currentColor" className="h-4 w-4">
               <path strokeLinecap="round" strokeLinejoin="round" d="m15.75 19.5-7.5-7.5 7.5-7.5" />
             </svg>
-            Back
+            {t('products.details.back')}
           </button>
           <button
             type="button"
             onClick={onClose}
             className="ui-hover-icon inline-flex h-11 w-11 items-center justify-center rounded-full bg-white text-slate-500 shadow-sm ring-1 ring-slate-200 transition hover:rotate-90 hover:text-slate-900 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700 dark:hover:text-white"
-            aria-label="Close product details"
+            aria-label={t('products.details.closeAria')}
           >
             <CloseIcon />
           </button>
@@ -373,8 +378,8 @@ export const ProductDetailsPage: React.FC<ProductDetailsPageProps> = ({
           </div>
         ) : error || !product ? (
           <div className="mx-auto mt-16 max-w-md rounded-[28px] bg-white p-8 text-center shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
-            <h2 className="text-2xl font-black text-slate-900 dark:text-white">Product unavailable</h2>
-            <p className="mt-3 text-sm font-medium text-slate-500 dark:text-slate-400">{error ?? 'This product could not be found.'}</p>
+            <h2 className="text-2xl font-black text-slate-900 dark:text-white">{t('products.details.productUnavailableTitle')}</h2>
+            <p className="mt-3 text-sm font-medium text-slate-500 dark:text-slate-400">{error ?? t('products.details.productUnavailableMessage')}</p>
           </div>
         ) : (
           <>
@@ -401,7 +406,7 @@ export const ProductDetailsPage: React.FC<ProductDetailsPageProps> = ({
                         type="button"
                         onClick={handlePreviousImage}
                         className="ui-hover-icon absolute left-3 top-1/2 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow-sm backdrop-blur transition hover:scale-105 hover:bg-white dark:bg-slate-950/80 dark:text-slate-200 dark:hover:bg-slate-900"
-                        aria-label="Show previous product image"
+                        aria-label={t('products.details.showPreviousImage')}
                       >
                         <ArrowIcon direction="left" />
                       </button>
@@ -409,7 +414,7 @@ export const ProductDetailsPage: React.FC<ProductDetailsPageProps> = ({
                         type="button"
                         onClick={handleNextImage}
                         className="ui-hover-icon absolute right-3 top-1/2 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow-sm backdrop-blur transition hover:scale-105 hover:bg-white dark:bg-slate-950/80 dark:text-slate-200 dark:hover:bg-slate-900"
-                        aria-label="Show next product image"
+                        aria-label={t('products.details.showNextImage')}
                       >
                         <ArrowIcon direction="right" />
                       </button>
@@ -427,7 +432,7 @@ export const ProductDetailsPage: React.FC<ProductDetailsPageProps> = ({
                           type="button"
                           onClick={() => handleSelectImage(index)}
                           className={`group/thumb relative shrink-0 overflow-hidden rounded-2xl border transition duration-200 ${isActive ? 'border-blue-500 ring-2 ring-blue-100 dark:ring-blue-900/40' : 'border-slate-200 hover:border-blue-200 dark:border-slate-700 dark:hover:border-blue-900/40'}`}
-                          aria-label={`Show ${image.label.toLowerCase()} image`}
+                          aria-label={t('products.details.showImage', { label: image.label.toLowerCase() })}
                           aria-pressed={isActive}
                         >
                           <img
@@ -451,52 +456,36 @@ export const ProductDetailsPage: React.FC<ProductDetailsPageProps> = ({
                     <StarRating rating={rating} />
                     <span className="text-sm font-black text-slate-900 dark:text-white">{rating.toFixed(1)}</span>
                   </div>
-                  <span className="text-sm font-medium text-slate-500 dark:text-slate-400">{ratingCount} verified reviews</span>
+                  <span className="text-sm font-medium text-slate-500 dark:text-slate-400">{t('products.details.verifiedReviews', { count: ratingCount })}</span>
                 </div>
 
-                <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white sm:text-3xl lg:text-4xl">{product.name}</h1>
+                <h1 className="text-xl font-black tracking-tight text-slate-900 dark:text-white sm:text-2xl lg:text-3xl">{product.name}</h1>
                 <p className="mt-3 text-2xl font-black text-blue-600 dark:text-blue-400 sm:mt-4 sm:text-3xl">{formatCurrency(product.price)}</p>
 
-                <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                  <div className="rounded-2xl bg-slate-50 p-4 dark:bg-slate-800/80">
-                    <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500">Stock Status</p>
-                    <p className="mt-2 text-sm font-bold text-slate-900 dark:text-white">{stockMeta.label}</p>
-                  </div>
-                  <div className="rounded-2xl bg-slate-50 p-4 dark:bg-slate-800/80">
-                    <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500">Warranty</p>
-                    <p className="mt-2 text-sm font-bold text-slate-900 dark:text-white">{warrantyLabel}</p>
-                  </div>
-                  <div className="rounded-2xl bg-slate-50 p-4 dark:bg-slate-800/80 sm:col-span-2">
-                    <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500">In Your Cart</p>
-                    <p className="mt-2 text-sm font-bold text-slate-900 dark:text-white">{cartQuantity > 0 ? `${cartQuantity} item${cartQuantity > 1 ? 's' : ''} ready for checkout` : 'Not added yet'}</p>
-                  </div>
-                </div>
-
                 <div className="mt-8">
-                  <h2 className="text-sm font-black uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500">Description</h2>
+                  <h2 className="text-sm font-black uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500">{t('products.details.descriptionHeading')}</h2>
                   <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-300 lg:text-base">{description}</p>
                 </div>
 
                 <div className="mt-8">
                   <div className="flex flex-col gap-3">
-                    <ActionButton
-                      onClick={handleAddToCart}
-                      disabled={isAdding || isOutOfStock}
+                  <ActionButton
+                    onClick={handleAddToCart}
+                    disabled={isAdding || isOutOfStock}
                       variant="primary"
                       icon={<CartIcon />}
                       className={`${showStickyMobileCta ? 'hidden sm:inline-flex' : 'inline-flex'} py-4 text-base`}
                     >
                       {primaryActionLabel}
                     </ActionButton>
-                    <ActionButton
-                      onClick={canCheckout ? onCheckout : undefined}
-                      disabled={!canCheckout}
-                      variant="secondary"
-                      icon={<ArrowIcon direction="right" className="h-4 w-4" />}
-                    >
-                      Continue to Checkout
-                    </ActionButton>
-                  </div>
+                  <ActionButton
+                    onClick={canCheckout ? onCheckout : undefined}
+                    disabled={!canCheckout}
+                    variant="secondary"
+                  >
+                    Continue to Checkout
+                  </ActionButton>
+                </div>
                   {actionMessage ? (
                     <p className={`mt-4 text-sm font-semibold transition ${isActionSuccess ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
                       {actionMessage}
@@ -504,7 +493,7 @@ export const ProductDetailsPage: React.FC<ProductDetailsPageProps> = ({
                   ) : null}
                   {cartQuantity <= 0 && !actionMessage ? (
                     <p className="mt-3 text-xs font-medium text-slate-500 dark:text-slate-400">
-                      Add this product to your cart first, then continue to checkout from here.
+                      {t('products.details.addToCartHint')}
                     </p>
                   ) : null}
                 </div>
@@ -514,14 +503,14 @@ export const ProductDetailsPage: React.FC<ProductDetailsPageProps> = ({
             <section className="mt-6 rounded-[28px] bg-white p-5 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 sm:mt-8 sm:rounded-[32px] sm:p-6 lg:p-8">
               <div className="mb-5 flex items-center justify-between gap-4">
                 <div>
-                  <h2 className="text-xl font-black text-slate-900 dark:text-white">Related Products</h2>
-                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">More picks from the same category.</p>
+                  <h2 className="text-xl font-black text-slate-900 dark:text-white">{t('products.details.relatedProducts')}</h2>
+                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{t('products.details.relatedSubtitle')}</p>
                 </div>
               </div>
 
               {relatedProducts.length === 0 ? (
                 <div className="rounded-3xl border border-dashed border-slate-200 px-6 py-10 text-center dark:border-slate-700">
-                  <p className="text-sm font-medium text-slate-500 dark:text-slate-400">No similar products available right now.</p>
+                  <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{t('products.details.relatedEmpty')}</p>
                 </div>
               ) : (
                 <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-none">
@@ -539,7 +528,7 @@ export const ProductDetailsPage: React.FC<ProductDetailsPageProps> = ({
                         <div className="relative mb-4 aspect-[1/1] overflow-hidden rounded-2xl bg-white dark:bg-slate-800">
                           <img src={item.image} alt={item.name} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
                           <span className={`absolute right-2 top-2 rounded-full px-2 py-1 text-[10px] font-black uppercase tracking-[0.15em] ${itemOutOfStock ? 'bg-rose-500 text-white' : 'bg-emerald-500 text-white'}`}>
-                            {itemOutOfStock ? 'Out' : 'Stock'}
+                            {itemOutOfStock ? t('products.details.outBadge') : t('products.details.stockBadge')}
                           </span>
                         </div>
                         <p className="truncate text-sm font-black text-slate-900 dark:text-white">{item.name}</p>

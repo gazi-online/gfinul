@@ -1,5 +1,4 @@
 import React from 'react';
-import type { TabId } from './BottomNav'
 
 const WhatsAppIcon = () => (
   <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
@@ -7,22 +6,16 @@ const WhatsAppIcon = () => (
   </svg>
 );
 
-interface WhatsAppButtonProps {
-  activeTab?: TabId
-}
-
-export const WhatsAppButton: React.FC<WhatsAppButtonProps> = ({ activeTab }) => {
+export const WhatsAppButton: React.FC = () => {
   const openWhatsApp = () => {
     // Replace with your company phone number
     window.open('https://wa.me/919000000000', '_blank');
   };
 
-  const mobileOffsetClass = activeTab === 'products' ? 'bottom-28' : 'bottom-24'
-
   return (
     <button
       onClick={openWhatsApp}
-      className={`fixed ${mobileOffsetClass} right-4 z-[100] flex h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-[#25D366] text-white shadow-2xl shadow-green-500/30 transition-all duration-300 hover:scale-110 active:scale-95 group sm:right-5 lg:bottom-10 lg:right-10 lg:h-16 lg:w-16`}
+      className="fixed bottom-24 right-5 lg:bottom-10 lg:right-10 z-[100] w-14 h-14 lg:w-16 lg:h-16 bg-[#25D366] text-white rounded-full flex items-center justify-center shadow-2xl shadow-green-500/30 hover:scale-110 active:scale-95 transition-all duration-300 group overflow-hidden"
       aria-label="Contact on WhatsApp"
     >
       <div className="absolute inset-0 bg-white/20 scale-0 group-hover:scale-150 transition-transform duration-700 rounded-full" />

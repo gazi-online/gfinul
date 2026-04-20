@@ -8,6 +8,7 @@ import { TextareaInput } from './TextareaInput';
 import { useToast } from './toast/useToast';
 import { formatServiceRequestReference } from '../lib/references';
 import { getServiceDisplayDescription, getServiceDisplayName, getServiceKind } from '../lib/serviceDisplay';
+import { useTranslation } from 'react-i18next';
 
 
 // ── Icons ──────────────────────────────────────────────────────────────────────
@@ -541,86 +542,101 @@ const getCroppedImageFile = async (source: string, crop: PixelCrop, fileName: st
   return new File([blob], fileName, { type: mimeType });
 };
 
-const SERVICE_REQUIREMENTS: Record<string, RequirementSection[]> = {
-  'Apply PAN': [
+const getServiceRequirements = (
+  serviceTitle: string,
+  t: (key: string, options?: Record<string, unknown>) => string,
+): RequirementSection[] => {
+  const requirements: Record<string, RequirementSection[]> = {
+    'Apply PAN': [
+      {
+        title: t('serviceFlow.requirements.pan.identityTitle'),
+        items: [
+          t('serviceFlow.requirements.pan.identityItems.aadhaar'),
+          t('serviceFlow.requirements.pan.identityItems.voter'),
+          t('serviceFlow.requirements.pan.identityItems.passport'),
+          t('serviceFlow.requirements.pan.identityItems.driving'),
+          t('serviceFlow.requirements.pan.identityItems.photoId'),
+        ],
+      },
+      {
+        title: t('serviceFlow.requirements.pan.addressTitle'),
+        items: [
+          t('serviceFlow.requirements.pan.addressItems.aadhaar'),
+          t('serviceFlow.requirements.pan.addressItems.passport'),
+          t('serviceFlow.requirements.pan.addressItems.utility'),
+          t('serviceFlow.requirements.pan.addressItems.bank'),
+          t('serviceFlow.requirements.pan.addressItems.postOffice'),
+        ],
+      },
+      {
+        title: t('serviceFlow.requirements.pan.birthTitle'),
+        items: [
+          t('serviceFlow.requirements.pan.birthItems.birthCertificate'),
+          t('serviceFlow.requirements.pan.birthItems.aadhaar'),
+          t('serviceFlow.requirements.pan.birthItems.passport'),
+          t('serviceFlow.requirements.pan.birthItems.matriculation'),
+        ],
+      },
+      {
+        title: t('serviceFlow.requirements.pan.photoTitle'),
+        items: [
+          t('serviceFlow.requirements.pan.photoItems.photo'),
+          t('serviceFlow.requirements.pan.photoItems.signature'),
+        ],
+      },
+    ],
+    'Pay Bill': [
+      {
+        title: t('serviceFlow.requirements.heading'),
+        items: [
+          t('serviceFlow.requirements.payBill.consumerNumber'),
+          t('serviceFlow.requirements.payBill.billCopy'),
+        ],
+      },
+    ],
+    Aadhaar: [
+      {
+        title: t('serviceFlow.requirements.heading'),
+        items: [
+          t('serviceFlow.requirements.aadhaar.aadhaarNumber'),
+          t('serviceFlow.requirements.aadhaar.mobile'),
+          t('serviceFlow.requirements.aadhaar.card'),
+        ],
+      },
+    ],
+    'Aadhaar Update': [
+      {
+        title: t('serviceFlow.requirements.heading'),
+        items: [
+          t('serviceFlow.requirements.aadhaar.aadhaarNumber'),
+          t('serviceFlow.requirements.aadhaar.mobile'),
+          t('serviceFlow.requirements.aadhaar.card'),
+        ],
+      },
+    ],
+    'Vehicle Tax': [
+      {
+        title: t('serviceFlow.requirements.heading'),
+        items: [t('serviceFlow.requirements.vehicleTax.mobile')],
+      },
+    ],
+  };
+
+  return requirements[serviceTitle] || [
     {
-      title: '1. Proof of Identity (any one)',
+      title: t('serviceFlow.requirements.heading'),
       items: [
-        'Aadhaar Card',
-        'Voter ID',
-        'Passport',
-        'Driving License',
-        'Photo ID issued by Government',
+        t('serviceFlow.requirements.default.mobile'),
+        t('serviceFlow.requirements.default.aadhaar'),
+        t('serviceFlow.requirements.default.photo'),
       ],
     },
-    {
-      title: '2. Proof of Address (any one)',
-      items: [
-        'Aadhaar Card',
-        'Passport',
-        'Utility bill (electricity, water, gas - not older than 3 months)',
-        'Bank account statement',
-        'Post office passbook',
-      ],
-    },
-    {
-      title: '3. Proof of Date of Birth (any one)',
-      items: [
-        'Birth Certificate',
-        'Aadhaar Card',
-        'Passport',
-        'Matriculation certificate',
-      ],
-    },
-    {
-      title: '4. Passport-size Photos',
-      items: [
-        'Colour passport photo upload with crop/edit support',
-        'Signature on white paper with crop/edit support.',
-      ],
-    },
-  ],
-  'Pay Bill': [
-    {
-      title: 'Requirements',
-      items: [
-        'Consumer or account number',
-        'Bill copy or latest bill details',
-      ],
-    },
-  ],
-  'Aadhaar': [
-    {
-      title: 'Requirements',
-      items: [
-        'Aadhar Number',
-        'Valid Mobile Number',
-        'Aadhaar Card (PDF/JPG)',
-      ],
-    },
-  ],
-  'Aadhaar Update': [
-    {
-      title: 'Requirements',
-      items: [
-        'Aadhar Number',
-        'Valid Mobile Number',
-        'Aadhaar Card (PDF/JPG)',
-      ],
-    },
-  ],
-  'Vehicle Tax': [
-    {
-      title: 'Requirements',
-      items: [
-        'Valid Mobile Number',
-      ],
-    },
-  ],
+  ];
 };
 
 export const ServiceFlow: React.FC<ServiceFlowProps> = ({ serviceTitle, serviceDescription, onClose, onComplete, onTrackApplication, onGoHome }) => {
   type FlowStage = 'intro' | 'form' | 'payment' | 'success';
+  const { t } = useTranslation();
   const { addToast } = useToast();
   const [stage, setStage] = useState<FlowStage>('intro');
   const [step, setStep] = useState(1);
@@ -654,13 +670,8 @@ export const ServiceFlow: React.FC<ServiceFlowProps> = ({ serviceTitle, serviceD
   const [cropDraft, setCropDraft] = useState<Crop>(DEFAULT_FREE_CROP);
   const [completedCrop, setCompletedCrop] = useState<PixelCrop | null>(null);
   const [pendingImageFile, setPendingImageFile] = useState<File | null>(null);
-  const requirements = SERVICE_REQUIREMENTS[serviceTitle] || [
-    {
-      title: 'Requirements',
-      items: ['Valid Mobile Number', 'Aadhaar Card (PDF/JPG)', 'Recent Photograph'],
-    },
-  ];
-  const showRequirementsHeading = !(requirements.length === 1 && requirements[0]?.title === 'Requirements');
+  const requirements = getServiceRequirements(serviceTitle, t);
+  const showRequirementsHeading = !(requirements.length === 1 && requirements[0]?.title === t('serviceFlow.requirements.heading'));
 
   // Form State
   const [formData, setFormData] = useState({
@@ -1075,7 +1086,7 @@ export const ServiceFlow: React.FC<ServiceFlowProps> = ({ serviceTitle, serviceD
       <p className={`mb-8 mx-auto text-sm leading-relaxed text-gray-500 dark:text-slate-400 ${isPanService ? 'max-w-2xl' : 'max-w-sm'}`}>{displayServiceDescription}</p>
       
       <div className="w-full bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700/50 rounded-[12px] p-6 mb-8 text-left shadow-sm">
-        {showRequirementsHeading && <h3 className="mb-4 text-sm font-bold text-gray-900 dark:text-white">Requirements:</h3>}
+        {showRequirementsHeading && <h3 className="mb-4 text-sm font-bold text-gray-900 dark:text-white">{t('serviceFlow.requirements.headingLabel')}</h3>}
         <div className={isPanService ? 'grid gap-5 md:grid-cols-2 xl:grid-cols-4' : 'space-y-5'}>
           {requirements.map((section) => (
             <div key={section.title}>
@@ -1098,7 +1109,7 @@ export const ServiceFlow: React.FC<ServiceFlowProps> = ({ serviceTitle, serviceD
           onClick={() => setStage('form')} 
           className="w-full rounded-xl bg-blue-600 py-4 font-bold text-white tap-scale shadow-lg shadow-blue-500/20 transition-all duration-300 hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-xl hover:shadow-blue-500/25 sm:w-auto sm:min-w-[220px] sm:px-10"
         >
-          Start Application
+          {t('serviceFlow.startApplication')}
         </button>
         {(isPanService || isAadhaarService || isPvcCardOrderService) && onTrackApplication && (
           <button
@@ -1106,7 +1117,7 @@ export const ServiceFlow: React.FC<ServiceFlowProps> = ({ serviceTitle, serviceD
             onClick={onTrackApplication}
             className="w-full rounded-xl border border-blue-200 bg-white py-4 font-bold text-blue-700 tap-scale shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md dark:border-blue-500/30 dark:bg-slate-900 dark:text-blue-300 dark:hover:border-blue-400/50 dark:hover:bg-slate-800 sm:w-auto sm:min-w-[220px] sm:px-10"
           >
-            {isAadhaarService ? 'Track Status' : isPanService ? 'Track Application' : 'Track Order'}
+            {isAadhaarService ? t('serviceFlow.trackStatus') : isPanService ? t('serviceFlow.trackApplication') : t('serviceFlow.trackOrder')}
           </button>
         )}
       </div>
@@ -1123,12 +1134,12 @@ export const ServiceFlow: React.FC<ServiceFlowProps> = ({ serviceTitle, serviceD
         {/* Step 1: Basic Details */}
         {step === 1 && (
           <div className={`animate-slide-up space-y-5 ${isPanService ? 'mx-auto max-w-3xl' : ''}`}>
-            <h3 className="text-lg font-black text-gray-900 dark:text-white mb-1">Basic Details</h3>
-            <p className="text-xs text-gray-500 mb-4">Please provide your contact information.</p>
+            <h3 className="text-lg font-black text-gray-900 dark:text-white mb-1">{t('serviceFlow.form.basicTitle')}</h3>
+            <p className="text-xs text-gray-500 mb-4">{t('serviceFlow.form.basicSubtitle')}</p>
             <div className={isPanService ? 'grid gap-4 md:grid-cols-2' : 'space-y-5'}>
               <TextInput
-                label="Full Name *"
-                placeholder="John Doe"
+                label={t('serviceFlow.form.fullNameLabel')}
+                placeholder={t('serviceFlow.form.fullNamePlaceholder')}
                 value={formData.name}
                 onChange={(nextValue) => setFormData({ ...formData, name: nextValue })}
                 required
@@ -1153,9 +1164,9 @@ export const ServiceFlow: React.FC<ServiceFlowProps> = ({ serviceTitle, serviceD
                 />
               )}
               <TextInput
-                label="Mobile Number *"
+                label={t('serviceFlow.form.mobileLabel')}
                 type="tel"
-                placeholder={isAadhaarService ? 'Enter 10-digit mobile number' : '+91'}
+                placeholder={isAadhaarService ? t('serviceFlow.form.aadhaarMobilePlaceholder') : t('serviceFlow.form.mobilePlaceholder')}
                 value={formData.mobile}
                 onChange={(nextValue) => setFormData({
                   ...formData,
@@ -1184,27 +1195,27 @@ export const ServiceFlow: React.FC<ServiceFlowProps> = ({ serviceTitle, serviceD
               {showAadhaarBasicDetailsExtras && (
                 <div className={isPanService ? 'md:col-span-2' : ''}>
                   <EmailInput
-                    label="Email Address"
+                    label={t('serviceFlow.form.emailLabel')}
                     value={formData.email}
                     onChange={(nextValue) => setFormData({ ...formData, email: nextValue })}
-                    placeholder="john@example.com"
-                    hint="Optional, but helpful for application updates."
+                    placeholder={t('serviceFlow.form.emailPlaceholder')}
+                    hint={t('serviceFlow.form.emailHint')}
                   />
                 </div>
               )}
               {showAadhaarBasicDetailsExtras && (
                 <div className={isPanService ? 'md:col-span-2' : ''}>
                   <TextareaInput
-                    label="Current Address *"
-                    placeholder="Enter full address"
+                    label={t('serviceFlow.form.currentAddressLabel')}
+                    placeholder={t('serviceFlow.form.currentAddressPlaceholder')}
                     rows={3}
                     value={formData.address}
                     onChange={(nextValue) => setFormData({ ...formData, address: nextValue })}
                     required
                     validator={isValidAddress}
-                    requiredMessage="Please enter your current address."
-                    invalidMessage={`Address must be at least ${MIN_ADDRESS_LENGTH} characters long.`}
-                    hint="Enter your complete present address."
+                    requiredMessage={t('serviceFlow.form.currentAddressRequired')}
+                    invalidMessage={t('serviceFlow.form.currentAddressInvalid', { count: MIN_ADDRESS_LENGTH })}
+                    hint={t('serviceFlow.form.currentAddressHint')}
                   />
                 </div>
               )}
@@ -1456,10 +1467,10 @@ export const ServiceFlow: React.FC<ServiceFlowProps> = ({ serviceTitle, serviceD
           }`}
         >
           {hasGooglePlayAmountStep && step === 2
-            ? 'Proceed to Payment →'
+            ? `${t('serviceFlow.form.proceedToPayment')} →`
             : step === totalSteps
-              ? 'Proceed to Payment'
-              : 'Continue'}
+              ? t('serviceFlow.form.proceedToPayment')
+              : t('serviceFlow.form.continue')}
         </button>
       </div>
     </div>

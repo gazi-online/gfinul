@@ -1,5 +1,6 @@
 import React, { forwardRef, useId, useMemo, useState } from 'react';
 import { getInteractiveInputClass, INPUT_STATE_CLASSES, type InputVisualState } from './inputFieldStyles';
+import { useTranslation } from 'react-i18next';
 
 type TextareaInputProps = Omit<React.TextareaHTMLAttributes<HTMLTextAreaElement>, 'value' | 'onChange'> & {
   label: string;
@@ -33,8 +34,8 @@ export const TextareaInput = forwardRef<HTMLTextAreaElement, TextareaInputProps>
     error,
     hint,
     validator,
-    invalidMessage = 'Please enter a valid value.',
-    requiredMessage = 'This field is required.',
+    invalidMessage,
+    requiredMessage,
     id,
     name,
     disabled = false,
@@ -48,6 +49,7 @@ export const TextareaInput = forwardRef<HTMLTextAreaElement, TextareaInputProps>
   },
   ref,
 ) {
+  const { t } = useTranslation();
   const generatedId = useId();
   const inputId = id ?? `textarea-input-${generatedId}`;
   const errorId = `${inputId}-error`;
@@ -69,11 +71,11 @@ export const TextareaInput = forwardRef<HTMLTextAreaElement, TextareaInputProps>
     }
 
     if (!hasValue) {
-      return required ? requiredMessage : null;
+      return required ? requiredMessage ?? t('validation.required') : null;
     }
 
-    return isValidValue ? null : invalidMessage;
-  }, [error, hasValue, invalidMessage, isTouched, isValidValue, required, requiredMessage]);
+    return isValidValue ? null : invalidMessage ?? t('validation.valueInvalid');
+  }, [error, hasValue, invalidMessage, isTouched, isValidValue, required, requiredMessage, t]);
 
   const showSuccess = !disabled && !resolvedError && !isFocused && hasValue && isTouched;
 
@@ -107,6 +109,7 @@ export const TextareaInput = forwardRef<HTMLTextAreaElement, TextareaInputProps>
           name={name ?? inputId}
           value={value}
           rows={rows}
+          placeholder={props.placeholder}
           disabled={disabled}
           required={required}
           aria-invalid={resolvedError ? 'true' : 'false'}
