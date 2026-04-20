@@ -191,7 +191,7 @@ const App: React.FC = () => {
     })
 
     // Listen for Auth Changes
-    const { data: { subscription } } = authApi.onAuthStateChange((session) => {
+    const { data: { subscription } } = authApi.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
       checkAdminStatus(session?.user?.id)
       refreshServiceRequests(session?.user?.id)

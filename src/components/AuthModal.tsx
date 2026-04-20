@@ -227,7 +227,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, onSuccess, initialMode =
 
         <div className="mt-8 text-center">
           <button
-            onClick={() => setIsLogin(!isLogin)}
+            type="button"
+            onClick={() => switchMode(isLogin ? 'signup' : 'login')}
             className="text-sm font-bold text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
           >
             {isLogin ? t('auth.dontHaveAccount') : t('auth.alreadyHaveAccount')}
