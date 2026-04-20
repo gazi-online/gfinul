@@ -181,67 +181,67 @@ html.dark, html.dark body, html.dark #root {
 .mode-card-btn {
   position: relative;
   display: flex;
-  min-height: 148px;
+  min-height: 124px;
   width: 100%;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 14px;
   overflow: hidden;
-  border-radius: 22px;
-  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 16px;
+  border: 1px solid #007efd;
   background: #fff;
-  padding: 16px 12px;
+  padding: 20px 10px;
+  cursor: pointer;
   text-align: center;
-  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease, background 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
   will-change: transform;
+  --btn-color: #64748b;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .dark .mode-card-btn {
-  border-color: rgba(71, 85, 105, 0.9);
-  background: rgba(15, 23, 42, 0.95);
+  background: rgba(15, 23, 42, 0.92);
+  border-color: rgba(59, 130, 246, 0.45);
+  box-shadow: 0 10px 24px -14px rgba(2, 6, 23, 0.72);
 }
 
 .mode-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--btn-color, #2563eb);
-  transition: transform 0.3s ease, color 0.3s ease;
+  color: var(--btn-color) !important;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   will-change: transform;
 }
 
 .mode-icon svg {
-  height: 2.25rem;
-  width: 2.25rem;
+  height: 32px;
+  width: 32px;
 }
 
 .mode-card-btn span {
-  color: #0f172a;
-  font-size: 0.95rem;
-  line-height: 1.2;
+  font-size: 14px;
+  font-weight: 700;
+  color: #334155;
+  line-height: 1.4;
   transition: color 0.3s ease;
 }
 
 .dark .mode-card-btn span {
-  color: #f8fafc;
+  color: #e2e8f0;
 }
 
 @media (min-width: 640px) {
   .mode-card-btn {
-    min-height: 180px;
-    gap: 16px;
-    padding: 20px;
-  }
-
-  .mode-icon svg {
-    height: 3rem;
-    width: 3rem;
+    min-height: 148px;
+    gap: 18px;
+    padding: 20px 10px;
   }
 
   .mode-card-btn span {
-    font-size: 1.125rem;
-    line-height: 1.25;
+    line-height: 1.45;
   }
 }
 
@@ -255,6 +255,7 @@ html.dark, html.dark body, html.dark #root {
 
   .dark .mode-card-btn:hover {
     background: color-mix(in srgb, var(--btn-color), #0f172a 88%) !important;
+    box-shadow: 0 14px 28px -10px rgba(2, 6, 23, 0.72);
   }
 
   .mode-card-btn:hover .mode-icon {
@@ -263,5 +264,85 @@ html.dark, html.dark body, html.dark #root {
 
   .mode-card-btn:hover span {
     color: var(--btn-color) !important;
+  }
+}
+
+.mode-separator {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 10px 0;
+  position: relative;
+  width: 100%;
+}
+
+.mode-separator span {
+  background: #f8fafc;
+  padding: 0 2px;
+  font-size: 13px;
+  font-weight: 800;
+  color: #4f46e5;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  z-index: 2;
+  text-align: center;
+}
+
+.mode-separator::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 1.5px;
+  background: linear-gradient(90deg, transparent, #6366f1, #25d366, transparent);
+  z-index: 1;
+}
+
+.dark .mode-separator span {
+  background: #0f172a;
+  color: #818cf8;
+}
+
+.back-top-btn {
+  border-color: color-mix(in srgb, var(--color-brand), white 68%);
+  background: color-mix(in srgb, var(--color-brand), white 88%);
+  color: var(--color-brand-dark);
+  box-shadow: 0 18px 40px rgba(37, 99, 235, 0.16);
+}
+
+.back-top-btn__icon {
+  background: color-mix(in srgb, var(--color-brand), white 92%);
+}
+
+.dark .back-top-btn {
+  border-color: color-mix(in srgb, var(--color-brand), #0f172a 55%);
+  background: color-mix(in srgb, var(--color-brand), #0f172a 82%);
+  color: #dbeafe;
+  box-shadow: 0 18px 40px rgba(2, 6, 23, 0.36);
+}
+
+.dark .back-top-btn__icon {
+  background: color-mix(in srgb, var(--color-brand), #0f172a 72%);
+}
+
+@media (hover: hover) {
+  .back-top-btn:hover {
+    border-color: color-mix(in srgb, var(--color-brand), white 52%);
+    background: color-mix(in srgb, var(--color-brand), white 82%);
+    box-shadow: 0 20px 44px rgba(37, 99, 235, 0.2);
+  }
+
+  .back-top-btn:hover .back-top-btn__icon {
+    background: color-mix(in srgb, var(--color-brand), white 86%);
+  }
+
+  .dark .back-top-btn:hover {
+    border-color: color-mix(in srgb, var(--color-brand), #0f172a 44%);
+    background: color-mix(in srgb, var(--color-brand), #0f172a 74%);
+    box-shadow: 0 20px 44px rgba(2, 6, 23, 0.44);
+  }
+
+  .dark .back-top-btn:hover .back-top-btn__icon {
+    background: color-mix(in srgb, var(--color-brand), #0f172a 64%);
   }
 }

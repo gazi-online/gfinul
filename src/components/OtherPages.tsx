@@ -47,8 +47,8 @@ import {
 } from 'lucide-react'
 
 // ── Icons ────────────────────────────────────────────────────────────────────
-const SearchIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+const SearchIcon: React.FC<{ className?: string }> = ({ className = 'h-5 w-5' }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={className}>
     <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
   </svg>
 )
@@ -701,7 +701,7 @@ export const TollPage: React.FC = () => {
     {
       title: 'ID, PDF & Document Prep',
       description: 'Crop, merge, convert, scan, and export print-ready files for everyday document work.',
-      tone: 'border-blue-100 bg-blue-50/70 dark:border-blue-500/20 dark:bg-blue-500/10',
+      tone: '',
       iconWrap: 'bg-blue-600 text-white shadow-lg shadow-blue-500/20',
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className="h-6 w-6">
@@ -728,7 +728,7 @@ export const TollPage: React.FC = () => {
     {
       title: 'Photo Studio & Print',
       description: 'Everything needed for passport photos, print layouts, image cleanup, and media export.',
-      tone: 'border-emerald-100 bg-emerald-50/70 dark:border-emerald-500/20 dark:bg-emerald-500/10',
+      tone: '',
       iconWrap: 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/20',
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className="h-6 w-6">
@@ -754,7 +754,7 @@ export const TollPage: React.FC = () => {
     {
       title: 'Background, Sign & Scan',
       description: 'Signature, background removal, and barcode-ready utilities for fast studio delivery.',
-      tone: 'border-amber-100 bg-amber-50/70 dark:border-amber-500/20 dark:bg-amber-500/10',
+      tone: '',
       iconWrap: 'bg-amber-500 text-white shadow-lg shadow-amber-500/20',
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className="h-6 w-6">
@@ -775,7 +775,7 @@ export const TollPage: React.FC = () => {
     {
       title: 'Writing, CV & Legal',
       description: 'Generate resumes, letters, notices, and legal drafting support from one organized section.',
-      tone: 'border-violet-100 bg-violet-50/70 dark:border-violet-500/20 dark:bg-violet-500/10',
+      tone: '',
       iconWrap: 'bg-violet-600 text-white shadow-lg shadow-violet-500/20',
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className="h-6 w-6">
@@ -799,7 +799,7 @@ export const TollPage: React.FC = () => {
     {
       title: 'Design, Print & Business Tools',
       description: 'Studio-friendly business assets and printable formats for branding, IDs, and daily shop output.',
-      tone: 'border-rose-100 bg-rose-50/70 dark:border-rose-500/20 dark:bg-rose-500/10',
+      tone: '',
       iconWrap: 'bg-rose-500 text-white shadow-lg shadow-rose-500/20',
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className="h-6 w-6">
@@ -824,7 +824,7 @@ export const TollPage: React.FC = () => {
     {
       title: 'Language, Date & Calculators',
       description: 'Useful translators, converters, and shop calculators for daily counter work.',
-      tone: 'border-cyan-100 bg-cyan-50/70 dark:border-cyan-500/20 dark:bg-cyan-500/10',
+      tone: '',
       iconWrap: 'bg-cyan-600 text-white shadow-lg shadow-cyan-500/20',
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className="h-6 w-6">
@@ -846,7 +846,7 @@ export const TollPage: React.FC = () => {
     {
       title: 'Checks, Tickets & Online Services',
       description: 'Travel, exam, visa, and online service tools grouped together for faster access.',
-      tone: 'border-slate-200 bg-slate-50/80 dark:border-slate-600 dark:bg-slate-800/70',
+      tone: '',
       iconWrap: 'bg-slate-800 text-white shadow-lg shadow-slate-500/20 dark:bg-slate-200 dark:text-slate-900',
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className="h-6 w-6">
@@ -868,7 +868,7 @@ export const TollPage: React.FC = () => {
     {
       title: 'Studio Hub & Smart Utilities',
       description: 'High-value extras from the reference board for smarter studio operations.',
-      tone: 'border-indigo-100 bg-indigo-50/70 dark:border-indigo-500/20 dark:bg-indigo-500/10',
+      tone: '',
       iconWrap: 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20',
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className="h-6 w-6">
@@ -902,20 +902,20 @@ export const TollPage: React.FC = () => {
   const visibleCategories = normalizedToolSearch ? filteredCategories : structuredCategories
   const visibleToolCount = visibleCategories.reduce((sum, category) => sum + category.tools.length, 0)
   const heroBackgroundIcons = [
-    { Icon: FileText, className: 'left-6 top-8 h-16 w-16 text-blue-200/80 dark:text-blue-400/20', delay: '0ms' },
-    { Icon: Camera, className: 'right-10 top-10 h-14 w-14 text-cyan-200/80 dark:text-cyan-400/20', delay: '900ms' },
-    { Icon: QrCode, className: 'left-14 bottom-12 h-12 w-12 text-sky-200/80 dark:text-sky-400/20', delay: '1700ms' },
-    { Icon: Printer, className: 'right-18 bottom-10 h-16 w-16 text-indigo-200/80 dark:text-indigo-400/20', delay: '2400ms' },
-    { Icon: WandSparkles, className: 'left-1/2 top-6 h-12 w-12 -translate-x-1/2 text-blue-100/90 dark:text-blue-300/20', delay: '1200ms' },
+    { Icon: FileText, className: 'left-6 top-8 h-16 w-16 text-blue-200/80 dark:text-blue-400/40', delay: '0ms' },
+    { Icon: Camera, className: 'right-10 top-10 h-14 w-14 text-cyan-200/80 dark:text-cyan-400/38', delay: '900ms' },
+    { Icon: QrCode, className: 'left-14 bottom-12 h-12 w-12 text-sky-200/80 dark:text-sky-400/38', delay: '1700ms' },
+    { Icon: Printer, className: 'right-18 bottom-10 h-16 w-16 text-indigo-200/80 dark:text-indigo-400/40', delay: '2400ms' },
+    { Icon: WandSparkles, className: 'left-1/2 top-6 h-12 w-12 -translate-x-1/2 text-blue-100/90 dark:text-blue-300/36', delay: '1200ms' },
   ]
   const skeletonCategoryCounts = [6, 8, 4]
 
   return (
-    <div className="min-h-screen bg-[#F9FAFB] px-3 py-6 dark:bg-slate-900/20 lg:px-8 lg:py-10">
+    <div className="min-h-screen px-3 py-6 lg:px-8 lg:py-10">
       <div className="space-y-6">
-        <section className="overflow-hidden rounded-[32px] border border-blue-100 bg-white shadow-sm dark:border-slate-700/60 dark:bg-slate-800">
+        <section className="overflow-hidden">
           {isToolsLoading ? (
-            <div className="px-6 py-8 lg:px-10 lg:py-12">
+            <div className="py-8 lg:py-12">
               <div className="mx-auto max-w-4xl animate-pulse">
                 <div className="mx-auto h-7 w-32 rounded-full bg-slate-200 dark:bg-slate-700" />
                 <div className="mx-auto mt-5 h-10 w-full max-w-3xl rounded-2xl bg-slate-200 dark:bg-slate-700 lg:h-14" />
@@ -930,7 +930,7 @@ export const TollPage: React.FC = () => {
               </div>
             </div>
           ) : (
-            <div className="relative overflow-hidden px-6 py-8 lg:px-10 lg:py-12">
+            <div className="relative overflow-hidden py-8 lg:py-12">
               <div className="pointer-events-none absolute inset-0">
                 {heroBackgroundIcons.map(({ Icon, className, delay }, index) => (
                   <div
@@ -962,20 +962,20 @@ export const TollPage: React.FC = () => {
                     Styled for document and media work
                   </span>
                 </div>
-                <div className="mt-6 w-full max-w-2xl">
+                <div className="mt-6 w-full max-w-3xl">
                   <label className="relative block">
                     <span className="sr-only">Search tools</span>
-                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400 dark:text-slate-300">
-                      <SearchIcon />
+                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 dark:text-slate-300 sm:pl-5">
+                      <SearchIcon className="h-5 w-5 sm:h-6 sm:w-6 lg:h-7 lg:w-7" />
                     </div>
                     <input
                       type="search"
                       value={toolSearch}
                       onChange={(event) => setToolSearch(event.target.value)}
                       placeholder="Search tools, PDF, photo, CV..."
-                      className="h-12 w-full rounded-2xl border border-slate-200 bg-white pl-12 pr-28 text-sm font-semibold text-slate-900 placeholder:text-slate-400 shadow-[0_10px_30px_rgba(15,23,42,0.06)] outline-none transition-all duration-300 focus:border-blue-300 focus:bg-white dark:border-slate-600 dark:bg-slate-700/70 dark:text-white dark:placeholder:text-slate-300"
+                      className="h-12 w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-4 text-sm font-semibold text-slate-900 placeholder:text-slate-400 shadow-[0_10px_30px_rgba(15,23,42,0.06)] outline-none transition-all duration-300 focus:border-blue-300 focus:bg-white dark:border-slate-600 dark:bg-slate-700/70 dark:text-white dark:placeholder:text-slate-300 sm:h-14 sm:pl-15 sm:pr-28 sm:text-base lg:h-15 lg:rounded-3xl"
                     />
-                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4 text-[11px] font-black uppercase tracking-[0.16em] text-slate-400 dark:text-slate-300">
+                    <div className="pointer-events-none absolute inset-y-0 right-0 hidden items-center pr-5 text-[11px] font-black uppercase tracking-[0.16em] text-slate-400 dark:text-slate-300 sm:flex">
                       {visibleToolCount} tools
                     </div>
                   </label>
@@ -984,12 +984,12 @@ export const TollPage: React.FC = () => {
             </div>
           )}
 
-          <div className="grid gap-4 px-6 py-6 lg:px-10 lg:py-8">
+          <div className="grid gap-4 py-6 lg:py-8">
             {isToolsLoading
               ? skeletonCategoryCounts.map((count, categoryIndex) => (
                   <article
                     key={`skeleton-${categoryIndex}`}
-                    className="rounded-[28px] border border-slate-200 bg-slate-50/80 px-5 py-5 dark:border-slate-700 dark:bg-slate-800/80"
+                    className="rounded-[28px] px-4 py-5 lg:px-3"
                   >
                     <div className="animate-pulse">
                       <div className="mx-auto h-7 w-56 rounded-xl bg-slate-200 dark:bg-slate-700" />
@@ -997,7 +997,7 @@ export const TollPage: React.FC = () => {
                       <div className="mx-auto mt-2 h-4 w-3/4 max-w-lg rounded-xl bg-slate-200 dark:bg-slate-700" />
                       <div className="mx-auto mt-4 h-7 w-24 rounded-full bg-slate-200 dark:bg-slate-700" />
                     </div>
-                    <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 2xl:grid-cols-4">
+                    <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
                       {Array.from({ length: count }).map((_, toolIndex) => (
                         <div
                           key={toolIndex}
@@ -1011,47 +1011,52 @@ export const TollPage: React.FC = () => {
                     </div>
                   </article>
                 ))
-              : visibleCategories.map(({ title, description, tone, iconWrap, icon, tools }, categoryIndex) => (
-                  <article
-                    key={title}
-                    className={`ui-hover-card animate-slide-up rounded-[28px] border px-5 py-5 shadow-sm transition-all duration-300 ${tone}`}
-                    style={{ animationDelay: `${categoryIndex * 60}ms` }}
-                  >
-                    <div className="mb-5 flex flex-col items-center text-center">
-                      <h3 className="max-w-[18rem] text-base font-black leading-tight text-gray-900 dark:text-white sm:max-w-[24rem] sm:text-lg lg:max-w-none lg:text-[1.35rem]">
-                        {title}
-                      </h3>
-                      <p className="mt-2 max-w-2xl text-sm font-medium leading-6 text-gray-600 dark:text-slate-300">
-                        {description}
-                      </p>
-                      <span className="mt-3 inline-flex rounded-full border border-black/5 bg-white/80 px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em] text-gray-700 dark:border-white/10 dark:bg-slate-900/60 dark:text-slate-200">
-                        {tools.length} tools
-                      </span>
-                    </div>
-                    <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 2xl:grid-cols-4">
-                      {tools.map(({ name, icon: ToolIcon, accent }, toolIndex) => (
-                        <article
-                          key={name}
-                          className="animate-fade-slide-in"
-                          style={{ animationDelay: `${categoryIndex * 90 + toolIndex * 18}ms` }}
-                        >
-                          <button
-                            type="button"
-                            className="mode-card-btn"
-                            style={{ ['--btn-color' as string]: TOOL_CARD_COLORS[accent] }}
-                          >
-                            <div className="mode-icon">
-                              <ToolIcon className="h-9 w-9 sm:h-12 sm:w-12" strokeWidth={2.1} />
-                            </div>
-                            <span className="text-[0.95rem] font-extrabold leading-tight sm:text-lg">
-                              {name}
-                            </span>
-                          </button>
-                        </article>
-                      ))}
-                    </div>
-                  </article>
-                ))}
+              : visibleCategories.map(({ title, tone, iconWrap, icon, tools }, categoryIndex) => {
+                  const isLastCompactCategory = categoryIndex === visibleCategories.length - 1 && tools.length <= 4
+                  const nextCategoryTitle = visibleCategories[categoryIndex + 1]?.title
+
+                  return (
+                    <React.Fragment key={title}>
+                      {categoryIndex === 0 ? (
+                        <div className="mode-separator">
+                          <span>{title}</span>
+                        </div>
+                      ) : null}
+                      <article
+                        className={`animate-slide-up rounded-[28px] px-5 pb-5 pt-1 transition-all duration-300 ${tone}`}
+                        style={{ animationDelay: `${categoryIndex * 60}ms` }}
+                      >
+                        <div className={isLastCompactCategory ? 'flex flex-wrap justify-center gap-2 sm:gap-3' : 'grid grid-cols-2 gap-2 sm:grid-cols-2 sm:gap-3 lg:grid-cols-4'}>
+                          {tools.map(({ name, icon: ToolIcon, accent }, toolIndex) => (
+                            <article
+                              key={name}
+                              className={`animate-fade-slide-in ${isLastCompactCategory ? 'w-[calc(50%-0.375rem)] sm:w-[calc(50%-0.5rem)] lg:w-[calc(25%-0.75rem)]' : ''}`}
+                              style={{ animationDelay: `${categoryIndex * 90 + toolIndex * 18}ms` }}
+                            >
+                              <button
+                                type="button"
+                                className="mode-card-btn"
+                                style={{ ['--btn-color' as string]: TOOL_CARD_COLORS[accent] }}
+                              >
+                                <div className="mode-icon">
+                                  <ToolIcon strokeWidth={2.1} />
+                                </div>
+                                <span>
+                                  {name}
+                                </span>
+                              </button>
+                            </article>
+                          ))}
+                        </div>
+                      </article>
+                      {nextCategoryTitle ? (
+                        <div className="mode-separator">
+                          <span>{nextCategoryTitle}</span>
+                        </div>
+                      ) : null}
+                    </React.Fragment>
+                  )
+                })}
           </div>
         </section>
 
