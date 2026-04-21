@@ -227,7 +227,6 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, onSuccess, initialMode =
 
         <div className="mt-8 text-center">
           <button
-            type="button"
             onClick={() => switchMode(isLogin ? 'signup' : 'login')}
             className="text-sm font-bold text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
           >

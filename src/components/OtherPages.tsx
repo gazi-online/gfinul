@@ -1,4 +1,7 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, lazy, Suspense } from 'react'
+
+const IDCardScanModal = lazy(() => import('./IDCardScanModal'))
+const TeletalkResizerModal = lazy(() => import('./TeletalkResizerModal'))
 import { type Product, type ServiceItem, type Order, type ServiceRequest } from '../lib/types'
 import { type User } from '@supabase/supabase-js'
 import { useTranslation } from 'react-i18next'
@@ -570,6 +573,7 @@ export const TollPage: React.FC = () => {
   const { t } = useTranslation()
   const [toolSearch, setToolSearch] = useState('')
   const [isToolsLoading, setIsToolsLoading] = useState(true)
+  const [activeToolModal, setActiveToolModal] = useState<string | null>(null)
 
   useEffect(() => {
     const timer = window.setTimeout(() => setIsToolsLoading(false), 450)
@@ -1037,6 +1041,7 @@ export const TollPage: React.FC = () => {
                                 type="button"
                                 className="mode-card-btn"
                                 style={{ ['--btn-color' as string]: TOOL_CARD_COLORS[accent] }}
+                                onClick={() => setActiveToolModal(name)}
                               >
                                 <div className="mode-icon">
                                   <ToolIcon strokeWidth={2.1} />
@@ -1072,6 +1077,29 @@ export const TollPage: React.FC = () => {
           </div>
         </section>
       </div>
+
+      {/* ID Card Scan Modal */}
+      {(activeToolModal === 'ID Card Crop to PDF' || activeToolModal === 'Passport Crop to PDF') && (
+        <Suspense fallback={
+          <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/40 backdrop-blur-sm">
+            <div className="flex flex-col items-center gap-3 p-6 bg-white dark:bg-slate-900 rounded-3xl shadow-xl">
+              <div className="w-10 h-10 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin"></div>
+              <p className="text-sm font-bold text-gray-600 dark:text-slate-400">Loading Tool...</p>
+            </div>
+          </div>
+        }>
+          <IDCardScanModal 
+            onClose={() => setActiveToolModal(null)} 
+            initialType={activeToolModal === 'Passport Crop to PDF' ? 'passport' : 'voter'}
+          />
+        </Suspense>
+      )}
+
+      {activeToolModal === 'Teletalk Photo & Sig Resizer' && (
+        <Suspense fallback={null}>
+          <TeletalkResizerModal onClose={() => setActiveToolModal(null)} />
+        </Suspense>
+      )}
     </div>
   )
 }
