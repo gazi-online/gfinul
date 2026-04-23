@@ -1,0 +1,2 @@
+vite-codex-20260418-102415.log
+vite-codex-20260418-102415.err.log

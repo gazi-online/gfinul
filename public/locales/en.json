@@ -1,0 +1,489 @@
+{
+  "app": {
+    "brand": "Gazi Online",
+    "pageTitle": {
+      "home": "Gazi Online",
+      "services": "All Services",
+      "products": "Products",
+      "toll": "Studio Tools",
+      "track": "Track Application",
+      "dashboard": "Dashboard",
+      "profile": "My Profile"
+    }
+  },
+  "nav": {
+    "home": "Home",
+    "services": "Services",
+    "products": "Products",
+    "toll": "Tools",
+    "track": "Track",
+    "dashboard": "Dashboard",
+    "profile": "Profile",
+    "main": "Main navigation"
+  },
+  "header": {
+    "toggleDarkMode": "Toggle dark mode",
+    "changeLanguage": "Change language, current {{language}}",
+    "cart": "Cart",
+    "profile": "Profile"
+  },
+  "language": {
+    "en": "English",
+    "bn": "Bengali",
+    "switcher": "Language"
+  },
+  "common": {
+    "viewAll": "View All",
+    "save": "Save",
+    "saveChanges": "Save Changes",
+    "saving": "Saving...",
+    "loading": "Loading...",
+    "close": "Close",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "link": "Link",
+    "verify": "Verify",
+    "verified": "Verified",
+    "notVerified": "Not Verified",
+    "signIn": "Sign In",
+    "signOut": "Sign Out",
+    "goToSignIn": "Go to Sign In",
+    "pleaseSignIn": "Please Sign In",
+    "optional": "Optional",
+    "required": "Required",
+    "search": "Search",
+    "refresh": "Refresh",
+    "comingSoon": "Coming Soon",
+    "ok": "OK",
+    "guest": "Guest",
+    "admin": "Admin",
+    "yes": "Yes",
+    "no": "No",
+    "na": "N/A",
+    "updated": "Updated {{date}}",
+    "notAvailable": "Not available"
+  },
+  "categories": {
+    "all": "All",
+    "government": "Government",
+    "finance": "Finance",
+    "utility": "Utility"
+  },
+  "validation": {
+    "required": "This field is required.",
+    "emailRequired": "Please enter your email address.",
+    "emailInvalid": "Please enter a valid email address.",
+    "passwordRequired": "Please enter your password.",
+    "passwordMin": "Password must be at least {{count}} characters long.",
+    "valueInvalid": "Please enter a valid value.",
+    "fullNameRequired": "Please enter your full name.",
+    "phoneInvalid": "Enter a valid phone number with 10 to 15 digits.",
+    "currentPasswordRequired": "Enter your current password.",
+    "newPasswordMin": "New password must be at least 8 characters.",
+    "newPasswordNumber": "Include at least one number in the new password.",
+    "confirmPasswordMismatch": "Passwords do not match.",
+    "linkedAccountRequired": "Please enter an ID number.",
+    "aadhaarInvalid": "Aadhaar must be exactly 12 digits.",
+    "panInvalid": "PAN must match the ABCDE1234F format.",
+    "voterInvalid": "Voter ID must be 8 to 16 letters or numbers."
+  },
+  "auth": {
+    "welcomeBack": "Welcome Back",
+    "createAccount": "Create Account",
+    "fullName": "Full Name",
+    "emailAddress": "Email Address",
+    "password": "Password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "createAccountButton": "Create Account",
+    "dontHaveAccount": "Don't have an account? Sign Up",
+    "alreadyHaveAccount": "Already have an account? Sign In",
+    "namePlaceholder": "Gazi Online",
+    "emailPlaceholder": "name@example.com",
+    "passwordPlaceholder": "Password",
+    "authFailed": "An error occurred during authentication"
+  },
+  "status": {
+    "pending": "Pending",
+    "processing": "Processing",
+    "completed": "Completed",
+    "rejected": "Rejected",
+    "shipped": "Shipped",
+    "delivered": "Delivered",
+    "cancelled": "Cancelled",
+    "inStock": "In Stock",
+    "outOfStock": "Out of Stock",
+    "lowStock": "Low Stock"
+  },
+  "home": {
+    "heroTitle": "Digital Gateway to Government Services",
+    "heroDescription": "Fast, transparent, and secure access to essential civic documentation.",
+    "quickServices": "Quick Access",
+    "quickTools": "Quick Tools",
+    "featuredProducts": "Featured Products",
+    "popularServices": "Most Requested Services",
+    "recentApplications": "Recent Applications",
+    "reviews": "Customer Reviews",
+    "whyChooseUs": "Why Choose Us",
+    "viewAllServices": "View All",
+    "searchPlaceholder": "Explore civic services, products, or trackers...",
+    "offersBadge": "Limited Offer",
+    "offersTitle": "20% off on all\nCitizen Accessories",
+    "offersSubtitle": "Secure your digital life with premium protection.",
+    "shopNow": "Shop Now",
+    "whatCitizensSay": "What Citizens Say",
+    "reviewPrompt": "Tap the button to leave a review directly on Google Maps.",
+    "writeReview": "Write a Review",
+    "privacyPolicy": "Privacy Policy",
+    "terms": "Terms",
+    "help": "Help",
+    "location": "Gazi Online Location",
+    "rights": "All rights reserved.",
+    "footerTagline": "Empowering Digital Governance",
+    "fastService": "Fast Service",
+    "fastServiceDescription": "Most applications processed within 24 hours with dedicated express queues.",
+    "securePayments": "Secure Payments",
+    "securePaymentsDescription": "Military-grade encryption for every transaction you make on our platform.",
+    "support247": "24/7 Support",
+    "support247Description": "Our team is always online to help you with your queries and document issues.",
+    "alwaysConnected": "Always Connected.",
+    "everywhere": "Everywhere.",
+    "appDescription": "Download our app for faster processing and get real-time application trackers on your lockscreen.",
+    "downloadApp": "Download App",
+    "whatsappHelp": "WhatsApp Help",
+    "noResultsTitle": "No results found",
+    "noResultsDescription": "Try adjusting your search terms to find what you're looking for.",
+    "reviewsUnavailableTitle": "Reviews unavailable",
+    "reviewsUnavailableMessage": "We could not load reviews right now. Please try again shortly."
+  },
+  "services": {
+    "applyNow": "Apply Now",
+    "searchPlaceholder": "Search for a service or scheme...",
+    "popularServices": "Popular Services",
+    "noServicesFound": "No services found",
+    "names": {
+      "applyPan": "Apply PAN",
+      "aadhaar": "Aadhaar mobile number update",
+      "aadhaarUpdate": "Aadhaar Update",
+      "payBill": "Pay Bill",
+      "incomeCertificate": "PVC Card Order",
+      "vehicleTax": "Google Play Redeem Codes",
+      "googlePlayRedeemCodes": "Google Play Redeem Codes"
+    },
+    "descriptions": {
+      "applyPan": "Digital application for new Permanent Account Number cards.",
+      "googlePlayRedeemCodes": "Buy or redeem Google Play gift codes online."
+    }
+  },
+  "serviceFlow": {
+    "requirements": {
+      "heading": "Requirements",
+      "headingLabel": "Requirements:",
+      "default": {
+        "mobile": "Valid Mobile Number",
+        "aadhaar": "Aadhaar Card (PDF/JPG)",
+        "photo": "Recent Photograph"
+      },
+      "aadhaar": {
+        "aadhaarNumber": "Aadhaar Number",
+        "mobile": "Valid Mobile Number",
+        "card": "Aadhaar Card (PDF/JPG)"
+      },
+      "payBill": {
+        "consumerNumber": "Consumer or account number",
+        "billCopy": "Bill copy or latest bill details"
+      },
+      "vehicleTax": {
+        "mobile": "Valid Mobile Number"
+      },
+      "pan": {
+        "identityTitle": "1. Proof of Identity (any one)",
+        "addressTitle": "2. Proof of Address (any one)",
+        "birthTitle": "3. Proof of Date of Birth (any one)",
+        "photoTitle": "4. Passport-size Photos",
+        "identityItems": {
+          "aadhaar": "Aadhaar Card",
+          "voter": "Voter ID",
+          "passport": "Passport",
+          "driving": "Driving License",
+          "photoId": "Photo ID issued by Government"
+        },
+        "addressItems": {
+          "aadhaar": "Aadhaar Card",
+          "passport": "Passport",
+          "utility": "Utility bill (electricity, water, gas - not older than 3 months)",
+          "bank": "Bank account statement",
+          "postOffice": "Post office passbook"
+        },
+        "birthItems": {
+          "birthCertificate": "Birth Certificate",
+          "aadhaar": "Aadhaar Card",
+          "passport": "Passport",
+          "matriculation": "Matriculation certificate"
+        },
+        "photoItems": {
+          "photo": "Colour passport photo upload with crop/edit support",
+          "signature": "Signature on white paper with crop/edit support."
+        }
+      }
+    },
+    "startApplication": "Start Application",
+    "trackStatus": "Track Status",
+    "trackApplication": "Track Application",
+    "trackOrder": "Track Order",
+    "form": {
+      "basicTitle": "Basic Details",
+      "basicSubtitle": "Please provide your contact information.",
+      "fullNameLabel": "Full Name *",
+      "fullNamePlaceholder": "John Doe",
+      "mobileLabel": "Mobile Number *",
+      "aadhaarMobilePlaceholder": "Enter 10-digit mobile number",
+      "mobilePlaceholder": "+91",
+      "emailLabel": "Email Address",
+      "emailPlaceholder": "john@example.com",
+      "emailHint": "Optional, but helpful for application updates.",
+      "currentAddressLabel": "Current Address *",
+      "currentAddressPlaceholder": "Enter full address",
+      "currentAddressRequired": "Please enter your current address.",
+      "currentAddressInvalid": "Address must be at least {{count}} characters long.",
+      "currentAddressHint": "Enter your complete present address.",
+      "continue": "Continue",
+      "proceedToPayment": "Proceed to Payment"
+    }
+  },
+  "trackPage": {
+    "publicHint": "Search by service name or reference number to check the latest request status.",
+    "publicSearchReady": "Public tracking is available.",
+    "emptyTitle": "No tracked requests yet",
+    "emptyMessage": "Search with a reference number or submit a service request to see updates here."
+  },
+  "toll": {
+    "badge": "Studio Tools",
+    "title": "One Smart Studio for Every Document & Media Need",
+    "subtitle": "Built for studios, photocopy and computer shops — fast, simple, and free.",
+    "cards": {
+      "recharge": {
+        "title": "Document Tools",
+        "description": "Create, edit, and prepare Aadhaar, PAN, PVC, and other customer document files from one workspace."
+      },
+      "vehicle": {
+        "title": "Photo & Media",
+        "description": "Handle passport photos, signatures, image cleanup, and print-ready media assets with a faster studio workflow."
+      },
+      "history": {
+        "title": "Shop Workflow",
+        "description": "Keep your daily document and media utilities organized for studios, photocopy shops, and computer centers."
+      }
+    },
+    "noteTitle": "Built for digital studios",
+    "noteDescription": "This section now works as a dedicated tools hub for document and media tasks from the top navigation bar."
+  },
+  "products": {
+    "catalogTitle": "Explore Products",
+    "catalogDescription": "Browse your product catalog in one dedicated place without scrolling the home page.",
+    "searchPlaceholder": "Search products by name or category...",
+    "noProductsFound": "No matching products found",
+    "noProductsDescription": "Try a different product name or category keyword.",
+    "addToCart": "Add to Cart",
+    "viewDetails": "View Details",
+    "stock": "Stock",
+    "rating": "Rating",
+    "description": "Description",
+    "category": "Category",
+    "reviews": "Reviews",
+    "continueCheckout": "Continue to Checkout",
+    "details": {
+      "back": "Back",
+      "closeAria": "Close product details",
+      "productUnavailableTitle": "Product unavailable",
+      "productUnavailableMessage": "This product could not be found.",
+      "loadError": "We could not load this product right now.",
+      "availabilityOnRequest": "Availability on request",
+      "limited": "Limited",
+      "outOfStock": "Out of stock",
+      "outOfStockShort": "Out of Stock",
+      "leftInStock": "{{count}} left in stock",
+      "lowStock": "Low Stock",
+      "inStock": "In stock",
+      "inStockShort": "In Stock",
+      "verifiedReviews": "{{count}} verified reviews",
+      "stockStatus": "Stock Status",
+      "warranty": "Warranty",
+      "warrantyMonths": "{{count}} month warranty",
+      "inYourCart": "In Your Cart",
+      "cartReady_one": "{{count}} item ready for checkout",
+      "cartReady_other": "{{count}} items ready for checkout",
+      "notAddedYet": "Not added yet",
+      "descriptionHeading": "Description",
+      "addToCart": "Add to Cart",
+      "addingToCart": "Adding...",
+      "continueShopping": "Continue Shopping",
+      "addToCartHint": "Add this product to your cart first, then continue to checkout from here.",
+      "relatedProducts": "Related Products",
+      "relatedSubtitle": "More picks from the same category.",
+      "relatedEmpty": "No similar products available right now.",
+      "showPreviousImage": "Show previous product image",
+      "showNextImage": "Show next product image",
+      "showImage": "Show {{label}} image",
+      "outBadge": "Out",
+      "stockBadge": "Stock",
+      "addedToCart": "Added to cart",
+      "addedToCartMessage": "{{name}} is ready in your cart.",
+      "addToCartFailed": "Add to cart failed",
+      "couldNotAdd": "Could not add this product right now.",
+      "autoDescription": "{{name}} is a carefully selected {{category}} designed for reliable everyday use with quick support from our team."
+    }
+  },
+  "profile": {
+    "citizenProfile": "Citizen Profile",
+    "signInUnlockTitle": "Sign in to unlock your settings",
+    "signInUnlockDescription": "Save your personal details, manage linked IDs, update your password, and keep your preferences synced across sessions.",
+    "applications": "Applications",
+    "activeRequests": "Active Requests",
+    "completedServices": "Completed Services",
+    "openAdminDashboard": "Open Admin Dashboard",
+    "sections": {
+      "personal": {
+        "title": "Personal Information",
+        "subtitle": "Name, phone, email"
+      },
+      "linked": {
+        "title": "Linked Accounts",
+        "subtitle": "Aadhaar, PAN, Voter ID"
+      },
+      "notifications": {
+        "title": "Notifications",
+        "subtitle": "SMS, email and app alerts"
+      },
+      "security": {
+        "title": "Security",
+        "subtitle": "Change your password"
+      },
+      "language": {
+        "title": "Language",
+        "subtitle": "English, Bengali"
+      },
+      "help": {
+        "title": "Help & Support",
+        "subtitle": "FAQ and contact channels"
+      }
+    },
+    "personal": {
+      "fullName": "Full Name",
+      "phoneNumber": "Phone Number",
+      "emailAddress": "Email Address",
+      "saveChanges": "Save Changes",
+      "saving": "Saving Changes..."
+    },
+    "linked": {
+      "updated": "Updated {{date}}",
+      "notLinkedYet": "Not linked yet",
+      "linkNewAccount": "Link a new account",
+      "linkDescription": "Add or replace a government identity number.",
+      "documentType": "Document Type",
+      "idNumber": "ID Number",
+      "aadhaarHint": "12 digit Aadhaar number",
+      "panHint": "PAN in ABCDE1234F format",
+      "voterHint": "Voter ID in 8 to 16 characters",
+      "saveLinkedAccount": "Save Linked Account",
+      "savingLinkedAccount": "Saving Account...",
+      "aadhaar": "Aadhaar",
+      "pan": "PAN",
+      "voter": "Voter ID",
+      "noAccountLinked": "No account linked yet"
+    },
+    "notifications": {
+      "smsTitle": "SMS Alerts",
+      "smsDescription": "Receive status updates and reminders by text message.",
+      "emailTitle": "Email Notifications",
+      "emailDescription": "Get order receipts, progress updates, and service notices.",
+      "appTitle": "App Notifications",
+      "appDescription": "See live updates inside the app when services change status.",
+      "savePreferences": "Save Preferences",
+      "savingPreferences": "Saving Preferences..."
+    },
+    "security": {
+      "currentPassword": "Current Password",
+      "newPassword": "New Password",
+      "newPasswordHint": "At least 8 characters and one number",
+      "confirmPassword": "Confirm Password",
+      "changePassword": "Change Password",
+      "updatingPassword": "Updating Password..."
+    },
+    "help": {
+      "contactSupport": "Contact Support",
+      "contactSupportDescription": "Open your email app and send a support request.",
+      "whatsAppSupport": "WhatsApp Support",
+      "whatsAppSupportDescription": "Start a chat with support for faster assistance.",
+      "faq": {
+        "trackQuestion": "How can I track an application after submission?",
+        "trackAnswer": "Open the Track tab to view your live request timeline, current status, and reference number.",
+        "documentsQuestion": "Can I update my linked document numbers later?",
+        "documentsAnswer": "Yes. Linked accounts can be edited at any time from the Linked Accounts section before you start a new request.",
+        "notificationsQuestion": "Why am I not receiving updates?",
+        "notificationsAnswer": "Check your notification toggles, confirm your email and phone number, and make sure your device notifications are enabled."
+      }
+    },
+    "languageOptions": {
+      "enDescription": "Recommended for wider compatibility",
+      "bnDescription": "Bangla interface for regional users"
+    },
+    "toasts": {
+      "pleaseSignInTitle": "Please sign in",
+      "pleaseSignInMessage": "Sign in to manage your profile and security settings.",
+      "sectionSignInMessage": "Sign in to access this profile section.",
+      "detailsErrorTitle": "Check your details",
+      "detailsErrorMessage": "Please fix the highlighted fields before saving.",
+      "profileUpdatedTitle": "Profile updated",
+      "profileUpdatedMessage": "Your personal information has been saved successfully.",
+      "profileUpdateFailedTitle": "Update failed",
+      "profileUpdateFailedMessage": "We could not save your profile details.",
+      "preferencesSavedTitle": "Preferences saved",
+      "preferencesSavedMessage": "Your notification settings are now up to date.",
+      "preferencesFailedTitle": "Save failed",
+      "preferencesFailedMessage": "We could not save your notification preferences.",
+      "languageUpdatedTitle": "Language updated",
+      "languageUpdatedMessage": "Your language preference is now saved across the app.",
+      "languageFailedTitle": "Update failed",
+      "languageFailedMessage": "We could not save your language preference.",
+      "passwordCheckFailedTitle": "Password check failed",
+      "passwordCheckFailedMessage": "Please fix the password form errors and try again.",
+      "missingAccountEmailTitle": "Missing account email",
+      "missingAccountEmailMessage": "Please sign in again before updating your password.",
+      "passwordUpdatedTitle": "Password updated",
+      "passwordUpdatedMessage": "Your password has been changed successfully.",
+      "passwordUpdateFailedTitle": "Unable to change password",
+      "passwordUpdateFailedMessage": "Please check your current password and try again.",
+      "linkSuccessTitle": "Account linked",
+      "linkSuccessMessage": "{{label}} was added and is waiting for verification.",
+      "linkFailedTitle": "Link failed",
+      "linkFailedMessage": "We could not save this ID right now.",
+      "verifyEmptyTitle": "Nothing to verify",
+      "verifyEmptyMessage": "Link your {{label}} number first.",
+      "verifySuccessTitle": "{{label}} verified",
+      "verifySuccessMessage": "{{label}} is now marked as verified.",
+      "verifyFailedTitle": "Verification failed",
+      "verifyFailedMessage": "Please try verifying this account again."
+    }
+  },
+  "admin": {
+    "title": "Admin Console",
+    "subtitle": "Gazi Online Management",
+    "accessDenied": "Access Denied",
+    "accessDeniedDescription": "You do not have the required permissions to access this area.",
+    "returnHome": "Return to Home",
+    "refreshData": "Refresh data",
+    "fetchingLatestData": "Fetching latest data...",
+    "totalUsers": "Total Users",
+    "totalOrders": "Total Orders",
+    "totalRevenue": "Total Revenue",
+    "orders": "Orders",
+    "requests": "Requests",
+    "products": "Products",
+    "inventory": "Inventory",
+    "users": "Users",
+    "overview": "Overview"
+  }
+}
