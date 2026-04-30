@@ -72,7 +72,7 @@ const UserIcon = ({ filled }: { filled?: boolean }) => (
   </svg>
 )
 
-export type TabId = 'home' | 'services' | 'products' | 'toll' | 'track' | 'dashboard' | 'profile'
+export type TabId = 'home' | 'services' | 'products' | 'toll' | 'track' | 'dashboard' | 'profile' | 'privacy' | 'terms' | 'contact'
 
 interface NavTab {
   id: TabId

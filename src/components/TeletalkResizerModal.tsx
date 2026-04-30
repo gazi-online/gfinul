@@ -124,10 +124,26 @@ const TeletalkResizerModal: React.FC<{ onClose: () => void }> = ({ onClose }) =>
               {photo ? (
                 <div className="flex flex-col items-center gap-4 w-full">
                   <img src={photo.preview} className="w-24 h-24 object-cover rounded-lg shadow-md border-2 border-white" alt="Photo Preview"/>
-                  <div className="flex gap-2 w-full">
-                    <button onClick={() => setEditor({ type: 'photo', src: photo.preview })} className="flex-1 py-2 rounded-xl bg-white border border-blue-200 text-[11px] font-bold text-blue-600 hover:bg-blue-50 transition-colors">✂️ Crop to Square</button>
-                    <button onClick={() => resizeAndDownload('photo')} disabled={processing === 'photo'} className="flex-1 py-2 rounded-xl bg-blue-600 text-white text-[11px] font-bold hover:bg-blue-700 transition-colors disabled:opacity-50">
-                      {processing === 'photo' ? 'Wait...' : 'Download 300x300'}
+                  <div className="flex flex-col gap-2 w-full">
+                    <div className="flex gap-2">
+                      <button onClick={() => setEditor({ type: 'photo', src: photo.preview })} className="flex-1 py-2 rounded-xl bg-white border border-blue-200 text-[11px] font-bold text-blue-600 hover:bg-blue-50 transition-colors">✂️ Crop to Square</button>
+                      <button 
+                        onClick={async () => {
+                          setProcessing('photo-filter')
+                          try {
+                            const filtered = await magicFilter(photo.preview)
+                            setPhoto(prev => prev ? { ...prev, preview: filtered, isEdited: true } : null)
+                          } catch { setErr('Filter failed') }
+                          finally { setProcessing('') }
+                        }}
+                        disabled={processing !== ''}
+                        className="flex-1 py-2 rounded-xl bg-blue-50 border border-blue-200 text-[11px] font-bold text-blue-700 hover:bg-blue-100 transition-colors flex items-center justify-center gap-1"
+                      >
+                        {processing === 'photo-filter' ? <div className="w-3 h-3 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" /> : '✨ Magic Filter'}
+                      </button>
+                    </div>
+                    <button onClick={() => resizeAndDownload('photo')} disabled={processing !== ''} className="w-full py-2.5 rounded-xl bg-blue-600 text-white text-xs font-black hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 active:scale-95">
+                      {processing === 'photo' ? 'Processing...' : 'Download 300x300 JPG'}
                     </button>
                   </div>
                 </div>
@@ -160,10 +176,26 @@ const TeletalkResizerModal: React.FC<{ onClose: () => void }> = ({ onClose }) =>
               {sig ? (
                 <div className="flex flex-col items-center gap-4 w-full">
                   <img src={sig.preview} className="w-full h-16 object-contain rounded-lg shadow-sm bg-white" alt="Signature Preview"/>
-                  <div className="flex gap-2 w-full">
-                    <button onClick={() => setEditor({ type: 'sig', src: sig.preview })} className="flex-1 py-2 rounded-xl bg-white border border-purple-200 text-[11px] font-bold text-purple-600 hover:bg-purple-50 transition-colors">✂️ Crop to Wide</button>
-                    <button onClick={() => resizeAndDownload('sig')} disabled={processing === 'sig'} className="flex-1 py-2 rounded-xl bg-purple-600 text-white text-[11px] font-bold hover:bg-purple-700 transition-colors disabled:opacity-50">
-                      {processing === 'sig' ? 'Wait...' : 'Download 300x80'}
+                  <div className="flex flex-col gap-2 w-full">
+                    <div className="flex gap-2">
+                      <button onClick={() => setEditor({ type: 'sig', src: sig.preview })} className="flex-1 py-2 rounded-xl bg-white border border-purple-200 text-[11px] font-bold text-purple-600 hover:bg-purple-50 transition-colors">✂️ Crop to Wide</button>
+                      <button 
+                        onClick={async () => {
+                          setProcessing('sig-filter')
+                          try {
+                            const filtered = await magicFilter(sig.preview)
+                            setSig(prev => prev ? { ...prev, preview: filtered, isEdited: true } : null)
+                          } catch { setErr('Filter failed') }
+                          finally { setProcessing('') }
+                        }}
+                        disabled={processing !== ''}
+                        className="flex-1 py-2 rounded-xl bg-purple-50 border border-purple-200 text-[11px] font-bold text-purple-700 hover:bg-purple-100 transition-colors flex items-center justify-center gap-1"
+                      >
+                        {processing === 'sig-filter' ? <div className="w-3 h-3 border-2 border-purple-600 border-t-transparent rounded-full animate-spin" /> : '✨ Magic Filter'}
+                      </button>
+                    </div>
+                    <button onClick={() => resizeAndDownload('sig')} disabled={processing !== ''} className="w-full py-2.5 rounded-xl bg-purple-600 text-white text-xs font-black hover:bg-purple-700 transition-all shadow-lg shadow-purple-200 active:scale-95">
+                      {processing === 'sig' ? 'Processing...' : 'Download 300x80 JPG'}
                     </button>
                   </div>
                 </div>

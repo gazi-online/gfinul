@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { BadgeCheck, BriefcaseBusiness, Calculator, CreditCard, Droplets, FileImage, FileText, Gift, Home, Landmark, Lightbulb, MapPin, QrCode, Receipt, Scissors, ShieldCheck, Signature, Smartphone, Truck, type LucideIcon, Zap } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { type CustomerReview, type Product, type ServiceItem } from '../lib/types'
@@ -258,7 +258,7 @@ export const RecentApplicationsSection: React.FC<{ title?: string }> = ({ title 
 }
 
 // â”€â”€ Footer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-export const FooterSection: React.FC<{ rights?: string }> = ({ rights }) => {
+export const FooterSection: React.FC<{ rights?: string; onNavigate?: (tab: any) => void }> = ({ rights, onNavigate }) => {
   const { t } = useTranslation()
 
   return (
@@ -277,9 +277,9 @@ export const FooterSection: React.FC<{ rights?: string }> = ({ rights }) => {
     
     <div className="lg:flex lg:items-center lg:gap-6">
       <div className="flex items-center justify-center gap-4 lg:gap-6 text-[11px] lg:text-sm font-medium text-gray-500 dark:text-slate-400 mb-3 lg:mb-0">
-        <button id="footer-privacy-btn" className="ui-hover-link hover:text-gray-900 dark:hover:text-slate-200 tap-scale transition-colors">{t('home.privacyPolicy')}</button>
-        <button id="footer-terms-btn" className="ui-hover-link hover:text-gray-900 dark:hover:text-slate-200 tap-scale transition-colors">{t('home.terms')}</button>
-        <button id="footer-help-btn" className="ui-hover-link hover:text-gray-900 dark:hover:text-slate-200 tap-scale transition-colors">{t('home.help')}</button>
+        <button id="footer-privacy-btn" onClick={() => onNavigate?.('privacy')} className="ui-hover-link hover:text-gray-900 dark:hover:text-slate-200 tap-scale transition-colors">{t('home.privacyPolicy')}</button>
+        <button id="footer-terms-btn" onClick={() => onNavigate?.('terms')} className="ui-hover-link hover:text-gray-900 dark:hover:text-slate-200 tap-scale transition-colors">{t('home.terms')}</button>
+        <button id="footer-help-btn" onClick={() => onNavigate?.('contact')} className="ui-hover-link hover:text-gray-900 dark:hover:text-slate-200 tap-scale transition-colors">{t('home.help') || 'Contact Us'}</button>
       </div>
       <div className="text-center lg:text-right">
         <a

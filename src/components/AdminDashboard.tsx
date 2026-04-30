@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { usersApi } from '../api/users'
 import { ordersApi } from '../api/orders'
 import { servicesApi } from '../api/services'
+import { contactApi } from '../api/contact'
 
 // ── Status helpers ─────────────────────────────────────────────────────────────
 const STATUS_COLORS: Record<string, string> = {
@@ -34,7 +35,8 @@ export const AdminDashboard: React.FC<{ onClose: () => void; isAdmin?: boolean }
   const [stats, setStats] = useState({ users: 0, orders: 0, revenue: 0 })
   const [orders, setOrders] = useState<any[]>([])
   const [requests, setRequests] = useState<any[]>([])
-  const [activeTab, setActiveTab] = useState<'orders' | 'requests'>('orders')
+  const [messages, setMessages] = useState<any[]>([])
+  const [activeTab, setActiveTab] = useState<'orders' | 'requests' | 'messages'>('orders')
   const [expandedReqId, setExpandedReqId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -58,10 +60,11 @@ export const AdminDashboard: React.FC<{ onClose: () => void; isAdmin?: boolean }
     try {
       setIsLoading(true)
       setError(null)
-      const [fetchedUsers, fetchedOrders, fetchedRequests] = await Promise.all([
+      const [fetchedUsers, fetchedOrders, fetchedRequests, fetchedMessages] = await Promise.all([
         usersApi.fetchAllUsers(),
         ordersApi.fetchAllOrders(),
         servicesApi.fetchAllServiceRequests(),
+        contactApi.fetchAllMessages(),
       ])
 
       setStats({
@@ -71,6 +74,7 @@ export const AdminDashboard: React.FC<{ onClose: () => void; isAdmin?: boolean }
       })
       setOrders(fetchedOrders)
       setRequests(fetchedRequests)
+      setMessages(fetchedMessages)
     } catch (err: any) {
       console.error('Error fetching admin data:', err)
       setError(err.message || 'Failed to fetch dashboard data')
@@ -96,6 +100,15 @@ export const AdminDashboard: React.FC<{ onClose: () => void; isAdmin?: boolean }
       await servicesApi.updateServiceStatus(reqId, newStatus);
     } catch (error) {
       console.error('Update request error:', error); fetchData()
+    }
+  }
+
+  const handleUpdateMessageStatus = async (msgId: string, newStatus: string) => {
+    setMessages(prev => prev.map(m => m.id === msgId ? { ...m, status: newStatus } : m))
+    try {
+      await contactApi.updateMessageStatus(msgId, newStatus);
+    } catch (error) {
+      console.error('Update message error:', error); fetchData()
     }
   }
 
@@ -194,6 +207,16 @@ export const AdminDashboard: React.FC<{ onClose: () => void; isAdmin?: boolean }
             >
               📋 Service Requests ({requests?.length || 0})
             </button>
+            <button
+              onClick={() => setActiveTab('messages')}
+              className={`px-4 py-2 rounded-xl text-sm font-bold transition-colors ${
+                activeTab === 'messages'
+                  ? 'bg-rose-50 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400'
+                  : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-700/50'
+              }`}
+            >
+              💬 Messages ({messages?.length || 0})
+            </button>
           </div>
 
           <div className="overflow-x-auto">
@@ -255,6 +278,76 @@ export const AdminDashboard: React.FC<{ onClose: () => void; isAdmin?: boolean }
                             <option value="delivered">Delivered</option>
                             <option value="cancelled">Cancelled</option>
                           </select>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            ) : activeTab === 'messages' ? (
+              /* ── MESSAGES TABLE ───────────────────────────────────────────── */
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-gray-50/50 dark:bg-slate-800/50">
+                    {['Date', 'Sender', 'Message', 'Status', 'Actions'].map((h, i) => (
+                      <th key={i} className={`px-6 py-4 text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider ${i === 4 ? 'text-right' : ''}`}>
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100 dark:divide-slate-700/50">
+                  {isLoading ? (
+                    Array.from({ length: 5 }).map((_, i) => (
+                      <tr key={i} className="animate-pulse">
+                        {Array.from({ length: 5 }).map((__, j) => (
+                          <td key={j} className="px-6 py-4"><div className="h-4 bg-gray-200 dark:bg-slate-700 rounded" /></td>
+                        ))}
+                      </tr>
+                    ))
+                  ) : !messages || messages.length === 0 ? (
+                    <tr><td colSpan={5} className="px-6 py-12 text-center text-gray-400 dark:text-slate-500">No messages found.</td></tr>
+                  ) : (
+                    messages?.map(msg => (
+                      <tr key={msg.id} className="hover:bg-gray-50 dark:hover:bg-slate-800/80 transition-colors">
+                        <td className="px-6 py-4 text-sm text-gray-600 dark:text-slate-300 whitespace-nowrap">
+                          {msg?.created_at ? new Date(msg.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute:'2-digit' }) : '—'}
+                        </td>
+                        <td className="px-6 py-4">
+                          <p className="text-sm font-bold text-gray-900 dark:text-white">{msg?.name || '—'}</p>
+                          <p className="text-xs text-blue-600 dark:text-blue-400 mt-0.5"><a href={`mailto:${msg?.email}`} className="hover:underline">{msg?.email || '—'}</a></p>
+                        </td>
+                        <td className="px-6 py-4">
+                          <p className="text-sm text-gray-700 dark:text-slate-300 max-w-sm lg:max-w-md break-words whitespace-pre-wrap">
+                            {msg?.message || '—'}
+                          </p>
+                        </td>
+                        <td className="px-6 py-4">
+                          <select
+                            value={msg?.status || 'new'}
+                            onChange={e => handleUpdateMessageStatus(msg?.id, e.target.value)}
+                            className={`text-xs font-bold rounded-full px-3 py-1.5 border-0 focus:ring-2 focus:ring-blue-500 outline-none ${
+                              msg?.status === 'replied' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400' :
+                              msg?.status === 'archived' ? 'bg-gray-100 text-gray-800 dark:bg-slate-700 dark:text-slate-300' :
+                              'bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-400'
+                            }`}
+                          >
+                            <option value="new">New</option>
+                            <option value="replied">Replied</option>
+                            <option value="archived">Archived</option>
+                          </select>
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <a
+                            href={`mailto:${msg?.email}?subject=${encodeURIComponent('Re: Your Contact Inquiry')}&body=${encodeURIComponent(`\n\n\n---\nOn ${new Date(msg.created_at).toLocaleString()}, ${msg.name} wrote:\n${msg.message}`)}`}
+                            onClick={() => handleUpdateMessageStatus(msg?.id, 'replied')}
+                            className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 dark:text-blue-400 rounded-lg text-sm font-bold transition-colors"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
+                            </svg>
+                            Reply
+                          </a>
                         </td>
                       </tr>
                     ))

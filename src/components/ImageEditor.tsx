@@ -115,7 +115,7 @@ export const ImageEditor: React.FC<Props> = ({ src, onApply, onClose, aspectRati
     setIsLoadingPreview(true)
     
     const image = imgRef.current
-    if (activeTool === 'perspective') {
+    if (aspectRatio) { // use aspectRatio to determine if perspective mode is active
       // For perspective, we define target size based on aspect ratio
       const targetW = aspectRatio ? 1000 : image.naturalWidth
       const targetH = aspectRatio ? 1000 / aspectRatio : image.naturalHeight
@@ -184,7 +184,8 @@ export const ImageEditor: React.FC<Props> = ({ src, onApply, onClose, aspectRati
   }, [onClose])
 
   const toolLabels: Record<ToolMode, string> = {
-    crop: 'Rotate Angle', zoom: 'Zoom Scale', contrast: 'Contrast', preview: 'Final Preview'
+    crop: 'Rotate Angle', zoom: 'Zoom Scale', contrast: 'Contrast', preview: 'Final Preview',
+    perspective: 'Perspective'
   }
 
   const modal = (

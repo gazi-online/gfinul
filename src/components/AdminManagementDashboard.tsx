@@ -1,13 +1,26 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
+import {
+  BarChart3,
+  Boxes,
+  ClipboardList,
+  MessageSquare,
+  PackageCheck,
+  RefreshCw,
+  ShieldCheck,
+  ShoppingBag,
+  Users,
+  X,
+} from 'lucide-react'
 import { productsApi, type ProductPayload } from '../api/products'
 import { usersApi } from '../api/users'
 import { ordersApi } from '../api/orders'
 import { servicesApi } from '../api/services'
+import { contactApi } from '../api/contact'
 import { type AppUser, type Order, type Product, type ServiceRequest } from '../lib/types'
 import { uploadImageToCloudinary } from '../lib/cloudinary'
 import { useToast } from './toast/useToast'
 
-type AdminTab = 'overview' | 'products' | 'inventory' | 'users' | 'orders' | 'requests'
+type AdminTab = 'overview' | 'products' | 'inventory' | 'users' | 'orders' | 'requests' | 'messages'
 
 type AdminOrder = Order & {
   users?: {
@@ -56,13 +69,14 @@ const PRODUCT_IMAGE_MIME_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp
 const ORDER_STATUS_OPTIONS: Array<AdminOrder['status']> = ['pending', 'processing', 'shipped', 'delivered', 'cancelled']
 const REQUEST_STATUS_OPTIONS: Array<ServiceRequest['status']> = ['pending', 'processing', 'completed', 'rejected']
 
-const TABS: Array<{ id: AdminTab; label: string }> = [
-  { id: 'overview', label: 'Overview' },
-  { id: 'products', label: 'Products' },
-  { id: 'inventory', label: 'Inventory' },
-  { id: 'users', label: 'Users' },
-  { id: 'orders', label: 'Orders' },
-  { id: 'requests', label: 'Requests' },
+const TABS: Array<{ id: AdminTab; label: string; icon: React.ElementType }> = [
+  { id: 'overview', label: 'Overview', icon: BarChart3 },
+  { id: 'products', label: 'Products', icon: ShoppingBag },
+  { id: 'inventory', label: 'Inventory', icon: Boxes },
+  { id: 'users', label: 'Users', icon: Users },
+  { id: 'orders', label: 'Orders', icon: PackageCheck },
+  { id: 'requests', label: 'Requests', icon: ClipboardList },
+  { id: 'messages', label: 'Messages', icon: MessageSquare },
 ]
 
 const STATUS_STYLES: Record<string, string> = {
@@ -82,11 +96,11 @@ const ChevronDownIcon = ({ open }: { open: boolean }) => (
 )
 
 const SectionCard: React.FC<{ title: string; subtitle?: string; rightSlot?: React.ReactNode; children: React.ReactNode }> = ({ title, subtitle, rightSlot, children }) => (
-  <section className="rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800 md:p-6">
+  <section className="rounded-[26px] border border-[#dfe5ee] bg-white p-6 shadow-[0_2px_4px_rgba(15,23,42,0.08)] dark:border-slate-700 dark:bg-slate-800 md:p-8">
     <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
       <div>
-        <h2 className="text-lg font-black text-gray-900 dark:text-white">{title}</h2>
-        {subtitle ? <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">{subtitle}</p> : null}
+        <h2 className="text-xl font-black leading-tight text-[#061733] dark:text-white">{title}</h2>
+        {subtitle ? <p className="mt-0.5 text-sm leading-tight text-[#7180a6] dark:text-slate-400">{subtitle}</p> : null}
       </div>
       {rightSlot}
     </div>
@@ -94,20 +108,29 @@ const SectionCard: React.FC<{ title: string; subtitle?: string; rightSlot?: Reac
   </section>
 )
 
-const StatCard = ({ label, value, tone = 'default' }: { label: string; value: string | number; tone?: 'default' | 'success' | 'warning' | 'danger' }) => {
+const StatCard = ({ label, value, tone = 'default', icon: Icon }: { label: string; value: string | number; tone?: 'default' | 'success' | 'warning' | 'danger'; icon?: React.ElementType }) => {
   const toneClass =
     tone === 'success'
-      ? 'bg-gradient-to-br from-emerald-500 to-teal-600 text-white'
+      ? 'bg-white text-[#061733] dark:bg-slate-800 dark:text-white'
       : tone === 'warning'
-      ? 'bg-gradient-to-br from-amber-500 to-orange-500 text-white'
+      ? 'bg-white text-[#061733] dark:bg-slate-800 dark:text-white'
       : tone === 'danger'
-      ? 'bg-gradient-to-br from-rose-500 to-red-500 text-white'
-      : 'bg-white text-gray-900 dark:bg-slate-800 dark:text-white'
+      ? 'bg-white text-[#061733] dark:bg-slate-800 dark:text-white'
+      : 'bg-white text-[#061733] dark:bg-slate-800 dark:text-white'
 
   return (
-    <div className={`rounded-3xl border border-gray-100 p-5 shadow-sm dark:border-slate-700 ${toneClass}`}>
-      <p className={`text-xs font-black uppercase tracking-[0.18em] ${tone === 'default' ? 'text-gray-400 dark:text-slate-500' : 'text-white/75'}`}>{label}</p>
-      <p className="mt-2 text-3xl font-black md:text-4xl">{value}</p>
+    <div className={`relative overflow-hidden rounded-[22px] border border-[#edf1f6] p-5 shadow-[0_1px_2px_rgba(15,23,42,0.04)] dark:border-slate-700 ${toneClass}`}>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#8b98bf] dark:text-slate-500">{label}</p>
+          <p className="mt-2 text-3xl font-black tracking-tight">{value}</p>
+        </div>
+        {Icon ? (
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#f3f6fb] text-[#175cff] dark:bg-blue-900/20 dark:text-blue-300">
+            <Icon className="h-5 w-5" aria-hidden="true" />
+          </span>
+        ) : null}
+      </div>
     </div>
   )
 }
@@ -164,6 +187,22 @@ const MinimalPieChart: React.FC<{ segments: PieSegment[]; total: number }> = ({ 
             </div>
           )
         })}
+      </div>
+    </div>
+  )
+}
+
+const ProgressMeter = ({ label, value, colorClassName }: { label: string; value: number; colorClassName: string }) => {
+  const safeValue = Math.min(100, Math.max(0, Math.round(value)))
+
+  return (
+    <div>
+      <div className="mb-2 flex items-center justify-between gap-3 text-sm">
+        <span className="font-bold text-gray-700 dark:text-slate-200">{label}</span>
+        <span className="font-black text-gray-900 dark:text-white">{safeValue}%</span>
+      </div>
+      <div className="h-2.5 overflow-hidden rounded-full bg-gray-100 dark:bg-slate-900">
+        <div className={`h-full rounded-full ${colorClassName}`} style={{ width: `${safeValue}%` }} />
       </div>
     </div>
   )
@@ -237,6 +276,9 @@ export const AdminManagementDashboard: React.FC<{ onClose: () => void; isAdmin?:
   const [users, setUsers] = useState<AppUser[]>([])
   const [orders, setOrders] = useState<AdminOrder[]>([])
   const [requests, setRequests] = useState<ServiceRequest[]>([])
+  const [messages, setMessages] = useState<any[]>([])
+  const [replyModal, setReplyModal] = useState<{ msg: any; text: string } | null>(null)
+  const [isSendingReply, setIsSendingReply] = useState(false)
   const [productForm, setProductForm] = useState<ProductFormState>(createInitialProductForm)
   const [editingProductId, setEditingProductId] = useState<string | null>(null)
   const [expandedReqId, setExpandedReqId] = useState<string | null>(null)
@@ -266,6 +308,15 @@ export const AdminManagementDashboard: React.FC<{ onClose: () => void; isAdmin?:
   const pendingRequests = useMemo(() => requests.filter((request) => request.status === 'pending'), [requests])
   const processingRequests = useMemo(() => requests.filter((request) => request.status === 'processing'), [requests])
   const completedRequests = useMemo(() => requests.filter((request) => request.status === 'completed'), [requests])
+  const unreadMessages = useMemo(() => messages.filter((message) => (message.status || 'new') === 'new'), [messages])
+  const deliveredOrderRate = useMemo(() => (orders.length > 0 ? Math.round((deliveredOrders.length / orders.length) * 100) : 0), [deliveredOrders.length, orders.length])
+  const stockHealthRate = useMemo(() => (products.length > 0 ? Math.round((healthyStockProducts.length / products.length) * 100) : 0), [healthyStockProducts.length, products.length])
+  const requestCompletionRate = useMemo(() => (requests.length > 0 ? Math.round((completedRequests.length / requests.length) * 100) : 0), [completedRequests.length, requests.length])
+  const activeUserRate = useMemo(() => (users.length > 0 ? Math.round((activeUsers.length / users.length) * 100) : 0), [activeUsers.length, users.length])
+  const attentionCount = useMemo(
+    () => pendingOrders.length + pendingRequests.length + outOfStockProducts.length + unreadMessages.length,
+    [outOfStockProducts.length, pendingOrders.length, pendingRequests.length, unreadMessages.length],
+  )
   const overviewPieSegments = useMemo<PieSegment[]>(
     () => [
       { label: 'Products', value: products.length, color: '#2563eb', swatchClassName: 'bg-blue-600' },
@@ -366,17 +417,19 @@ export const AdminManagementDashboard: React.FC<{ onClose: () => void; isAdmin?:
     try {
       setIsLoading(true)
       setError(null)
-      const [productData, userData, orderData, requestData] = await Promise.all([
+      const [productData, userData, orderData, requestData, messageData] = await Promise.all([
         productsApi.fetchAllProducts(),
         usersApi.fetchAllUsers(),
         ordersApi.fetchAllOrders(),
         servicesApi.fetchAllServiceRequests(),
+        contactApi.fetchAllMessages(),
       ])
 
       setProducts(productData ?? [])
       setUsers(userData ?? [])
       setOrders((orderData ?? []) as AdminOrder[])
       setRequests((requestData ?? []) as ServiceRequest[])
+      setMessages((messageData ?? []) as any[])
     } catch (fetchError: any) {
       console.error('Error fetching admin data:', fetchError)
       setError(fetchError?.message || 'Failed to load admin data.')
@@ -750,66 +803,142 @@ export const AdminManagementDashboard: React.FC<{ onClose: () => void; isAdmin?:
     }
   }
 
+  const handleMessageStatusChange = async (messageId: string, status: string) => {
+    const previousMessages = messages
+    const previousMessage = previousMessages.find((msg) => msg.id === messageId)
+    if (!previousMessage || previousMessage.status === status) return
+    setMessages((prev) => prev.map((msg) => (msg.id === messageId ? { ...msg, status } : msg)))
+    try {
+      await contactApi.updateMessageStatus(messageId, status)
+      showSuccessToast('Message updated', `Message marked as ${status}.`)
+    } catch (updateError: any) {
+      console.error('Message status update error:', updateError)
+      setMessages(previousMessages)
+      const errMessage = updateError?.message || 'Failed to update message status.'
+      setError(errMessage)
+      showErrorToast('Message update failed', errMessage)
+    }
+  }
+
+  const handleSendReply = async () => {
+    if (!replyModal || !replyModal.text.trim()) return
+    setIsSendingReply(true)
+    try {
+      const updated = await contactApi.saveReply(replyModal.msg.id, replyModal.text.trim())
+      setMessages((prev) => prev.map((m) => (m.id === replyModal.msg.id ? { ...m, ...updated } : m)))
+      showSuccessToast('Reply saved', 'Your reply has been saved and the message marked as replied.')
+      setReplyModal(null)
+    } catch (err: any) {
+      showErrorToast('Reply failed', err?.message || 'Failed to save reply.')
+    } finally {
+      setIsSendingReply(false)
+    }
+  }
+
+
   if (!isAdmin) {
     return (
       <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/50 p-4">
-        <div className="w-full max-w-md rounded-3xl border border-gray-100 bg-white p-8 text-center shadow-xl dark:border-slate-800 dark:bg-slate-900">
-          <h2 className="text-2xl font-black text-gray-900 dark:text-white">Access denied</h2>
-          <p className="mt-2 text-sm text-gray-500 dark:text-slate-400">You do not have permission to open the admin console.</p>
-          <button onClick={onClose} className="mt-6 rounded-2xl bg-gray-100 px-5 py-3 text-sm font-bold text-gray-800 transition hover:bg-gray-200 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">
-            Return
-          </button>
+        <div className="w-full max-w-md rounded-3xl border border-orange-100 bg-white p-8 text-center shadow-xl">
+          <h2 className="text-2xl font-black text-gray-900">Access denied</h2>
+          <p className="mt-2 text-sm text-gray-500">You do not have permission to open the admin console.</p>
+          <button onClick={onClose} className="mt-6 rounded-2xl bg-orange-500 px-5 py-3 text-sm font-bold text-white transition hover:bg-orange-600">Return</button>
         </div>
       </div>
     )
   }
 
+  const navItems: { id: AdminTab; label: string; icon: any }[] = [
+    { id: 'overview', label: 'Overview', icon: BarChart3 },
+    { id: 'products', label: 'Products', icon: ShoppingBag },
+    { id: 'inventory', label: 'Inventory', icon: Boxes },
+    { id: 'users', label: 'Users', icon: Users },
+    { id: 'orders', label: 'Orders', icon: PackageCheck },
+    { id: 'requests', label: 'Requests', icon: ClipboardList },
+    { id: 'messages', label: 'Messages', icon: MessageSquare },
+  ]
+
   return (
-    <div ref={containerRef} className="fixed inset-0 z-[100] h-full w-full overflow-y-auto bg-gray-50 dark:bg-slate-900">
-      <div className="sticky top-0 z-20 border-b border-gray-100 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-900/90">
-        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-4 md:px-8 lg:flex-row lg:items-center lg:justify-between">
+    <div ref={containerRef} className="fixed inset-0 z-[100] flex h-full w-full overflow-hidden bg-[#f8f4f1]">
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Work+Sans:wght@300;400;500;600;700;800&display=swap');
+        .adm-wrap, .adm-wrap * { font-family: 'Work Sans', sans-serif; box-sizing: border-box; }
+        .adm-heading { font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.05em; }
+        @keyframes admSlideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes admFadeIn { from { opacity:0; } to { opacity:1; } }
+        .adm-section { animation: admSlideUp 0.4s ease-out forwards; }
+        .adm-stat { position:relative; overflow:hidden; transition:all 0.3s cubic-bezier(0.4,0,0.2,1); background:white; box-shadow:0 1px 3px rgba(0,0,0,0.08); border-radius:16px; }
+        .adm-stat:hover { transform:translateY(-4px); box-shadow:0 12px 24px rgba(0,0,0,0.12); }
+        .adm-nav { transition:all 0.2s ease; position:relative; color:#64748b; width:100%; text-align:left; display:flex; align-items:center; gap:12px; padding:10px 16px; border-radius:10px; font-size:0.875rem; font-weight:500; cursor:pointer; border:none; background:transparent; }
+        .adm-nav::before { content:''; position:absolute; left:0; top:0; bottom:0; width:4px; background:#FF6B35; transform:scaleY(0); transition:transform 0.2s ease; border-radius:0 4px 4px 0; }
+        .adm-nav:hover::before, .adm-nav.adm-active::before { transform:scaleY(1); }
+        .adm-nav:hover { background:rgba(255,107,53,0.08); color:#1e293b; }
+        .adm-nav.adm-active { background:rgba(255,107,53,0.12); color:#FF6B35; font-weight:600; }
+        .adm-sidebar { background:linear-gradient(180deg,#fff 0%,#fff5f2 100%); border-right:2px solid #ffe0d6; width:240px; flex-shrink:0; height:100%; display:flex; flex-direction:column; z-index:10; box-shadow:2px 0 8px rgba(0,0,0,0.05); }
+        .adm-main-area { flex:1; display:flex; flex-direction:column; min-width:0; overflow:hidden; }
+        .adm-scroll { flex:1; overflow-y:auto; padding:24px; }
+        .adm-input { border:1px solid #e2e8f0; border-radius:10px; padding:8px 12px; font-size:0.875rem; transition:all 0.2s; width:100%; }
+        .adm-input:focus { outline:none; border-color:#FF6B35; box-shadow:0 0 0 3px rgba(255,107,53,0.12); }
+        .adm-btn-primary { background:#FF6B35; color:white; border:none; border-radius:10px; padding:8px 16px; font-size:0.875rem; font-weight:600; cursor:pointer; transition:all 0.2s; }
+        .adm-btn-primary:hover { background:#e85a24; }
+        .adm-btn-primary:disabled { opacity:0.6; cursor:not-allowed; }
+        .adm-table { width:100%; border-collapse:collapse; font-size:0.875rem; }
+        .adm-table th { background:#fff5f2; color:#FF6B35; font-weight:700; text-align:left; padding:12px 16px; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; border-bottom:2px solid #ffe0d6; }
+        .adm-table td { padding:12px 16px; border-bottom:1px solid #f1f5f9; color:#334155; vertical-align:top; }
+        .adm-table tr:hover td { background:#fafafa; }
+        .adm-card { background:white; border-radius:16px; box-shadow:0 1px 3px rgba(0,0,0,0.08); border:1px solid rgba(0,0,0,0.05); padding:24px; }
+        .adm-badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; }
+      `}</style>
+
+      {/* ── Sidebar ── */}
+      <aside className="adm-sidebar">
+        <div className="p-5 border-b border-orange-200">
+          <h1 className="adm-heading text-3xl text-orange-600" style={{textShadow:'0 2px 8px rgba(255,107,53,0.3)'}}>GAZI ONLINE</h1>
+          <p className="text-xs text-slate-400 mt-0.5 font-medium tracking-wide">Admin Dashboard</p>
+        </div>
+        <nav className="p-3 space-y-0.5 flex-1 overflow-y-auto">
+          {navItems.map((item) => {
+            const Icon = item.icon
+            return (
+              <button key={item.id} onClick={() => setActiveTab(item.id)} className={`adm-nav ${activeTab === item.id ? 'adm-active' : ''}`}>
+                <Icon size={17} />
+                <span>{item.label}</span>
+              </button>
+            )
+          })}
+        </nav>
+        <div className="p-3 border-t border-orange-100">
+          <button onClick={onClose} className="w-full flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gray-100 text-gray-500 text-sm font-medium hover:bg-red-50 hover:text-red-500 transition-colors">
+            <X size={15} />
+            Close Dashboard
+          </button>
+        </div>
+      </aside>
+
+      {/* ── Main ── */}
+      <div className="adm-main-area adm-wrap">
+        {/* Header */}
+        <header className="flex-shrink-0 bg-white border-b border-gray-100 shadow-sm px-6 py-4 flex items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-black text-gray-900 dark:text-white">Admin Console</h1>
-            <p className="text-sm text-gray-500 dark:text-slate-400">Manage products, inventory, users, orders, and service requests.</p>
+            <h2 className="text-base font-bold text-slate-800 capitalize">
+              {activeTab === 'overview' ? 'Dashboard Overview' : activeTab === 'requests' ? 'Service Requests' : activeTab}
+            </h2>
+            <p className="text-xs text-slate-400 mt-0.5">{new Date().toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</p>
           </div>
           <div className="flex items-center gap-3">
-            <button onClick={fetchData} className="rounded-2xl bg-gray-100 px-4 py-2.5 text-sm font-bold text-gray-700 transition hover:bg-gray-200 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">
+            {isLoading && <span className="text-xs text-orange-400 font-medium animate-pulse">Loading…</span>}
+            <button onClick={fetchData} className="adm-btn-primary inline-flex items-center gap-2 px-4 py-2 text-sm shadow-sm">
+              <RefreshCw size={14} />
               Refresh
             </button>
-            <button onClick={onClose} className="rounded-2xl bg-gray-900 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-gray-700 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white">
-              Exit Admin
-            </button>
           </div>
-        </div>
-        <div className="mx-auto flex max-w-7xl gap-2 overflow-x-auto px-4 pb-4 md:px-8">
-          {TABS.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-bold transition ${
-                activeTab === tab.id
-                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-      </div>
+        </header>
 
-      <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-8 md:py-8">
-        {error ? <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700 dark:border-rose-900/50 dark:bg-rose-900/20 dark:text-rose-300">{error}</div> : null}
+        {/* Tab content */}
+        <div className="adm-scroll">
+          <div className="adm-section">
 
-        {activeTab !== 'overview' ? (
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
-            {tabStats.map((stat) => (
-              <StatCard key={stat.label} label={stat.label} value={isLoading ? '...' : stat.value} tone={stat.tone} />
-            ))}
-          </div>
-        ) : null}
-
-        {activeTab === 'overview' ? (
+            {activeTab === 'overview' && (
           <div className="space-y-6">
             <SectionCard title="Admin Overview" subtitle="High-level snapshot across products, inventory, orders, users, and requests.">
               <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
@@ -944,8 +1073,8 @@ export const AdminManagementDashboard: React.FC<{ onClose: () => void; isAdmin?:
               </SectionCard>
             </div>
           </div>
-        ) : null}
-        {activeTab === 'products' ? (
+        )}
+            {activeTab === 'products' && (
           <div className="grid grid-cols-1 gap-6 xl:grid-cols-[0.9fr_1.1fr]">
             <SectionCard title={editingProductId ? 'Edit Product' : 'Add Product'} subtitle="Create new products or update existing catalog items.">
               <form className="space-y-4" onSubmit={handleProductSubmit}>
@@ -1108,8 +1237,8 @@ export const AdminManagementDashboard: React.FC<{ onClose: () => void; isAdmin?:
               </div>
             </SectionCard>
           </div>
-        ) : null}
-        {activeTab === 'inventory' ? (
+        )}
+            {activeTab === 'inventory' && (
           <div className="space-y-6">
             <SectionCard title="Stock Distribution" subtitle="Live catalog split by healthy, low, and out of stock items.">
               {isLoading ? (
@@ -1226,8 +1355,8 @@ export const AdminManagementDashboard: React.FC<{ onClose: () => void; isAdmin?:
               </div>
             </SectionCard>
           </div>
-        ) : null}
-        {activeTab === 'users' ? (
+        )}
+            {activeTab === 'users' && (
           <SectionCard title="User Management" subtitle="Review customer details and control account access.">
             <div className="overflow-x-auto">
               <table className="min-w-full text-left text-sm">
@@ -1275,8 +1404,8 @@ export const AdminManagementDashboard: React.FC<{ onClose: () => void; isAdmin?:
               {!isLoading && users.length === 0 ? <p className="py-6 text-sm text-gray-500 dark:text-slate-400">No users found.</p> : null}
             </div>
           </SectionCard>
-        ) : null}
-        {activeTab === 'orders' ? (
+        )}
+            {activeTab === 'orders' && (
           <SectionCard
             title="Order Management"
             subtitle="Track order progress and recognized revenue."
@@ -1333,8 +1462,8 @@ export const AdminManagementDashboard: React.FC<{ onClose: () => void; isAdmin?:
               {!isLoading && orders.length === 0 ? <p className="py-6 text-sm text-gray-500 dark:text-slate-400">No orders found.</p> : null}
             </div>
           </SectionCard>
-        ) : null}
-        {activeTab === 'requests' ? (
+        )}
+            {activeTab === 'requests' && (
           <SectionCard title="Service Requests" subtitle="Review applications, update status, and inspect submitted documents.">
             <div className="overflow-x-auto">
               <table className="min-w-full text-left text-sm">
@@ -1448,8 +1577,110 @@ export const AdminManagementDashboard: React.FC<{ onClose: () => void; isAdmin?:
               {!isLoading && requests.length === 0 ? <p className="py-6 text-sm text-gray-500 dark:text-slate-400">No service requests found.</p> : null}
             </div>
           </SectionCard>
-        ) : null}
+        )}
+            {activeTab === 'messages' && (
+          <SectionCard title="Contact Messages" subtitle="Review inquiries and messages from the contact form.">
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b border-gray-100 dark:border-slate-700">
+                    <th className="pb-3 font-bold text-gray-500 dark:text-slate-400">Date</th>
+                    <th className="pb-3 font-bold text-gray-500 dark:text-slate-400">Sender</th>
+                    <th className="pb-3 font-bold text-gray-500 dark:text-slate-400">Message</th>
+                    <th className="pb-3 font-bold text-gray-500 dark:text-slate-400">Status</th>
+                    <th className="pb-3 text-right font-bold text-gray-500 dark:text-slate-400">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
+                  {(isLoading ? [] : messages).map((msg) => (
+                    <tr key={msg.id}>
+                      <td className="py-4 text-gray-700 dark:text-slate-300">{formatDate(msg.created_at)}</td>
+                      <td className="py-4">
+                        <p className="font-bold text-gray-900 dark:text-white">{msg.name || '-'}</p>
+                        <p className="text-xs text-blue-600 dark:text-blue-400"><a href={`mailto:${msg.email}`} className="hover:underline">{msg.email || '-'}</a></p>
+                      </td>
+                      <td className="py-4">
+                        <p className="text-sm text-gray-700 dark:text-slate-300 max-w-sm lg:max-w-md break-words whitespace-pre-wrap">{msg.message || '-'}</p>
+                      </td>
+                      <td className="py-4">
+                        <select
+                          value={msg.status || 'new'}
+                          onChange={(event) => handleMessageStatusChange(msg.id, event.target.value)}
+                          className={`rounded-xl border-0 px-3 py-2 text-xs font-bold outline-none ring-1 ring-inset ${
+                            msg.status === 'replied' ? 'bg-emerald-50 text-emerald-800 ring-emerald-600/20 dark:bg-emerald-900/20 dark:text-emerald-400 dark:ring-emerald-500/20' :
+                            msg.status === 'archived' ? 'bg-gray-50 text-gray-800 ring-gray-600/20 dark:bg-slate-800 dark:text-slate-300 dark:ring-slate-700' :
+                            'bg-rose-50 text-rose-800 ring-rose-600/20 dark:bg-rose-900/20 dark:text-rose-400 dark:ring-rose-500/20'
+                          }`}
+                        >
+                          <option value="new">New</option>
+                          <option value="replied">Replied</option>
+                          <option value="archived">Archived</option>
+                        </select>
+                      </td>
+                      <td className="py-4 text-right">
+                        <button
+                          onClick={() => setReplyModal({ msg, text: msg.admin_reply || '' })}
+                          className="inline-flex items-center gap-1.5 rounded-xl bg-blue-50 px-3 py-2 text-xs font-bold text-blue-700 transition hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-300 dark:hover:bg-blue-900/30"
+                        >
+                          {msg.admin_reply ? 'Edit Reply' : 'Reply'}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {!isLoading && messages.length === 0 ? <p className="py-6 text-sm text-gray-500 dark:text-slate-400">No messages found.</p> : null}
+            </div>
+          </SectionCard>
+        )}
+
+
+          </div>
+        </div>
       </div>
+
+      {/* Reply modal */}
+      {replyModal ? (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-slate-800">Reply to message</h3>
+              <button onClick={() => setReplyModal(null)} className="rounded-full p-1.5 hover:bg-gray-100 transition-colors text-gray-500">
+                <X size={18} />
+              </button>
+            </div>
+            <div className="mb-4 rounded-xl bg-orange-50 border border-orange-100 p-4">
+              <p className="text-sm font-semibold text-slate-700">
+                {replyModal.msg.name}
+                <span className="font-normal text-slate-400 ml-1">({replyModal.msg.email})</span>
+              </p>
+              <p className="mt-2 text-sm text-slate-600">{replyModal.msg.message}</p>
+            </div>
+            <textarea
+              className="adm-input min-h-[100px] resize-none"
+              placeholder="Type your reply…"
+              value={replyModal.text}
+              onChange={(e) => setReplyModal((prev) => prev ? { ...prev, text: e.target.value } : prev)}
+            />
+            <div className="mt-4 flex justify-end gap-3">
+              <button onClick={() => setReplyModal(null)} className="rounded-xl bg-gray-100 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-200 transition-colors">
+                Cancel
+              </button>
+              <button onClick={handleSendReply} disabled={isSendingReply} className="adm-btn-primary px-5 py-2 flex items-center gap-2">
+                {isSendingReply ? (
+                  <>
+                    <svg className="h-4 w-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                    Saving…
+                  </>
+                ) : 'Save Reply'}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   )
 }

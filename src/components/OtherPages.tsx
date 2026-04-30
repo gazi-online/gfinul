@@ -2,6 +2,7 @@ import React, { useState, useEffect, lazy, Suspense } from 'react'
 
 const IDCardScanModal = lazy(() => import('./IDCardScanModal'))
 const TeletalkResizerModal = lazy(() => import('./TeletalkResizerModal'))
+const PassportPhotoModal = lazy(() => import('./PassportPhotoModal'))
 import { type Product, type ServiceItem, type Order, type ServiceRequest } from '../lib/types'
 import { type User } from '@supabase/supabase-js'
 import { useTranslation } from 'react-i18next'
@@ -1098,6 +1099,12 @@ export const TollPage: React.FC = () => {
       {activeToolModal === 'Teletalk Photo & Sig Resizer' && (
         <Suspense fallback={null}>
           <TeletalkResizerModal onClose={() => setActiveToolModal(null)} />
+        </Suspense>
+      )}
+
+      {activeToolModal === 'Passport Photo Maker' && (
+        <Suspense fallback={null}>
+          <PassportPhotoModal onClose={() => setActiveToolModal(null)} />
         </Suspense>
       )}
     </div>

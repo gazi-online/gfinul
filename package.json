@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Your Digital Gateway to Government Services",
   "type": "module",
+  "engines": {
+    "node": "20.x"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
@@ -17,7 +20,8 @@
     "react-dom": "^18.3.1",
     "react-dropzone": "^15.0.0",
     "react-i18next": "^17.0.4",
-    "react-image-crop": "^11.0.10"
+    "react-image-crop": "^11.0.10",
+    "recharts": "^3.8.1"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.0.0",

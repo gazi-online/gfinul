@@ -24,6 +24,7 @@ import CheckoutPage from './components/CheckoutPage'
 import OrderSuccessPage from './components/OrderSuccessPage'
 import ProductDetailsPage from './components/ProductDetailsPage'
 import ScrollToTopButton from './components/ScrollToTopButton'
+import { PrivacyPolicyPage, TermsConditionsPage, ContactPage } from './components/LegalPages'
 import AuthModal from './components/AuthModal'
 import UserDashboard from './components/UserDashboard'
 import AdminDashboard from './components/AdminManagementDashboard'
@@ -47,6 +48,9 @@ const PAGE_TITLES: Record<TabId, string> = {
   track:     'Track Application',
   dashboard: 'Dashboard',
   profile:   'My Profile',
+  privacy:   'Privacy Policy',
+  terms:     'Terms & Conditions',
+  contact:   'Contact Us',
 }
 
 const TAB_PATHS: Record<TabId, string> = {
@@ -57,6 +61,9 @@ const TAB_PATHS: Record<TabId, string> = {
   track: '/track',
   dashboard: '/dashboard',
   profile: '/profile',
+  privacy: '/privacy-policy',
+  terms: '/terms-conditions',
+  contact: '/contact',
 }
 
 const PATH_TO_TAB: Record<string, TabId> = Object.entries(TAB_PATHS).reduce(
@@ -545,7 +552,7 @@ const App: React.FC = () => {
           </div>
         )}
         
-        <FooterSection rights={t('home.rights')} />
+        <FooterSection rights={t('home.rights')} onNavigate={handleTabChange} />
       </>
     ),
     services: <ServicesPage services={services} isLoading={isLoading} onStartService={handleStartService} />,
@@ -580,6 +587,9 @@ const App: React.FC = () => {
       currentPath={currentPath}
       onNavigate={handleProfileNavigate}
     />,
+    privacy: <PrivacyPolicyPage />,
+    terms: <TermsConditionsPage />,
+    contact: <ContactPage />,
   }
 
   const pageTitle = t(`app.pageTitle.${activeTab}`) || PAGE_TITLES[activeTab]
