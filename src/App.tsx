@@ -28,6 +28,7 @@ import { PrivacyPolicyPage, TermsConditionsPage, ContactPage } from './component
 import AuthModal from './components/AuthModal'
 import UserDashboard from './components/UserDashboard'
 import AdminDashboard from './components/AdminManagementDashboard'
+import AdminLoginPage from './components/AdminLoginPage'
 import { type User } from '@supabase/supabase-js'
 import { supabase } from './lib/supabase'
 import { getServiceKind } from './lib/serviceDisplay'
@@ -65,6 +66,8 @@ const TAB_PATHS: Record<TabId, string> = {
   terms: '/terms-conditions',
   contact: '/contact',
 }
+
+const ADMIN_LOGIN_PATH = '/admin-login'
 
 const PATH_TO_TAB: Record<string, TabId> = Object.entries(TAB_PATHS).reduce(
   (acc, [tab, path]) => {
@@ -115,6 +118,10 @@ const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabId>(() => {
     if (typeof window === 'undefined') return 'home'
     return getTabFromPathname(window.location.pathname)
+  })
+  const [showAdminLogin, setShowAdminLogin] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return window.location.pathname === ADMIN_LOGIN_PATH
   })
   const [searchQuery, setSearchQuery] = useState('')
   const [activeServiceFlow, setActiveServiceFlow] = useState<ActiveService>(null)
@@ -293,7 +300,12 @@ const App: React.FC = () => {
     const handlePopState = () => {
       const nextPath = window.location.pathname
       setCurrentPath(nextPath)
-      setActiveTab(getTabFromPathname(nextPath))
+      if (nextPath === ADMIN_LOGIN_PATH) {
+        setShowAdminLogin(true)
+      } else {
+        setShowAdminLogin(false)
+        setActiveTab(getTabFromPathname(nextPath))
+      }
       setSearchQuery('')
       if (mainRef.current) {
         mainRef.current.scrollTo({ top: 0, behavior: 'smooth' })
@@ -314,9 +326,29 @@ const App: React.FC = () => {
     }
     setActiveTab(tab)
     setSearchQuery('')
+    setShowAdminLogin(false)
     if (mainRef.current) {
       mainRef.current.scrollTo({ top: 0, behavior: 'smooth' })
     }
+  }, [])
+
+  const handleOpenAdminLogin = useCallback(() => {
+    if (typeof window !== 'undefined') {
+      window.history.pushState({}, '', ADMIN_LOGIN_PATH)
+      setCurrentPath(ADMIN_LOGIN_PATH)
+    }
+    setShowAdminLogin(true)
+  }, [])
+
+  const handleAdminAuthenticated = useCallback(() => {
+    setShowAdminLogin(false)
+    // navigate back to home path
+    if (typeof window !== 'undefined') {
+      window.history.pushState({}, '', '/')
+      setCurrentPath('/')
+    }
+    setActiveTab('home')
+    setShowAdminPanel(true)
   }, [])
 
   const handleProfileNavigate = useCallback((section: ProfileSectionId | null) => {
@@ -552,7 +584,7 @@ const App: React.FC = () => {
           </div>
         )}
         
-        <FooterSection rights={t('home.rights')} onNavigate={handleTabChange} />
+        <FooterSection rights={t('home.rights')} onNavigate={(tab: string) => tab === 'admin-login' ? handleOpenAdminLogin() : handleTabChange(tab as TabId)} />
       </>
     ),
     services: <ServicesPage services={services} isLoading={isLoading} onStartService={handleStartService} />,
@@ -574,7 +606,7 @@ const App: React.FC = () => {
       onLogout={handleLogout} 
       onSignIn={() => setIsAuthOpen(true)}
       isAdmin={isAdmin} 
-      onOpenAdmin={() => setShowAdminPanel(true)} 
+      onOpenAdmin={handleOpenAdminLogin} 
       language={language}
       onLanguageChange={handleLanguageChange}
       onUserChange={setUser}
@@ -707,6 +739,21 @@ const App: React.FC = () => {
         <AuthModal 
           onClose={() => setIsAuthOpen(false)} 
           onSuccess={() => setIsAuthOpen(false)} 
+        />
+      )}
+
+      {/* Admin Login Page */}
+      {showAdminLogin && (
+        <AdminLoginPage
+          onAdminAuthenticated={handleAdminAuthenticated}
+          onGoHome={() => {
+            setShowAdminLogin(false)
+            if (typeof window !== 'undefined') {
+              window.history.pushState({}, '', '/')
+              setCurrentPath('/')
+            }
+            setActiveTab('home')
+          }}
         />
       )}
 
