@@ -1,0 +1,870 @@
+import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import {
+  BarChart3,
+  Bell,
+  Boxes,
+  ClipboardList,
+  Menu,
+  MessageSquare,
+  PackageCheck,
+  RefreshCw,
+  Search,
+  ShieldCheck,
+  ShoppingBag,
+  TrendingUp,
+  Users,
+  X,
+} from 'lucide-react'
+import { productsApi, type ProductPayload } from '../api/products'
+import { usersApi } from '../api/users'
+import { ordersApi } from '../api/orders'
+import { servicesApi } from '../api/services'
+import { contactApi } from '../api/contact'
+import { type AppUser, type Order, type Product, type ServiceRequest } from '../lib/types'
+import { uploadImageToCloudinary } from '../lib/cloudinary'
+import { useToast } from './toast/useToast'
+
+type AdminTab = 'overview' | 'products' | 'inventory' | 'users' | 'orders' | 'requests' | 'messages'
+
+type AdminOrder = Order & {
+  users?: {
+    name?: string | null
+    email?: string | null
+    phone?: string | null
+  } | null
+  order_items?: {
+    id: string
+    quantity: number
+    price: number
+    products?: {
+      name?: string | null
+      image?: string | null
+      category?: string | null
+    } | null
+  }[]
+}
+
+type ProductFormState = {
+  name: string
+  price: string
+  images: string[]
+  category: string
+  description: string
+  rating: string
+  stock: string
+  warranty_months: string
+  is_active: boolean
+}
+
+type PendingProductImage = {
+  file: File
+  key: string
+}
+
+type ProductImagePreview = {
+  id: string
+  src: string
+  kind: 'existing' | 'upload'
+  fileKey?: string
+}
+
+const LOW_STOCK_THRESHOLD = 5
+const PRODUCT_IMAGE_MIME_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp'])
+const ORDER_STATUS_OPTIONS: Array<AdminOrder['status']> = ['pending', 'processing', 'shipped', 'delivered', 'cancelled']
+const REQUEST_STATUS_OPTIONS: Array<ServiceRequest['status']> = ['pending', 'processing', 'completed', 'rejected']
+
+const TABS: Array<{ id: AdminTab; label: string; icon: React.ElementType }> = [
+  { id: 'overview', label: 'Overview', icon: BarChart3 },
+  { id: 'products', label: 'Products', icon: ShoppingBag },
+  { id: 'inventory', label: 'Inventory', icon: Boxes },
+  { id: 'users', label: 'Users', icon: Users },
+  { id: 'orders', label: 'Orders', icon: PackageCheck },
+  { id: 'requests', label: 'Requests', icon: ClipboardList },
+  { id: 'messages', label: 'Messages', icon: MessageSquare },
+]
+
+const STATUS_STYLES: Record<string, string> = {
+  pending: 'bg-gray-100 text-gray-700 dark:bg-slate-700 dark:text-slate-300',
+  processing: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
+  shipped: 'bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-300',
+  completed: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300',
+  delivered: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300',
+  cancelled: 'bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300',
+  rejected: 'bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300',
+}
+
+const ChevronDownIcon = ({ open }: { open: boolean }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className={`h-4 w-4 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+  </svg>
+)
+
+const SectionCard: React.FC<{ title: string; subtitle?: string; rightSlot?: React.ReactNode; children: React.ReactNode }> = ({ title, subtitle, rightSlot, children }) => (
+  <section className="rounded-[26px] border border-[#dfe5ee] bg-white p-6 shadow-[0_2px_4px_rgba(15,23,42,0.08)] dark:border-slate-700 dark:bg-slate-800 md:p-8">
+    <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <div>
+        <h2 className="text-xl font-black leading-tight text-[#061733] dark:text-white">{title}</h2>
+        {subtitle ? <p className="mt-0.5 text-sm leading-tight text-[#7180a6] dark:text-slate-400">{subtitle}</p> : null}
+      </div>
+      {rightSlot}
+    </div>
+    {children}
+  </section>
+)
+
+const StatCard = ({ label, value, tone = 'default', icon: Icon }: { label: string; value: string | number; tone?: 'default' | 'success' | 'warning' | 'danger'; icon?: React.ElementType }) => {
+  const toneClass =
+    tone === 'success'
+      ? 'bg-white text-[#061733] dark:bg-slate-800 dark:text-white'
+      : tone === 'warning'
+      ? 'bg-white text-[#061733] dark:bg-slate-800 dark:text-white'
+      : tone === 'danger'
+      ? 'bg-white text-[#061733] dark:bg-slate-800 dark:text-white'
+      : 'bg-white text-[#061733] dark:bg-slate-800 dark:text-white'
+
+  return (
+    <div className={`relative overflow-hidden rounded-[22px] border border-[#edf1f6] p-5 shadow-[0_1px_2px_rgba(15,23,42,0.04)] dark:border-slate-700 ${toneClass}`}>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-[11px] font-black uppercase tracking-[0.16em] text-[#8b98bf] dark:text-slate-500">{label}</p>
+          <p className="mt-2 text-3xl font-black tracking-tight">{value}</p>
+        </div>
+        {Icon ? (
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#f3f6fb] text-[#175cff] dark:bg-blue-900/20 dark:text-blue-300">
+            <Icon className="h-5 w-5" aria-hidden="true" />
+          </span>
+        ) : null}
+      </div>
+    </div>
+  )
+}
+
+type PieSegment = {
+  label: string
+  value: number
+  color: string
+  swatchClassName: string
+}
+
+const MinimalPieChart: React.FC<{ segments: PieSegment[]; total: number }> = ({ segments, total }) => {
+  const safeSegments = segments.filter((segment) => segment.value > 0)
+
+  const gradient = useMemo(() => {
+    if (safeSegments.length === 0 || total <= 0) {
+      return 'conic-gradient(#e2e8f0 0deg 360deg)'
+    }
+
+    let currentAngle = 0
+    const stops = safeSegments.map((segment) => {
+      const nextAngle = currentAngle + (segment.value / total) * 360
+      const stop = `${segment.color} ${currentAngle}deg ${nextAngle}deg`
+      currentAngle = nextAngle
+      return stop
+    })
+
+    return `conic-gradient(${stops.join(', ')})`
+  }, [safeSegments, total])
+
+  return (
+    <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="relative mx-auto h-48 w-48 shrink-0 rounded-full p-4 shadow-inner ring-1 ring-black/5 dark:ring-white/5" style={{ backgroundImage: gradient }}>
+        <div className="flex h-full w-full flex-col items-center justify-center rounded-full bg-white text-center shadow-sm dark:bg-slate-800">
+          <span className="text-[11px] font-black uppercase tracking-[0.18em] text-gray-400 dark:text-slate-500">Live Total</span>
+          <span className="mt-2 text-4xl font-black text-gray-900 dark:text-white">{total}</span>
+        </div>
+      </div>
+
+      <div className="w-full space-y-3">
+        {segments.map((segment) => {
+          const percentage = total > 0 ? Math.round((segment.value / total) * 100) : 0
+
+          return (
+            <div key={segment.label} className="flex items-center justify-between rounded-2xl bg-gray-50 px-4 py-3 dark:bg-slate-900">
+              <div className="flex items-center gap-3">
+                <span className={`h-3 w-3 rounded-full ${segment.swatchClassName}`} />
+                <div>
+                  <p className="text-sm font-bold text-gray-900 dark:text-white">{segment.label}</p>
+                  <p className="text-xs text-gray-500 dark:text-slate-400">{percentage}% of tracked records</p>
+                </div>
+              </div>
+              <span className="text-lg font-black text-gray-900 dark:text-white">{segment.value}</span>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+const ProgressMeter = ({ label, value, colorClassName }: { label: string; value: number; colorClassName: string }) => {
+  const safeValue = Math.min(100, Math.max(0, Math.round(value)))
+
+  return (
+    <div>
+      <div className="mb-2 flex items-center justify-between gap-3 text-sm">
+        <span className="font-bold text-gray-700 dark:text-slate-200">{label}</span>
+        <span className="font-black text-gray-900 dark:text-white">{safeValue}%</span>
+      </div>
+      <div className="h-2.5 overflow-hidden rounded-full bg-gray-100 dark:bg-slate-900">
+        <div className={`h-full rounded-full ${colorClassName}`} style={{ width: `${safeValue}%` }} />
+      </div>
+    </div>
+  )
+}
+
+const TextInput = ({ label, value, onChange, placeholder, type = 'text', min }: { label: string; value: string; onChange: (value: string) => void; placeholder?: string; type?: React.HTMLInputTypeAttribute; min?: number }) => (
+  <label className="block">
+    <span className="mb-2 block text-xs font-bold uppercase tracking-[0.16em] text-gray-500 dark:text-slate-400">{label}</span>
+    <input
+      type={type}
+      value={value}
+      min={min}
+      onChange={(event) => onChange(event.target.value)}
+      placeholder={placeholder}
+      className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-900 outline-none transition focus:border-blue-500 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+    />
+  </label>
+)
+
+const SelectInput = ({ label, value, onChange, options }: { label: string; value: string; onChange: (value: string) => void; options: Array<{ label: string; value: string }> }) => (
+  <label className="block">
+    <span className="mb-2 block text-xs font-bold uppercase tracking-[0.16em] text-gray-500 dark:text-slate-400">{label}</span>
+    <select
+      value={value}
+      onChange={(event) => onChange(event.target.value)}
+      className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-900 outline-none transition focus:border-blue-500 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+    >
+      {options.map((option) => (
+        <option key={option.value} value={option.value}>
+          {option.label}
+        </option>
+      ))}
+    </select>
+  </label>
+)
+
+const formatCurrency = (value: number) => `Rs ${Number(value || 0).toLocaleString('en-IN')}`
+
+const formatDate = (value?: string | null) => {
+  if (!value) return '-'
+  const parsed = new Date(value)
+  if (Number.isNaN(parsed.getTime())) return '-'
+  return parsed.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+}
+
+const createInitialProductForm = (): ProductFormState => ({
+  name: '',
+  price: '',
+  images: [],
+  category: '',
+  description: '',
+  rating: '4.6',
+  stock: '0',
+  warranty_months: '12',
+  is_active: true,
+})
+
+const createProductImageKey = (file: File) => `${file.name}-${file.lastModified}-${file.size}`
+
+const createExistingImagePreviews = (images: string[]): ProductImagePreview[] =>
+  images.map((src, index) => ({
+    id: `existing-${index}-${src}`,
+    src,
+    kind: 'existing',
+  }))
+
+export const AdminManagementDashboard: React.FC<{ onClose: () => void; isAdmin?: boolean }> = ({ onClose, isAdmin }) => {
+  const { addToast } = useToast()
+  const [activeTab, setActiveTab] = useState<AdminTab>('overview')
+  const [products, setProducts] = useState<Product[]>([])
+  const [users, setUsers] = useState<AppUser[]>([])
+  const [orders, setOrders] = useState<AdminOrder[]>([])
+  const [requests, setRequests] = useState<ServiceRequest[]>([])
+  const [messages, setMessages] = useState<any[]>([])
+  const [replyModal, setReplyModal] = useState<{ msg: any; text: string } | null>(null)
+  const [isSendingReply, setIsSendingReply] = useState(false)
+  const [productForm, setProductForm] = useState<ProductFormState>(createInitialProductForm)
+  const [editingProductId, setEditingProductId] = useState<string | null>(null)
+  const [expandedReqId, setExpandedReqId] = useState<string | null>(null)
+  const [stockDrafts, setStockDrafts] = useState<Record<string, string>>({})
+  const [productImageFiles, setProductImageFiles] = useState<PendingProductImage[]>([])
+  const [productImagePreviews, setProductImagePreviews] = useState<ProductImagePreview[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isUploadingImage, setIsUploadingImage] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const containerRef = useRef<HTMLDivElement | null>(null)
+  const previewObjectUrlsRef = useRef<string[]>([])
+
+  const lowStockProducts = useMemo(() => products.filter((product) => Number(product.stock ?? 0) > 0 && Number(product.stock ?? 0) <= LOW_STOCK_THRESHOLD), [products])
+  const outOfStockProducts = useMemo(() => products.filter((product) => Number(product.stock ?? 0) <= 0), [products])
+  const healthyStockProducts = useMemo(() => products.filter((product) => Number(product.stock ?? 0) > LOW_STOCK_THRESHOLD), [products])
+  const activeProducts = useMemo(() => products.filter((product) => product.is_active !== false), [products])
+  const inactiveProducts = useMemo(() => products.filter((product) => product.is_active === false), [products])
+  const productCategoriesCount = useMemo(() => new Set(products.map((product) => (product.category || '').trim()).filter(Boolean)).size, [products])
+  const totalRevenue = useMemo(() => orders.reduce((sum, order) => (order.status === 'delivered' || order.status === 'completed' ? sum + Number(order.total || 0) : sum), 0), [orders])
+  const totalStockUnits = useMemo(() => products.reduce((sum, product) => sum + Number(product.stock ?? 0), 0), [products])
+  const deliveredOrders = useMemo(() => orders.filter((order) => order.status === 'delivered' || order.status === 'completed'), [orders])
+  const pendingOrders = useMemo(() => orders.filter((order) => order.status === 'pending' || order.status === 'processing'), [orders])
+  const blockedUsers = useMemo(() => users.filter((user) => Boolean(user.is_blocked)), [users])
+  const adminUsers = useMemo(() => users.filter((user) => Boolean(user.is_admin) || user.role === 'Admin'), [users])
+  const activeUsers = useMemo(() => users.filter((user) => !user.is_blocked), [users])
+  const pendingRequests = useMemo(() => requests.filter((request) => request.status === 'pending'), [requests])
+  const processingRequests = useMemo(() => requests.filter((request) => request.status === 'processing'), [requests])
+  const completedRequests = useMemo(() => requests.filter((request) => request.status === 'completed'), [requests])
+  const unreadMessages = useMemo(() => messages.filter((message) => (message.status || 'new') === 'new'), [messages])
+  const deliveredOrderRate = useMemo(() => (orders.length > 0 ? Math.round((deliveredOrders.length / orders.length) * 100) : 0), [deliveredOrders.length, orders.length])
+  const stockHealthRate = useMemo(() => (products.length > 0 ? Math.round((healthyStockProducts.length / products.length) * 100) : 0), [healthyStockProducts.length, products.length])
+  const requestCompletionRate = useMemo(() => (requests.length > 0 ? Math.round((completedRequests.length / requests.length) * 100) : 0), [completedRequests.length, requests.length])
+  const activeUserRate = useMemo(() => (users.length > 0 ? Math.round((activeUsers.length / users.length) * 100) : 0), [activeUsers.length, users.length])
+  const attentionCount = useMemo(
+    () => pendingOrders.length + pendingRequests.length + outOfStockProducts.length + unreadMessages.length,
+    [outOfStockProducts.length, pendingOrders.length, pendingRequests.length, unreadMessages.length],
+  )
+  const overviewPieSegments = useMemo<PieSegment[]>(
+    () => [
+      { label: 'Products', value: products.length, color: '#2563eb', swatchClassName: 'bg-blue-600' },
+      { label: 'Users', value: users.length, color: '#10b981', swatchClassName: 'bg-emerald-500' },
+      { label: 'Orders', value: orders.length, color: '#f59e0b', swatchClassName: 'bg-amber-500' },
+      { label: 'Requests', value: requests.length, color: '#f43f5e', swatchClassName: 'bg-rose-500' },
+    ],
+    [orders.length, products.length, requests.length, users.length],
+  )
+  const overviewPieTotal = useMemo(
+    () => overviewPieSegments.reduce((sum, segment) => sum + segment.value, 0),
+    [overviewPieSegments],
+  )
+  const inventoryPieSegments = useMemo<PieSegment[]>(
+    () => [
+      { label: 'Healthy', value: healthyStockProducts.length, color: '#10b981', swatchClassName: 'bg-emerald-500' },
+      { label: 'Low stock', value: lowStockProducts.length, color: '#f59e0b', swatchClassName: 'bg-amber-500' },
+      { label: 'Out of stock', value: outOfStockProducts.length, color: '#f43f5e', swatchClassName: 'bg-rose-500' },
+    ],
+    [healthyStockProducts.length, lowStockProducts.length, outOfStockProducts.length],
+  )
+  const inventoryPieTotal = useMemo(
+    () => inventoryPieSegments.reduce((sum, segment) => sum + segment.value, 0),
+    [inventoryPieSegments],
+  )
+  const tabStats = useMemo<Array<{ label: string; value: string | number; tone?: 'default' | 'success' | 'warning' | 'danger' }>>(() => {
+    if (activeTab === 'products') {
+      return [
+        { label: 'Products', value: products.length },
+        { label: 'Active Products', value: activeProducts.length, tone: 'success' },
+        { label: 'Inactive Products', value: inactiveProducts.length, tone: 'warning' },
+        { label: 'Categories', value: productCategoriesCount },
+      ]
+    }
+
+    if (activeTab === 'inventory') {
+      return [
+        { label: 'Inventory Units', value: totalStockUnits },
+        { label: 'Healthy Stock', value: healthyStockProducts.length, tone: 'success' },
+        { label: 'Low Stock', value: lowStockProducts.length, tone: 'warning' },
+        { label: 'Out Of Stock', value: outOfStockProducts.length, tone: 'danger' },
+      ]
+    }
+
+    if (activeTab === 'users') {
+      return [
+        { label: 'Total Users', value: users.length },
+        { label: 'Active Users', value: activeUsers.length, tone: 'success' },
+        { label: 'Blocked Users', value: blockedUsers.length, tone: 'danger' },
+        { label: 'Admins', value: adminUsers.length },
+      ]
+    }
+
+    if (activeTab === 'orders') {
+      return [
+        { label: 'Orders', value: orders.length },
+        { label: 'Pending Orders', value: pendingOrders.length, tone: 'warning' },
+        { label: 'Delivered Orders', value: deliveredOrders.length, tone: 'success' },
+        { label: 'Revenue', value: formatCurrency(totalRevenue), tone: 'success' },
+      ]
+    }
+
+    if (activeTab === 'requests') {
+      return [
+        { label: 'Requests', value: requests.length },
+        { label: 'Pending', value: pendingRequests.length, tone: 'warning' },
+        { label: 'Processing', value: processingRequests.length },
+        { label: 'Completed', value: completedRequests.length, tone: 'success' },
+      ]
+    }
+
+    return []
+  }, [
+    activeProducts.length,
+    activeTab,
+    activeUsers.length,
+    adminUsers.length,
+    blockedUsers.length,
+    completedRequests.length,
+    deliveredOrders.length,
+    healthyStockProducts.length,
+    inactiveProducts.length,
+    lowStockProducts.length,
+    orders.length,
+    outOfStockProducts.length,
+    pendingOrders.length,
+    pendingRequests.length,
+    processingRequests.length,
+    productCategoriesCount,
+    products.length,
+    requests.length,
+    totalRevenue,
+    totalStockUnits,
+    users.length,
+  ])
+
+  const fetchData = async () => {
+    try {
+      setIsLoading(true)
+      setError(null)
+      const [productData, userData, orderData, requestData, messageData] = await Promise.all([
+        productsApi.fetchAllProducts(),
+        usersApi.fetchAllUsers(),
+        ordersApi.fetchAllOrders(),
+        servicesApi.fetchAllServiceRequests(),
+        contactApi.fetchAllMessages(),
+      ])
+
+      setProducts(productData ?? [])
+      setUsers(userData ?? [])
+      setOrders((orderData ?? []) as AdminOrder[])
+      setRequests((requestData ?? []) as ServiceRequest[])
+      setMessages((messageData ?? []) as any[])
+    } catch (fetchError: any) {
+      console.error('Error fetching admin data:', fetchError)
+      setError(fetchError?.message || 'Failed to load admin data.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchData()
+  }, [])
+
+  useEffect(() => {
+    setStockDrafts(
+      Object.fromEntries(products.map((product) => [product.id, String(Number(product.stock ?? 0))])),
+    )
+  }, [products])
+
+  useEffect(() => {
+    return () => {
+      previewObjectUrlsRef.current.forEach((previewUrl) => URL.revokeObjectURL(previewUrl))
+      previewObjectUrlsRef.current = []
+    }
+  }, [])
+
+  const showSuccessToast = (title: string, message: string) => {
+    addToast({ type: 'success', title, message })
+  }
+
+  const showErrorToast = (title: string, message: string) => {
+    addToast({ type: 'error', title, message })
+  }
+
+  const scrollAdminToTop = () => {
+    window.requestAnimationFrame(() => {
+      containerRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
+    })
+  }
+
+  const revokePreviewUrl = (previewUrl: string) => {
+    if (!previewUrl.startsWith('blob:')) return
+    URL.revokeObjectURL(previewUrl)
+    previewObjectUrlsRef.current = previewObjectUrlsRef.current.filter((item) => item !== previewUrl)
+  }
+
+  const clearPendingImageFiles = () => {
+    productImagePreviews.forEach((preview) => {
+      if (preview.kind === 'upload') {
+        revokePreviewUrl(preview.src)
+      }
+    })
+    setProductImageFiles([])
+    setProductImagePreviews([])
+  }
+
+  const uploadImages = async (files: PendingProductImage[]) => {
+    if (files.length === 0) return []
+    return Promise.all(files.map(({ file }) => uploadImageToCloudinary(file)))
+  }
+
+  const resetProductForm = () => {
+    clearPendingImageFiles()
+    setProductForm(createInitialProductForm())
+    setEditingProductId(null)
+  }
+
+  const handleProductSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    setIsSubmitting(true)
+    setError(null)
+
+    const trimmedName = productForm.name.trim()
+    const trimmedImages = productForm.images.map((image) => image.trim()).filter(Boolean)
+    const trimmedCategory = productForm.category.trim()
+    const trimmedDescription = productForm.description.trim()
+    const numericPrice = Number(productForm.price || 0)
+    const numericStock = Number(productForm.stock || 0)
+    const numericRating = Number(productForm.rating || 0)
+    const numericWarrantyMonths = Number(productForm.warranty_months || 0)
+
+    if (!trimmedName || !trimmedCategory) {
+      const message = 'Name and category are required.'
+      setError(message)
+      showErrorToast('Product save failed', message)
+      setIsSubmitting(false)
+      return
+    }
+
+    if (!Number.isFinite(numericPrice) || numericPrice < 0) {
+      const message = 'Price must be a valid positive number.'
+      setError(message)
+      showErrorToast('Invalid price', message)
+      setIsSubmitting(false)
+      return
+    }
+
+    if (!Number.isFinite(numericStock) || numericStock < 0) {
+      const message = 'Stock must be zero or higher.'
+      setError(message)
+      showErrorToast('Invalid stock', message)
+      setIsSubmitting(false)
+      return
+    }
+
+    if (!Number.isFinite(numericRating) || numericRating < 0 || numericRating > 5) {
+      const message = 'Rating must be between 0 and 5.'
+      setError(message)
+      showErrorToast('Invalid rating', message)
+      setIsSubmitting(false)
+      return
+    }
+
+    let allImageUrls = trimmedImages
+
+    if (allImageUrls.length === 0 && productImageFiles.length === 0) {
+      const message = 'At least one product image is required.'
+      setError(message)
+      showErrorToast('Product save failed', message)
+      setIsSubmitting(false)
+      return
+    }
+
+    if (productImageFiles.length > 0) {
+      setIsUploadingImage(true)
+      try {
+        const uploadedImageUrls = await uploadImages(productImageFiles)
+        allImageUrls = Array.from(new Set([...allImageUrls, ...uploadedImageUrls]))
+      } catch (uploadError: any) {
+        console.error('Cloudinary upload error:', uploadError)
+        const message = uploadError?.message || 'Failed to upload product images.'
+        setError(message)
+        showErrorToast('Upload failed', message)
+        setIsUploadingImage(false)
+        setIsSubmitting(false)
+        return
+      } finally {
+        setIsUploadingImage(false)
+      }
+    }
+
+    const payload: ProductPayload = {
+      name: trimmedName,
+      price: numericPrice,
+      image: allImageUrls[0] ?? '',
+      images: allImageUrls,
+      category: trimmedCategory,
+      description: trimmedDescription || null,
+      rating: numericRating,
+      stock: numericStock,
+      warranty_months: Number.isFinite(numericWarrantyMonths) && numericWarrantyMonths >= 0 ? numericWarrantyMonths : 12,
+      is_active: productForm.is_active,
+    }
+
+    try {
+      if (editingProductId) {
+        const updated = await productsApi.updateProduct(editingProductId, payload)
+        setProducts((prev) => prev.map((product) => (product.id === editingProductId ? updated : product)))
+        showSuccessToast('Product updated', `${updated.name} has been updated successfully.`)
+      } else {
+        const created = await productsApi.createProduct(payload)
+        setProducts((prev) => [created, ...prev])
+        showSuccessToast('Product added', `${created.name} has been added to the catalog.`)
+      }
+      resetProductForm()
+    } catch (submitError: any) {
+      console.error('Product submit error:', submitError)
+      const message = submitError?.message || 'Failed to save product.'
+      setError(message)
+      showErrorToast('Product save failed', message)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleEditProduct = (product: Product) => {
+    const existingImages = Array.from(new Set((product.images?.length ? product.images : [product.image]).filter(Boolean)))
+
+    clearPendingImageFiles()
+    setEditingProductId(product.id)
+    setProductImageFiles([])
+    setProductImagePreviews(createExistingImagePreviews(existingImages))
+    setProductForm({
+      name: product.name ?? '',
+      price: String(product.price ?? ''),
+      images: existingImages,
+      category: product.category ?? '',
+      description: product.description ?? '',
+      rating: String(product.rating ?? 4.6),
+      stock: String(product.stock ?? 0),
+      warranty_months: String(product.warranty_months ?? 12),
+      is_active: product.is_active ?? true,
+    })
+    setActiveTab('products')
+    scrollAdminToTop()
+  }
+
+  const handleDeleteProduct = async (productId: string) => {
+    if (!window.confirm('Delete this product?')) return
+    setIsSubmitting(true)
+    setError(null)
+    try {
+      await productsApi.deleteProduct(productId)
+      setProducts((prev) => prev.filter((product) => product.id !== productId))
+      if (editingProductId === productId) resetProductForm()
+      showSuccessToast('Product deleted', 'The product has been removed from the catalog.')
+    } catch (deleteError: any) {
+      console.error('Delete product error:', deleteError)
+      const message = deleteError?.message || 'Failed to delete product.'
+      setError(message)
+      showErrorToast('Delete failed', message)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleStockDraftChange = (productId: string, value: string) => {
+    setStockDrafts((prev) => ({
+      ...prev,
+      [productId]: value,
+    }))
+  }
+
+  const handleQuickStockUpdate = async (product: Product) => {
+    const draftValue = stockDrafts[product.id] ?? String(product.stock ?? 0)
+    const numericStock = Number(draftValue)
+
+    if (!Number.isFinite(numericStock) || numericStock < 0) {
+      const message = 'Stock must be zero or higher.'
+      setError(message)
+      showErrorToast('Invalid stock', message)
+      return
+    }
+
+    setIsSubmitting(true)
+    setError(null)
+
+    const nextIsActive =
+      numericStock <= 0
+        ? false
+        : Number(product.stock ?? 0) <= 0
+        ? true
+        : (product.is_active ?? true)
+
+    try {
+      const updated = await productsApi.updateProductStock(product.id, numericStock, nextIsActive)
+      const refreshedProducts = await productsApi.fetchAllProducts()
+      const nextProducts = refreshedProducts.length > 0 ? refreshedProducts : products.map((item) => (item.id === product.id ? updated : item))
+      const refreshedProduct = nextProducts.find((item) => item.id === product.id) ?? updated
+
+      setProducts(nextProducts)
+      setStockDrafts((prev) => ({
+        ...prev,
+        [product.id]: String(Number(refreshedProduct.stock ?? numericStock)),
+      }))
+      const savedStock = Number(refreshedProduct.stock ?? numericStock)
+      const stockMessage =
+        savedStock <= 0
+          ? `${refreshedProduct.name} quantity updated to 0. Product is now out of stock.`
+          : Number(product.stock ?? 0) <= 0
+          ? `${refreshedProduct.name} quantity updated to ${savedStock}. Product has been restocked.`
+          : `${refreshedProduct.name} quantity updated to ${savedStock}.`
+      showSuccessToast('Stock updated', stockMessage)
+    } catch (updateError: any) {
+      console.error('Quick stock update error:', updateError)
+      const message = updateError?.message || 'Failed to update product stock.'
+      setError(message)
+      showErrorToast('Stock update failed', message)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleProductImageSelection = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const nextFiles = Array.from(event.target.files ?? [])
+    if (nextFiles.length === 0) return
+
+    const invalidFile = nextFiles.find((file) => !PRODUCT_IMAGE_MIME_TYPES.has(file.type))
+    if (invalidFile) {
+      const message = 'Only JPG, PNG, and WEBP images are supported.'
+      setError(message)
+      showErrorToast('Invalid image format', message)
+      event.target.value = ''
+      return
+    }
+
+    const pendingFiles = nextFiles.map((file) => ({ file, key: createProductImageKey(file) }))
+    const previewItems = pendingFiles.map(({ file, key }) => {
+      const objectUrl = URL.createObjectURL(file)
+      previewObjectUrlsRef.current.push(objectUrl)
+      return {
+        id: `upload-${key}`,
+        src: objectUrl,
+        kind: 'upload' as const,
+        fileKey: key,
+      }
+    })
+
+    setProductImageFiles((prev) => [...prev, ...pendingFiles])
+    setProductImagePreviews((prev) => [...prev, ...previewItems])
+    setError(null)
+    event.target.value = ''
+  }
+
+  const handleRemoveProductImage = (preview: ProductImagePreview) => {
+    if (preview.kind === 'upload' && preview.fileKey) {
+      setProductImageFiles((prev) => prev.filter((item) => item.key !== preview.fileKey))
+      revokePreviewUrl(preview.src)
+    }
+
+    if (preview.kind === 'existing') {
+      setProductForm((prev) => ({
+        ...prev,
+        images: prev.images.filter((imageUrl) => imageUrl !== preview.src),
+      }))
+    }
+
+    setProductImagePreviews((prev) => prev.filter((item) => item.id !== preview.id))
+  }
+
+  const handleToggleUserBlock = async (user: AppUser) => {
+    setIsSubmitting(true)
+    setError(null)
+    try {
+      const updated = await usersApi.updateUserStatus(user.id, {
+        is_blocked: !user.is_blocked,
+        is_admin: Boolean(user.is_admin),
+      })
+      setUsers((prev) => prev.map((item) => (item.id === user.id ? updated : item)))
+      showSuccessToast(user.is_blocked ? 'User unblocked' : 'User blocked', `${updated.name || updated.email || 'User'} status updated successfully.`)
+    } catch (updateError: any) {
+      console.error('Update user status error:', updateError)
+      const message = updateError?.message || 'Failed to update user.'
+      setError(message)
+      showErrorToast('User update failed', message)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleOrderStatusChange = async (orderId: string, status: AdminOrder['status']) => {
+    const previousOrders = orders
+    const previousOrder = previousOrders.find((order) => order.id === orderId)
+    if (!previousOrder || previousOrder.status === status) return
+    setOrders((prev) => prev.map((order) => (order.id === orderId ? { ...order, status } : order)))
+    try {
+      await ordersApi.updateOrderStatus(orderId, status)
+      showSuccessToast('Order updated', `Order #${orderId.slice(0, 8).toUpperCase()} marked as ${status}.`)
+    } catch (updateError: any) {
+      console.error('Order status update error:', updateError)
+      setOrders(previousOrders)
+      const message = updateError?.message || 'Failed to update order status.'
+      setError(message)
+      showErrorToast('Order update failed', message)
+    }
+  }
+
+  const handleRequestStatusChange = async (requestId: string, status: ServiceRequest['status']) => {
+    const previousRequests = requests
+    const previousRequest = previousRequests.find((request) => request.id === requestId)
+    if (!previousRequest || previousRequest.status === status) return
+    setRequests((prev) => prev.map((request) => (request.id === requestId ? { ...request, status } : request)))
+    try {
+      await servicesApi.updateServiceStatus(requestId, status)
+      showSuccessToast('Request updated', `Service request #${requestId.slice(0, 8).toUpperCase()} marked as ${status}.`)
+    } catch (updateError: any) {
+      console.error('Service request update error:', updateError)
+      setRequests(previousRequests)
+      const message = updateError?.message || 'Failed to update service request.'
+      setError(message)
+      showErrorToast('Request update failed', message)
+    }
+  }
+
+  const handleMessageStatusChange = async (messageId: string, status: string) => {
+    const previousMessages = messages
+    const previousMessage = previousMessages.find((msg) => msg.id === messageId)
+    if (!previousMessage || previousMessage.status === status) return
+    setMessages((prev) => prev.map((msg) => (msg.id === messageId ? { ...msg, status } : msg)))
+    try {
+      await contactApi.updateMessageStatus(messageId, status)
+      showSuccessToast('Message updated', `Message marked as ${status}.`)
+    } catch (updateError: any) {
+      console.error('Message status update error:', updateError)
+      setMessages(previousMessages)
+      const errMessage = updateError?.message || 'Failed to update message status.'
+      setError(errMessage)
+      showErrorToast('Message update failed', errMessage)
+    }
+  }
+
+  const handleSendReply = async () => {
+    if (!replyModal || !replyModal.text.trim()) return
+    setIsSendingReply(true)
+    try {
+      const updated = await contactApi.saveReply(replyModal.msg.id, replyModal.text.trim())
+      setMessages((prev) => prev.map((m) => (m.id === replyModal.msg.id ? { ...m, ...updated } : m)))
+      showSuccessToast('Reply saved', 'Your reply has been saved and the message marked as replied.')
+      setReplyModal(null)
+    } catch (err: any) {
+      showErrorToast('Reply failed', err?.message || 'Failed to save reply.')
+    } finally {
+      setIsSendingReply(false)
+    }
+  }
+
+
+const ADMIN_STYLES = `
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Work+Sans:wght@300;400;500;600;700&display=swap');
+  * { font-family: 'Work Sans', sans-serif; }
+  .heading-font { font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.05em; }
+  @keyframes slideInUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+  .animate-slide-in-up { animation: slideInUp 0.5s ease-out forwards; }
+  .animate-fade-in { animation: fadeIn 0.8s ease-out forwards; }
+  .stat-card { position:relative; overflow:hidden; transition:all 0.3s cubic-bezier(0.4,0,0.2,1); }
+  .stat-card:hover { transform:translateY(-4px); box-shadow:0 12px 24px rgba(0,0,0,0.12); }
+  .glass-effect { background:white; box-shadow:0 1px 3px rgba(0,0,0,0.08); border:1px solid rgba(0,0,0,0.06); }
+  .nav-item { transition:all 0.2s ease; position:relative; color:#475569; }
+  .nav-item::before { content:''; position:absolute; left:0; top:0; bottom:0; width:4px; background:#FF6B35; transform:scaleY(0); transition:transform 0.2s ease; border-radius:0 4px 4px 0; }
+  .nav-item:hover::before, .nav-item.active::before { transform:scaleY(1); }
+  .nav-item:hover { background:rgba(255,107,53,0.08); color:#1e293b; }
+  .nav-item.active { background:rgba(255,107,53,0.12); color:#FF6B35; font-weight:600; }
+  .status-badge { display:inline-block; padding:4px 12px; border-radius:12px; font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; }
+  .status-completed { background:rgba(0,168,107,0.15); color:#00753d; border:1px solid rgba(0,168,107,0.3); }
+  .status-pending { background:rgba(247,147,30,0.15); color:#c5740a; border:1px solid rgba(247,147,30,0.3); }
+  .status-processing { background:rgba(78,205,196,0.15); color:#2d8b84; border:1px solid rgba(78,205,196,0.3); }
+  .status-shipped { background:rgba(99,102,241,0.15); color:#4338ca; border:1px solid rgba(99,102,241,0.3); }
+  .status-delivered { background:rgba(0,168,107,0.15); color:#00753d; border:1px solid rgba(0,168,107,0.3); }
+  .status-cancelled, .status-rejected { background:rgba(244,63,94,0.15); color:#be123c; border:1px solid rgba(244,63,94,0.3); }
+  .metric-number { font-variant-numeric:tabular-nums; }
+  .sidebar-bg { background:linear-gradient(180deg,#fff 0%,#fef3f0 100%); border-right:2px solid #ffe8e0; }
+  .scrollbar-none::-webkit-scrollbar { display:none; } .scrollbar-none { -ms-overflow-style:none; scrollbar-width:none; }
+`

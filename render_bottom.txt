@@ -1,0 +1,52 @@
+
+          </div>
+        </div>
+      </div>
+
+      {/* Reply modal */}
+      {replyModal ? (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-slate-800">Reply to message</h3>
+              <button onClick={() => setReplyModal(null)} className="rounded-full p-1.5 hover:bg-gray-100 transition-colors text-gray-500">
+                <X size={18} />
+              </button>
+            </div>
+            <div className="mb-4 rounded-xl bg-orange-50 border border-orange-100 p-4">
+              <p className="text-sm font-semibold text-slate-700">
+                {replyModal.msg.name}
+                <span className="font-normal text-slate-400 ml-1">({replyModal.msg.email})</span>
+              </p>
+              <p className="mt-2 text-sm text-slate-600">{replyModal.msg.message}</p>
+            </div>
+            <textarea
+              className="adm-input min-h-[100px] resize-none"
+              placeholder="Type your reply…"
+              value={replyModal.text}
+              onChange={(e) => setReplyModal((prev) => prev ? { ...prev, text: e.target.value } : prev)}
+            />
+            <div className="mt-4 flex justify-end gap-3">
+              <button onClick={() => setReplyModal(null)} className="rounded-xl bg-gray-100 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-200 transition-colors">
+                Cancel
+              </button>
+              <button onClick={handleSendReply} disabled={isSendingReply} className="adm-btn-primary px-5 py-2 flex items-center gap-2">
+                {isSendingReply ? (
+                  <>
+                    <svg className="h-4 w-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                    Saving…
+                  </>
+                ) : 'Save Reply'}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
+export default AdminManagementDashboard
