@@ -1119,16 +1119,6 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                 : statsCards.map((card) => <StatCard key={card.label} {...card} />)}
             </div>
 
-            {isAdmin ? (
-              <button
-                type="button"
-                onClick={onOpenAdmin}
-                className="mt-5 flex w-full items-center justify-center rounded-[24px] bg-slate-950 px-4 py-4 text-sm font-black text-white shadow-lg transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200"
-              >
-                {t('profile.openAdminDashboard')}
-              </button>
-            ) : null}
-
             {!user ? (
               <div className="mt-5 rounded-[28px] border border-blue-100 bg-blue-50/80 p-5 dark:border-blue-500/20 dark:bg-blue-500/10">
                 <p className="text-sm font-black text-slate-900 dark:text-white">{t('profile.signInUnlockTitle')}</p>

@@ -626,6 +626,22 @@ const App: React.FC = () => {
 
   const pageTitle = t(`app.pageTitle.${activeTab}`) || PAGE_TITLES[activeTab]
 
+  if (showAdminLogin) {
+    return (
+      <AdminLoginPage
+        onAdminAuthenticated={handleAdminAuthenticated}
+        onGoHome={() => {
+          setShowAdminLogin(false)
+          if (typeof window !== 'undefined') {
+            window.history.pushState({}, '', '/')
+            setCurrentPath('/')
+          }
+          setActiveTab('home')
+        }}
+      />
+    )
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-[var(--color-surface)] dark:bg-slate-900 transition-colors duration-300">
       <Header 
@@ -637,6 +653,7 @@ const App: React.FC = () => {
         language={language}
         onLanguageChange={handleLanguageChange}
         notificationCount={notifications}
+        onOpenAdmin={handleOpenAdminLogin}
       />
 
       <main
@@ -742,20 +759,6 @@ const App: React.FC = () => {
         />
       )}
 
-      {/* Admin Login Page */}
-      {showAdminLogin && (
-        <AdminLoginPage
-          onAdminAuthenticated={handleAdminAuthenticated}
-          onGoHome={() => {
-            setShowAdminLogin(false)
-            if (typeof window !== 'undefined') {
-              window.history.pushState({}, '', '/')
-              setCurrentPath('/')
-            }
-            setActiveTab('home')
-          }}
-        />
-      )}
 
       {/* Admin Dashboard */}
       {showAdminPanel && (

@@ -284,7 +284,7 @@ export const FooterSection: React.FC<{ rights?: string; onNavigate?: (tab: any) 
           id="footer-admin-login-btn"
           type="button"
           onClick={() => onNavigate?.('admin-login')}
-          className="ui-hover-link inline-flex items-center gap-1 text-gray-300 dark:text-slate-600 hover:text-orange-500 dark:hover:text-orange-400 tap-scale transition-colors"
+          className="ui-hover-link inline-flex items-center gap-1 text-gray-500 dark:text-slate-400 hover:text-orange-500 dark:hover:text-orange-400 tap-scale transition-colors"
           title="Admin Portal"
         >
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3 h-3">

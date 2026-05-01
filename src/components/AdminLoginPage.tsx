@@ -102,8 +102,9 @@ const AdminLoginPage: React.FC<AdminLoginPageProps> = ({ onAdminAuthenticated, o
           padding: 1rem;
           overflow: hidden;
           position: relative;
-          /* Override global dark-mode bg */
-          background-color: #fff7ed !important;
+        }
+        html.dark .admin-lp-root {
+          background: linear-gradient(135deg, #0f172a 0%, #1e293b 40%, #020617 100%);
         }
 
         /* bg shapes */
@@ -113,6 +114,9 @@ const AdminLoginPage: React.FC<AdminLoginPageProps> = ({ onAdminAuthenticated, o
           border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
           opacity: 0.4;
           animation: adm-float 20s infinite ease-in-out;
+        }
+        html.dark .adm-lp-shape {
+          opacity: 0.15;
         }
         .adm-lp-shape:nth-child(1) {
           width: 300px; height: 300px;
@@ -148,6 +152,13 @@ const AdminLoginPage: React.FC<AdminLoginPageProps> = ({ onAdminAuthenticated, o
           position: relative;
           z-index: 1;
         }
+        html.dark .adm-lp-card {
+          background: #1e293b;
+          box-shadow:
+            0 0 0 1px rgba(255,255,255,0.05),
+            0 20px 60px rgba(0,0,0,0.4),
+            0 0 100px rgba(255,107,53,0.05);
+        }
         @media (min-width: 768px) {
           .adm-lp-card { padding: 3rem; }
         }
@@ -170,6 +181,11 @@ const AdminLoginPage: React.FC<AdminLoginPageProps> = ({ onAdminAuthenticated, o
           font-weight: 600;
           color: #334155;
         }
+        html.dark .adm-lp-badge {
+          background: rgba(30,41,59,0.85);
+          border-color: rgba(255,107,53,0.3);
+          color: #cbd5e1;
+        }
 
         /* back to home */
         .adm-lp-back {
@@ -190,10 +206,19 @@ const AdminLoginPage: React.FC<AdminLoginPageProps> = ({ onAdminAuthenticated, o
           cursor: pointer;
           transition: all 200ms ease;
         }
+        html.dark .adm-lp-back {
+          background: rgba(30,41,59,0.75);
+          border-color: rgba(255,255,255,0.1);
+          color: #94a3b8;
+        }
         .adm-lp-back:hover {
           background: rgba(255,255,255,0.95);
           color: #1e293b;
           transform: translateX(-2px);
+        }
+        html.dark .adm-lp-back:hover {
+          background: rgba(30,41,59,0.95);
+          color: #f1f5f9;
         }
 
         /* logo */
@@ -206,6 +231,9 @@ const AdminLoginPage: React.FC<AdminLoginPageProps> = ({ onAdminAuthenticated, o
           background: linear-gradient(135deg, #f97316 0%, #ef4444 100%);
           margin-bottom: 1rem;
           filter: drop-shadow(0 4px 12px rgba(255,107,53,0.3));
+        }
+        html.dark .adm-lp-logo {
+          filter: drop-shadow(0 4px 12px rgba(255,107,53,0.15));
         }
 
         /* gradient text */
@@ -230,7 +258,13 @@ const AdminLoginPage: React.FC<AdminLoginPageProps> = ({ onAdminAuthenticated, o
           transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
           box-sizing: border-box;
         }
+        html.dark .adm-lp-input {
+          border-color: #334155;
+          color: #f1f5f9;
+          background: #0f172a;
+        }
         .adm-lp-input::placeholder { color: #94a3b8; }
+        html.dark .adm-lp-input::placeholder { color: #64748b; }
         .adm-lp-input:focus {
           border-color: #f97316;
           transform: translateY(-2px);
@@ -238,9 +272,19 @@ const AdminLoginPage: React.FC<AdminLoginPageProps> = ({ onAdminAuthenticated, o
             0 0 0 3px rgba(249,115,22,0.12),
             0 8px 16px rgba(0,0,0,0.08);
         }
+        html.dark .adm-lp-input:focus {
+          border-color: #f97316;
+          box-shadow:
+            0 0 0 3px rgba(249,115,22,0.2),
+            0 8px 16px rgba(0,0,0,0.2);
+        }
         .adm-lp-input.adm-lp-input--error {
           border-color: #dc2626;
           background: #fef2f2;
+        }
+        html.dark .adm-lp-input.adm-lp-input--error {
+          border-color: #ef4444;
+          background: rgba(220,38,38,0.1);
         }
         .adm-lp-input--pass { padding-right: 3rem; }
 
@@ -255,6 +299,8 @@ const AdminLoginPage: React.FC<AdminLoginPageProps> = ({ onAdminAuthenticated, o
           pointer-events: none;
           display: flex;
         }
+        html.dark .adm-lp-input-icon { color: #64748b; }
+        
         .adm-lp-eye-btn {
           position: absolute;
           right: 1rem;
@@ -268,7 +314,9 @@ const AdminLoginPage: React.FC<AdminLoginPageProps> = ({ onAdminAuthenticated, o
           padding: 0.25rem;
           transition: color 150ms;
         }
+        html.dark .adm-lp-eye-btn { color: #64748b; }
         .adm-lp-eye-btn:hover { color: #475569; }
+        html.dark .adm-lp-eye-btn:hover { color: #94a3b8; }
 
         /* error messages */
         .adm-lp-field-err {
@@ -280,6 +328,8 @@ const AdminLoginPage: React.FC<AdminLoginPageProps> = ({ onAdminAuthenticated, o
           font-size: 0.8125rem;
           animation: adm-err-in 0.25s ease-out;
         }
+        html.dark .adm-lp-field-err { color: #f87171; }
+        
         .adm-lp-global-err {
           display: flex;
           align-items: flex-start;
@@ -293,6 +343,11 @@ const AdminLoginPage: React.FC<AdminLoginPageProps> = ({ onAdminAuthenticated, o
           font-weight: 600;
           margin-bottom: 1.25rem;
           animation: adm-err-in 0.3s ease-out;
+        }
+        html.dark .adm-lp-global-err {
+          background: rgba(220,38,38,0.1);
+          border-color: rgba(239,68,68,0.3);
+          color: #f87171;
         }
 
         /* submit button */
@@ -344,6 +399,9 @@ const AdminLoginPage: React.FC<AdminLoginPageProps> = ({ onAdminAuthenticated, o
           position: relative;
           flex-shrink: 0;
         }
+        html.dark .adm-lp-checkbox {
+          border-color: #475569;
+        }
         .adm-lp-checkbox:checked {
           background: linear-gradient(135deg, #ff6b35, #f7931e);
           border-color: #ff6b35;
@@ -372,6 +430,9 @@ const AdminLoginPage: React.FC<AdminLoginPageProps> = ({ onAdminAuthenticated, o
           border-top: 2px solid #e2e8f0;
           top: 50%;
         }
+        html.dark .adm-lp-divider::before {
+          border-top-color: #334155;
+        }
         .adm-lp-divider-label {
           position: relative;
           display: flex;
@@ -383,6 +444,10 @@ const AdminLoginPage: React.FC<AdminLoginPageProps> = ({ onAdminAuthenticated, o
           font-size: 0.8125rem;
           font-weight: 600;
           color: #64748b;
+        }
+        html.dark .adm-lp-divider-label span {
+          background: #1e293b;
+          color: #94a3b8;
         }
 
         /* bottom bar */
@@ -397,6 +462,9 @@ const AdminLoginPage: React.FC<AdminLoginPageProps> = ({ onAdminAuthenticated, o
           font-size: 0.8125rem;
           color: #64748b;
           font-weight: 500;
+        }
+        html.dark .adm-lp-bottom p {
+          color: #94a3b8;
         }
       `}</style>
 
@@ -430,13 +498,13 @@ const AdminLoginPage: React.FC<AdminLoginPageProps> = ({ onAdminAuthenticated, o
             <Lock size={36} color="#fff" strokeWidth={2.5} />
           </div>
           <h1
-            className="adm-lp-serif"
-            style={{ fontSize: 'clamp(2rem, 5vw, 2.75rem)', fontWeight: 700, color: '#0f172a', margin: '0 0 0.5rem', lineHeight: 1.1 }}
+            className="adm-lp-serif text-slate-900 dark:text-white"
+            style={{ fontSize: 'clamp(2rem, 5vw, 2.75rem)', fontWeight: 700, margin: '0 0 0.5rem', lineHeight: 1.1 }}
           >
             Admin{' '}
-            <span className="adm-lp-gradient-text" style={{ fontStyle: 'italic' }}>Portal</span>
+            <span className="adm-lp-gradient-text" style={{ fontStyle: 'italic', paddingRight: '0.15em' }}>Portal</span>
           </h1>
-          <p style={{ color: '#475569', fontWeight: 500, margin: 0 }}>Gazi Online Government Services</p>
+          <p className="text-slate-600 dark:text-slate-400" style={{ fontWeight: 500, margin: 0 }}>Gazi Online Government Services</p>
         </div>
 
         {/* Global auth error */}
@@ -452,7 +520,7 @@ const AdminLoginPage: React.FC<AdminLoginPageProps> = ({ onAdminAuthenticated, o
 
           {/* Email */}
           <div>
-            <label htmlFor="adm-email" style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.5rem' }}>
+            <label htmlFor="adm-email" className="text-slate-700 dark:text-slate-300" style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem' }}>
               Email Address
             </label>
             <div className="adm-lp-input-wrap">
@@ -478,7 +546,7 @@ const AdminLoginPage: React.FC<AdminLoginPageProps> = ({ onAdminAuthenticated, o
 
           {/* Password */}
           <div>
-            <label htmlFor="adm-password" style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.5rem' }}>
+            <label htmlFor="adm-password" className="text-slate-700 dark:text-slate-300" style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem' }}>
               Password
             </label>
             <div className="adm-lp-input-wrap">
@@ -514,7 +582,7 @@ const AdminLoginPage: React.FC<AdminLoginPageProps> = ({ onAdminAuthenticated, o
                 onChange={(e) => setRememberMe(e.target.checked)}
                 className="adm-lp-checkbox"
               />
-              <span style={{ fontSize: '0.875rem', fontWeight: 500, color: '#334155' }}>Remember me</span>
+              <span className="text-slate-700 dark:text-slate-300" style={{ fontSize: '0.875rem', fontWeight: 500 }}>Remember me</span>
             </label>
             <a href="#" style={{ fontSize: '0.875rem', fontWeight: 600, color: '#ea580c', textDecoration: 'none' }}
                onClick={(e) => e.preventDefault()}>
@@ -548,7 +616,7 @@ const AdminLoginPage: React.FC<AdminLoginPageProps> = ({ onAdminAuthenticated, o
             <CheckCircle size={16} />
             <span style={{ fontSize: '0.875rem', fontWeight: 600 }}>256-bit SSL Encrypted</span>
           </div>
-          <p style={{ fontSize: '0.75rem', color: '#64748b', lineHeight: 1.6, margin: 0 }}>
+          <p className="text-slate-500 dark:text-slate-400" style={{ fontSize: '0.75rem', lineHeight: 1.6, margin: 0 }}>
             This portal is restricted to authorized government officials only.
             Unauthorized access is prohibited and monitored.
           </p>

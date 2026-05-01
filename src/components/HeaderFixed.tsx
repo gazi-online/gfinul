@@ -71,6 +71,20 @@ const SunIcon = () => (
   </svg>
 )
 
+const ShieldIcon = () => (
+  <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    fill="none" 
+    viewBox="0 0 24 24" 
+    strokeWidth={1.8} 
+    stroke="currentColor" 
+    className="h-5 w-5"
+  >
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
+  </svg>
+)
+
+
 const CartIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -212,6 +226,7 @@ interface HeaderProps {
   language: Language
   onLanguageChange: (lang: Language) => void
   notificationCount: number
+  onOpenAdmin?: () => void
 }
 
 const LANGUAGE_OPTIONS: Language[] = ['en', 'bn']
@@ -225,6 +240,7 @@ const HeaderFixed: React.FC<HeaderProps> = ({
   language,
   onLanguageChange,
   notificationCount,
+  onOpenAdmin,
 }) => {
   const { t } = useTranslation()
   const [isDark, setIsDark] = useState(false)
@@ -327,26 +343,21 @@ const HeaderFixed: React.FC<HeaderProps> = ({
               </span>
             </button>
 
-            <div className="hidden items-center rounded-xl border border-gray-100 bg-gray-50 p-1 transition-all duration-300 hover:border-blue-100 hover:bg-blue-50/80 hover:shadow-sm hover:shadow-blue-100/60 dark:border-slate-700 dark:bg-slate-800 dark:hover:border-blue-500/20 dark:hover:bg-blue-500/10 lg:flex">
-              {LANGUAGE_OPTIONS.map((lang) => (
-                <button
-                  key={lang}
-                  onClick={() => onLanguageChange(lang)}
-                  className={`rounded-lg px-2 py-1 text-[10px] font-black transition-all duration-300 active:scale-95 ${
-                    language === lang
-                      ? 'bg-blue-600 text-white shadow-sm'
-                      : 'text-gray-500 hover:bg-white/80 hover:text-blue-600 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-blue-300'
-                  }`}
-                >
-                  {LANGUAGE_LABELS[lang]}
-                </button>
-              ))}
-            </div>
+            <button
+              onClick={() => onOpenAdmin?.()}
+              title="Admin Login"
+              className="group rounded-full border border-transparent p-2 text-gray-600 transition-all duration-300 hover:-translate-y-0.5 hover:border-orange-100 hover:bg-orange-50 hover:text-orange-600 hover:shadow-sm hover:shadow-orange-100/70 active:scale-95 dark:text-slate-400 dark:hover:border-orange-400/20 dark:hover:bg-orange-500/10 dark:hover:text-orange-300"
+              aria-label="Admin Login"
+            >
+              <span className="block transition-transform duration-300 group-hover:scale-110">
+                <ShieldIcon />
+              </span>
+            </button>
 
             <button
               onClick={handleMobileLanguageChange}
               aria-label={t('header.changeLanguage', { language: LANGUAGE_LABELS[nextLanguage] })}
-              className="rounded-xl border border-gray-100 bg-gray-50 px-2.5 py-2 text-[10px] font-black tracking-[0.2em] text-gray-600 transition-all duration-300 hover:border-blue-100 hover:bg-blue-50/80 hover:text-blue-600 hover:shadow-sm hover:shadow-blue-100/60 active:scale-95 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-blue-500/20 dark:hover:bg-blue-500/10 dark:hover:text-blue-300 lg:hidden"
+              className="rounded-xl border border-gray-100 bg-gray-50 px-2.5 py-2 text-[10px] font-black tracking-[0.2em] text-gray-600 transition-all duration-300 hover:border-blue-100 hover:bg-blue-50/80 hover:text-blue-600 hover:shadow-sm hover:shadow-blue-100/60 active:scale-95 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-blue-500/20 dark:hover:bg-blue-500/10 dark:hover:text-blue-300"
             >
               {LANGUAGE_LABELS[nextLanguage]}
             </button>
